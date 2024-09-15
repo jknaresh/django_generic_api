@@ -1,0 +1,2 @@
+# django_generic_api
+django_generic_api
