@@ -41,14 +41,16 @@ def apply_filters(filters):
     """Apply dynamic filters using Q objects."""
     query = Q()
     for filter_item in filters:
-        operator = filter_item.get("operator")
-        field_name = filter_item.get("name")
-        value = filter_item.get("value")
+        operator = filter_item.operator
+        field_name = filter_item.name
+        value = filter_item.value
 
         if operator == "eq":
             query &= Q(**{f"{field_name}__exact": value[0]})
         elif operator == "in":
             query &= Q(**{f"{field_name}__in": value})
+        else:
+            raise ValueError(f"Unsupported operator: {operator}")
 
     return query
 

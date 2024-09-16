@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr, Field, constr, validator
-from typing import Optional, Dict, Any, List
+from typing import Optional, Any, List
+
+from pydantic import BaseModel, EmailStr, validator, JsonValue
 
 
 class SaveInput(BaseModel):
@@ -15,7 +16,7 @@ class SaveInput(BaseModel):
 class SavePayload(BaseModel):
     modelName: str
     id: Optional[str] = None
-    saveInput: SaveInput
+    saveInput: JsonValue
 
     # Additional validations if needed
     @validator("modelName")
