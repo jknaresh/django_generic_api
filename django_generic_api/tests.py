@@ -71,3 +71,67 @@ class GenericFetchAPITest(TestCase):
         self.assertIn("data", response.data)
         self.assertEqual(response.data["data"][0]["first_name"], "Jane")
         self.assertEqual(response.data["data"][0]["last_name"], "Doe")
+
+
+class GenericSaveAPITest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        # Create a sample contact to test update
+        self.contact = Contact.objects.create(
+            first_name="Jane",
+            last_name="Doe",
+            email="jane.doe@example.com",
+            organization_id="org123",
+        )
+
+    def test_create_contact(self):
+        """Test creating a new contact via the save API."""
+        save_payload = {
+            "payload": {
+                "variables": {
+                    "id": None,
+                    "modelName": "contact",
+                    "saveInput": {
+                        "first_name": "John",
+                        "last_name": "Smith",
+                        "email": "john.smith@example.com",
+                        "organization_id": "org456",
+                    },
+                }
+            }
+        }
+
+        response = self.client.post("/api/save/", save_payload, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["status"], "success")
+
+        # Check if the contact was created in the database
+        new_contact = Contact.objects.get(email="john.smith@example.com")
+        self.assertEqual(new_contact.first_name, "John")
+        self.assertEqual(new_contact.last_name, "Smith")
+
+    def test_update_contact(self):
+        """Test updating an existing contact via the save API."""
+        save_payload = {
+            "payload": {
+                "variables": {
+                    "id": str(self.contact.id),
+                    "modelName": "contact",
+                    "saveInput": {
+                        "first_name": "Jane",
+                        "last_name": "Doe",
+                        "email": "jane.new@example.com",
+                        "organization_id": "org123",
+                    },
+                }
+            }
+        }
+
+        response = self.client.post("/api/save/", save_payload, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["status"], "success")
+
+        # Check if the contact was updated in the database
+        updated_contact = Contact.objects.get(id=self.contact.id)
+        self.assertEqual(updated_contact.email, "jane.new@example.com")

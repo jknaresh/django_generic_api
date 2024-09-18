@@ -30,6 +30,10 @@ class GenericFetchAPIView(APIView):
         try:
             query_filters = apply_filters(filters)
             queryset = model.objects.filter(query_filters).values(*fields)
+
+            # Apply distinct to ensure no duplicates
+            queryset = queryset.distinct()
+
             return Response(
                 {"data": list(queryset)}, status=status.HTTP_200_OK
             )
@@ -43,6 +47,8 @@ class GenericSaveAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         payload = request.data.get("payload", {}).get("variables", {})
+
+        payload.get("saveInput", {}).pop("csrfmiddlewaretoken", "")
 
         try:
             # Validate the payload using the Pydantic model
