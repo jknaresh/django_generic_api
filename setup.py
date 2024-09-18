@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="django_generic_api",
-    version="0.1.0a1.1",
+    version="0.1.0a1",
     packages=find_packages(),
     include_package_data=True,
     license="MIT",
@@ -30,5 +30,6 @@ setup(
         "Django>=3.2",
         "djangorestframework==3.15.2",
         "pydantic==2.9.1",
+        "email-validator==2.2.0",
     ],
 )

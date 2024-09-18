@@ -13,28 +13,48 @@ def get_model_by_name(model_name):
     raise ValueError(f"Model '{model_name}' not found in any installed app.")
 
 
-def fetch_data(model_name, filters=None, fields=None):
+def fetch_data(
+    model_name, filters=None, fields=None, page_number=1, records_per_page=50
+):
     """
     Fetches data from a dynamically retrieved model.
 
+    :param records_per_page:
+    :param page_number:
     :param model_name: The name of the model (case-insensitive)
     :param filters: Dictionary of filters for the query
     :param fields: List of fields to return
     """
     model = get_model_by_name(model_name)
+    if not model:
+        raise ValueError(f"Model '{model_name}' not found.")
 
     # Perform a query on the model
     queryset = model.objects.all()
 
     # Apply filters dynamically
     if filters:
-        queryset = queryset.filter(**filters)
+        query_filters = apply_filters(filters)
+        queryset = queryset.filter(query_filters)
 
     # Select only specified fields
-    if fields:
-        queryset = queryset.values(*fields)
+    queryset = queryset.values(*fields)
 
-    return queryset
+    # Apply pagination AS per the input payload.
+    # queryset = queryset[0:10]
+
+    # Apply distinct to ensure no duplicates
+    queryset = queryset.distinct()
+
+    # SQL-level pagination using slicing
+    start_index = (page_number - 1) * records_per_page
+    end_index = start_index + records_per_page
+    paginated_queryset = queryset[start_index:end_index]
+
+    # Fetch the total count of the records (without pagination)
+    total_records = queryset.count()
+
+    return dict(data=list(paginated_queryset), total=total_records)
 
 
 def apply_filters(filters):

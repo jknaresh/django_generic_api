@@ -1,9 +1,14 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .services import get_model_by_name, apply_filters, handle_save_input
-from .payload_models import FetchPayload, SavePayload
 from pydantic import ValidationError
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .payload_models import FetchPayload, SavePayload
+from .services import (
+    get_model_by_name,
+    handle_save_input,
+    fetch_data,
+)
 
 
 class GenericFetchAPIView(APIView):
@@ -20,23 +25,19 @@ class GenericFetchAPIView(APIView):
         fields = validated_data.fields
         filters = validated_data.filters
 
-        model = get_model_by_name(model_name)
-        if not model:
-            return Response(
-                {"error": "Model not found"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        # Default values
+        page_number = getattr(validated_data, "pageNumber", 1)
+        page_size = getattr(validated_data, "pageSize", 50)
 
         try:
-            query_filters = apply_filters(filters)
-            queryset = model.objects.filter(query_filters).values(*fields)
-
-            # Apply distinct to ensure no duplicates
-            queryset = queryset.distinct()
-
-            return Response(
-                {"data": list(queryset)}, status=status.HTTP_200_OK
+            data = fetch_data(
+                model_name,
+                filters,
+                fields,
+                page_number,
+                page_size,
             )
+            return Response(data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST

@@ -1,9 +1,9 @@
 from typing import Optional, Any, List
 
-from pydantic import BaseModel, EmailStr, validator, JsonValue
+from pydantic import BaseModel, EmailStr, field_validator, JsonValue
 
 
-class SaveInput(BaseModel):
+class SaveInputTemplate(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
@@ -19,7 +19,7 @@ class SavePayload(BaseModel):
     saveInput: JsonValue
 
     # Additional validations if needed
-    @validator("modelName")
+    @field_validator("modelName")
     def validate_model_name(cls, v):
         if not v:
             raise ValueError("modelName is required")
@@ -37,20 +37,14 @@ class FetchPayload(BaseModel):
     fields: List[str]
     filters: Optional[List[FetchFilter]] = None
 
-    @validator("modelName")
+    @field_validator("modelName")
     def validate_model_name(cls, v):
         if not v:
             raise ValueError("modelName is required")
         return v
 
-    @validator("fields")
+    @field_validator("fields")
     def validate_fields(cls, v):
         if not v:
             raise ValueError("fields must not be empty")
-        return v
-
-    @validator("filters")
-    def validate_fields(cls, v):
-        if not v:
-            raise ValueError("filters must not be empty")
         return v
