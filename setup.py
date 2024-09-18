@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="django_generic_api",
-    version="0.1.0a1",
+    version="0.1.0a2",
     packages=find_packages(),
     include_package_data=True,
     license="MIT",

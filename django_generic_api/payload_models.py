@@ -15,7 +15,7 @@ class SaveInputTemplate(BaseModel):
 
 class SavePayload(BaseModel):
     modelName: str
-    id: Optional[str] = None
+    id: Optional[int] = None
     saveInput: JsonValue
 
     # Additional validations if needed
