@@ -14,7 +14,12 @@ def get_model_by_name(model_name):
 
 
 def fetch_data(
-    model_name, filters=None, fields=None, page_number=1, records_per_page=50
+    model_name,
+    filters=None,
+    fields=None,
+    page_number=1,
+    page_size=5,
+    sort=None,
 ):
     """
     Fetches data from a dynamically retrieved model.
@@ -40,6 +45,12 @@ def fetch_data(
     # Select only specified fields
     queryset = queryset.values(*fields)
 
+    if sort:
+        sort_fields = []
+        prefix = "-" if sort.order_by == "desc" else ""
+        sort_fields.append(f"{prefix}{sort.field}")
+        queryset = queryset.order_by(*sort_fields)
+
     # Apply pagination AS per the input payload.
     # queryset = queryset[0:10]
 
@@ -47,14 +58,14 @@ def fetch_data(
     queryset = queryset.distinct()
 
     # SQL-level pagination using slicing
-    start_index = (page_number - 1) * records_per_page
-    end_index = start_index + records_per_page
+    start_index = (page_number - 1) * page_size
+    end_index = start_index + page_size
     paginated_queryset = queryset[start_index:end_index]
 
     # Fetch the total count of the records (without pagination)
     total_records = queryset.count()
 
-    return dict(data=list(paginated_queryset), total=total_records)
+    return dict(total=total_records, data=list(paginated_queryset))
 
 
 def apply_filters(filters):

@@ -2,7 +2,6 @@ from pydantic import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from .payload_models import FetchPayload, SavePayload
 from .services import (
     get_model_by_name,
@@ -13,8 +12,8 @@ from .services import (
 
 class GenericFetchAPIView(APIView):
 
-    def post(self, request, *args, **kwargs):
-        payload = request.data.get("payload", {}).get("variables", {})
+    def post(self, *args, **kwargs):
+        payload = self.request.data.get("payload", {}).get("variables", {})
         try:
             # Validate the payload using the Pydantic model
             validated_data = FetchPayload(**payload)
@@ -26,16 +25,13 @@ class GenericFetchAPIView(APIView):
         filters = validated_data.filters
 
         # Default values
-        page_number = getattr(validated_data, "pageNumber", 1)
-        page_size = getattr(validated_data, "pageSize", 50)
+        page_number = getattr(validated_data, "pageNumber")
+        page_size = getattr(validated_data, "pageSize")
+        sort = validated_data.sort
 
         try:
             data = fetch_data(
-                model_name,
-                filters,
-                fields,
-                page_number,
-                page_size,
+                model_name, filters, fields, page_number, page_size, sort
             )
             return Response(data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -46,8 +42,8 @@ class GenericFetchAPIView(APIView):
 
 class GenericSaveAPIView(APIView):
 
-    def post(self, request, *args, **kwargs):
-        payload = request.data.get("payload", {}).get("variables", {})
+    def post(self, *args, **kwargs):
+        payload = self.request.data.get("payload", {}).get("variables", {})
 
         payload.get("saveInput", {}).pop("csrfmiddlewaretoken", "")
 
