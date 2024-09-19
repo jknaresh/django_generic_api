@@ -1,6 +1,8 @@
 # Django Generic API
 
-A reusable Django app for generic CRUD operations based on dynamic payloads. This package allows you to dynamically fetch and save data for any Django model via a REST API.
+A reusable Django app for generic CRUD operations based on dynamic payloads.
+This package allows you to dynamically fetch and save data for any Django model
+via a REST API.
 
 ## Features
 
@@ -14,7 +16,7 @@ A reusable Django app for generic CRUD operations based on dynamic payloads. Thi
 pip install django_generic_api
 ```
 
-## Integration 
+## Integration
 
 ### Django Installation
 
@@ -27,10 +29,13 @@ pip install django_generic_api
 ```bash
 path("<url prefix>", include('django_generic_api.urls'))
 ```
-# Example APIs
-## Save data 
 
--  To save data, post data on the url '/<prefix>/save/' and set header as well prepare payload as following
+# Example APIs
+
+## Save data
+
+- To save data, post data on the url '/<prefix>/save/' and set header as well
+  prepare payload as following
 
 ### Header:
 
@@ -62,11 +67,12 @@ Value: application/json
 
 ```
 
-## Fetch data 
+## Fetch data
 
-- To fetch the data, post on the url '/<prefix>/fetch/' and set header as well prepare payload as following
+- To fetch the data, post on the url '/<prefix>/fetch/' and set header as well
+  prepare payload as following
 
-###  Header:
+### Header:
 
 ```bash
 Key: Content-Type
