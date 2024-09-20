@@ -17,14 +17,17 @@ def fetch_data(
     model_name,
     filters=None,
     fields=None,
-    page_number=1,
-    page_size=5,
+    page_number=None,
+    page_size=None,
     sort=None,
+    distinct=None,
 ):
     """
     Fetches data from a dynamically retrieved model.
 
-    :param records_per_page:
+    :param distinct:
+    :param sort:
+    :param page_size:
     :param page_number:
     :param model_name: The name of the model (case-insensitive)
     :param filters: Dictionary of filters for the query
@@ -54,18 +57,20 @@ def fetch_data(
     # Apply pagination AS per the input payload.
     # queryset = queryset[0:10]
 
-    # Apply distinct to ensure no duplicates
-    queryset = queryset.distinct()
+    if distinct is not False:
+        # Apply distinct to ensure no duplicates
+        queryset = queryset.distinct()
 
-    # SQL-level pagination using slicing
-    start_index = (page_number - 1) * page_size
-    end_index = start_index + page_size
-    paginated_queryset = queryset[start_index:end_index]
+    if page_number and page_size:
+        # SQL-level pagination using slicing
+        start_index = (page_number - 1) * page_size
+        end_index = start_index + page_size
+        queryset = queryset[start_index:end_index]
 
     # Fetch the total count of the records (without pagination)
     total_records = queryset.count()
 
-    return dict(total=total_records, data=list(paginated_queryset))
+    return dict(total=total_records, data=list(queryset))
 
 
 def apply_filters(filters):

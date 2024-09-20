@@ -36,7 +36,7 @@ class SavePayload(BaseModel):
     # only allows str and int for id
     @field_validator("id")
     def validate_value_type(cls, v):
-        if not isinstance(v, (int, str)):
+        if not isinstance(v, (int, str, type(None))):
             raise ValueError("id must be an integer or a string")
         return v
 
@@ -70,9 +70,10 @@ class FetchPayload(BaseModel):
     modelName: str
     fields: List[str]
     filters: Optional[List[FetchFilter]] = None
-    pageNumber: Optional[int] = Field(default=1)
-    pageSize: Optional[int] = Field(default=10)
+    pageNumber: Optional[int] = None
+    pageSize: Optional[int] = None
     sort: Optional[FetchSort] = None
+    distinct: Optional[bool] = None
 
     @field_validator("modelName")
     def validate_model_name(cls, v):

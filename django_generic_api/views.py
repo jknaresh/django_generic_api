@@ -19,25 +19,36 @@ class GenericFetchAPIView(APIView):
             # Validate the payload using the Pydantic model
             validated_data = FetchPayload(**payload)
         except ValidationError as e:
-            return Response({"error": e.errors()}, status=400)
+            return Response(
+                {"error": e.errors(), "code": "DGA-0E"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         model_name = validated_data.modelName
         fields = validated_data.fields
         filters = validated_data.filters
 
         # Default values
-        page_number = getattr(validated_data, "pageNumber")
-        page_size = getattr(validated_data, "pageSize")
+        page_number = validated_data.pageNumber
+        page_size = validated_data.pageSize
         sort = validated_data.sort
+        distinct = validated_data.distinct
 
         try:
             data = fetch_data(
-                model_name, filters, fields, page_number, page_size, sort
+                model_name,
+                filters,
+                fields,
+                page_number,
+                page_size,
+                sort,
+                distinct,
             )
             return Response(data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
-                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
+                {"error": str(e), "code": "DGA-0D"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
 
@@ -52,7 +63,10 @@ class GenericSaveAPIView(APIView):
             # Validate the payload using the Pydantic model
             validated_data = SavePayload(**payload)
         except ValidationError as e:
-            return Response({"error": e.errors()}, status=400)
+            return Response(
+                {"error": e.errors(), "code": "DGA-0A"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # Proceed with saving the data using validated_data
         model_name = validated_data.modelName
@@ -62,7 +76,7 @@ class GenericSaveAPIView(APIView):
         model = get_model_by_name(model_name)
         if not model:
             return Response(
-                {"error": "Model not found"},
+                {"error": "Model not found", "code": "DGA-0B"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -74,5 +88,6 @@ class GenericSaveAPIView(APIView):
             )
         except Exception as e:
             return Response(
-                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
+                {"error": str(e), "code": "DGA-0C"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
