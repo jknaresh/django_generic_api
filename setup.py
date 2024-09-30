@@ -34,5 +34,6 @@ setup(
         "djangorestframework==3.15.2",
         "pydantic==2.9.1",
         "email-validator==2.2.0",
+        "djangorestframework-simplejwt==5.3.1",
     ],
 )
