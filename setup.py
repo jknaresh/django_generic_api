@@ -2,11 +2,14 @@ from setuptools import setup, find_packages
 
 setup(
     name="django_generic_api",
-    version="0.1.0a1",
+    version="0.1.0a22",
     packages=find_packages(),
     include_package_data=True,
     license="MIT",
-    description="A reusable Django app for generic CRUD operations based on dynamic payloads.",
+    description=(
+        "A reusable Django app for generic CRUD operations based on "
+        "dynamic payloads."
+    ),
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/jknaresh/django_generic_api",

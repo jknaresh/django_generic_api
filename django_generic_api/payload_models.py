@@ -6,7 +6,6 @@ from pydantic import (
     EmailStr,
     field_validator,
     JsonValue,
-    Field,
     ConfigDict,
 )
 
@@ -46,10 +45,16 @@ class OperatorByEnum(str, Enum):
     IN = "in"
 
 
+class OperationByEnum(str, Enum):
+    OR = "or"
+    AND = "and"
+
+
 class FetchFilter(BaseModel):
     operator: OperatorByEnum
     name: str
     value: List[Any]
+    operation: Optional[OperationByEnum] = OperationByEnum.AND
 
     model_config = ConfigDict(
         extra="forbid"

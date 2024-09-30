@@ -42,12 +42,15 @@ def fetch_data(
 
     # Apply filters dynamically
     if filters:
-        query_filters = apply_filters(filters)
+        query_filters = apply_filters(model, filters)
+        # todo: length(query_filters) < 1
+        # return empty results
+        # return dict(total=0, data=[])
         queryset = queryset.filter(query_filters)
 
     # Select only specified fields
     queryset = queryset.values(*fields)
-
+    print(50, queryset.query)
     if sort:
         sort_fields = []
         prefix = "-" if sort.order_by == "desc" else ""
@@ -73,15 +76,33 @@ def fetch_data(
     return dict(total=total_records, data=list(queryset))
 
 
-def apply_filters(filters):
+def validate_field_value(model, field, value):
+    # todo: validate model field with data type and value length. .. etc
+    return True
+
+
+def apply_filters(model, filters):
     """Apply dynamic filters using Q objects."""
     query = Q()
     for filter_item in filters:
         operator = filter_item.operator
         field_name = filter_item.name
         value = filter_item.value
+        operation = filter_item.operation
+        print(84, filter_item)
 
-        if operator == "eq":
+        if not validate_field_value(model, field_name, value):
+            continue
+            # raise ValueError(f"Invalid value for field '{field_name}':
+            # {value}")
+
+        if operation == "or":
+            if operator == "eq":
+                query |= Q(**{f"{field_name}__exact": value[0]})
+            elif operator == "in":
+                query |= Q(**{f"{field_name}__in": value})
+
+        elif operator == "eq":
             query &= Q(**{f"{field_name}__exact": value[0]})
         elif operator == "in":
             query &= Q(**{f"{field_name}__in": value})
