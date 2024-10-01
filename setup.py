@@ -1,8 +1,11 @@
 from setuptools import setup, find_packages
 
+with open("requirements.txt") as f:
+    install_requires = f.read().splitlines()
+
 setup(
     name="django_generic_api",
-    version="0.1.0a22",
+    version="0.1.0a25",
     packages=find_packages(),
     include_package_data=True,
     license="MIT",
@@ -29,11 +32,5 @@ setup(
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     ],
-    install_requires=[
-        "Django>=3.2",
-        "djangorestframework==3.15.2",
-        "pydantic==2.9.1",
-        "email-validator==2.2.0",
-        "djangorestframework-simplejwt==5.3.1",
-    ],
+    install_requires=install_requires,
 )

@@ -3,7 +3,7 @@ from functools import wraps
 from typing import Dict, Optional
 
 from django.apps import apps
-from django.contrib.auth import get_user_model, login
+from django.contrib.auth import get_user_model
 from django.db.models import *
 from jsonschema import validate
 from pydantic import BaseModel, create_model, EmailStr
@@ -39,7 +39,7 @@ def get_model_by_name(model_name):
             model = app_config.models.get(model_name.lower())
             if model:
                 return model
-    raise ValueError(f"Invalid Model [{model_name}].")
+    raise ValueError("Dataset not found.")
 
 
 def generate_token(user):
@@ -66,10 +66,10 @@ def validate_access_token(view_function):
                     user_id = token["user_id"]
                     user_model = get_user_model()
                     user = user_model.objects.get(id=user_id)
-                    login(request, user)
+                    # login(request, user)
                     # todo: instead of login user user.check_password if
                     #  possible.
-                    # user.check_password(request)
+                    setattr(request, "user", user)
                 except Exception as e:
                     return Response(
                         {"error": f"Authentication failed: {str(e)}"},
@@ -83,7 +83,10 @@ def validate_access_token(view_function):
 def get_config_schema(model):
     model_fields: Dict[str, tuple] = {}
 
-    for field in model._meta.fields:
+    model_meta = getattr(model, "_meta", None)
+    for field in model_meta.fields:
+        if field.name == "id":
+            continue
         field_type = None
         is_optional = field.null or field.blank
         if field.get_internal_type() == "ForeignKey":
@@ -175,9 +178,6 @@ def fetch_data(
         sort_fields.append(f"{prefix}{sort.field}")
         queryset = queryset.order_by(*sort_fields)
 
-    # Apply pagination AS per the input payload.
-    # queryset = queryset[0:10]
-
     if distinct is not False:
         # Apply distinct to ensure no duplicates
         queryset = queryset.distinct()
@@ -195,7 +195,7 @@ def fetch_data(
 
 def apply_filters(model, filters):
     """Apply dynamic filters using Q objects."""
-    query = Q()
+    query1 = Q()
     for filter_item in filters:
         operator = filter_item.operator
         field_name = filter_item.name
@@ -204,23 +204,21 @@ def apply_filters(model, filters):
 
         if not validate_field_value(model, field_name, value):
             continue
-            # raise ValueError(f"Invalid value for field '{field_name}':
-            # {value}")
 
         if operation == "or":
             if operator == "eq":
-                query |= Q(**{f"{field_name}__exact": value[0]})
+                query1 |= Q(**{f"{field_name}__exact": value[0]})
             elif operator == "in":
-                query |= Q(**{f"{field_name}__in": value})
+                query1 |= Q(**{f"{field_name}__in": value})
 
         elif operator == "eq":
-            query &= Q(**{f"{field_name}__exact": value[0]})
+            query1 &= Q(**{f"{field_name}__exact": value[0]})
         elif operator == "in":
-            query &= Q(**{f"{field_name}__in": value})
+            query1 &= Q(**{f"{field_name}__in": value})
         else:
             raise ValueError(f"Unsupported operator: {operator}")
 
-    return query
+    return query1
 
 
 def handle_save_input(model, record_id, save_input):
@@ -232,14 +230,12 @@ def handle_save_input(model, record_id, save_input):
     validate(instance=save_input, schema=schema)
 
     if record_id:
-        # todo: check change user permissions
         instance = model.objects.get(id=record_id)
         for field, value in save_input.items():
             setattr(instance, field, value)
         instance.save()
         message = "Record updated successfully."
     else:
-        # todo: check add user permissions
         instance = model.objects.create(**save_input)
         message = "Record created successfully."
     return instance, message
