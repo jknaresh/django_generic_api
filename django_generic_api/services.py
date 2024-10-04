@@ -5,11 +5,12 @@ from typing import Dict, Optional
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.db.models import *
-from jsonschema import validate
 from pydantic import BaseModel, create_model, EmailStr
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+
+from .utils import get_model_field_type, is_fields_exist
 
 DEFAULT_APPS = {
     "django.contrib.admin": True,
@@ -30,6 +31,12 @@ DJANGO_TO_PYDANTIC_TYPE_MAP = {
     TextField: str,
     ForeignKey: int,
 }
+
+
+class PydanticModelConfigV1:
+    str_strip_whitespace = True
+    smart_union = True
+    extra = "forbid"
 
 
 def get_model_by_name(model_name):
@@ -84,20 +91,16 @@ def get_config_schema(model):
     model_fields: Dict[str, tuple] = {}
 
     model_meta = getattr(model, "_meta", None)
-    for field in model_meta.fields:
-        if field.name == "id":
+    for field1 in model_meta.fields:
+        if field1.name == "id":
             continue
         field_type = None
-        is_optional = field.null or field.blank
-        if field.get_internal_type() == "ForeignKey":
-            if not field.name.endswith("_id"):
-                field.name = f"{field.name}_id"
-            field.name = field.name
+        is_optional = field1.null or field1.blank
 
         # Check if the field type exists in the mapping dictionary
         for django_field, pydantic_type in DJANGO_TO_PYDANTIC_TYPE_MAP.items():
-            if isinstance(field, django_field):
-                if isinstance(field, ForeignKey):
+            if isinstance(field1, django_field):
+                if isinstance(field1, ForeignKey):
                     related_model_pk_type = int
                     field_type = (
                         (
@@ -118,7 +121,7 @@ def get_config_schema(model):
                     )
                 break
         if field_type:
-            model_fields[field.name] = field_type
+            model_fields[field1.column] = field_type
 
     # Dynamically create a Pydantic model
     pydantic_model = create_model(
@@ -126,17 +129,22 @@ def get_config_schema(model):
         **model_fields,  # Model fields passed as keyword arguments
         __base__=BaseModel,  # Base class for Pydantic models
     )
-    schema = pydantic_model.model_json_schema()
-    return json.dumps(schema)
+    pydantic_model.__config__ = PydanticModelConfigV1
+    return pydantic_model
 
 
-def validate_field_value(model, field, value):
-    # todo: validate model field with data type and value length. .. etc
+def check_field_value(model, field1, value):
+    is_fields_exist(model, [field1])
+
+    data_type = get_model_field_type(model, field1)
+    if data_type == "IntegerField" and not value[0].isdigit():
+        return False
+
     return True
 
 
 def fetch_data(
-    model_name,
+    model,
     filters=None,
     fields1=None,
     page_number=None,
@@ -151,13 +159,16 @@ def fetch_data(
     :param sort:
     :param page_size:
     :param page_number:
-    :param model_name: The name of the model (case-insensitive)
+    :param model: django DB Model
     :param filters: Dictionary of filters for the query
     :param fields1: List of fields to return
     """
-    model = get_model_by_name(model_name)
-    if not model:
-        raise ValueError(f"Model '{model_name}' not found.")
+    # todo: validate field names from payload against config
+    is_fields_exist(model, fields1)
+
+    # sort field validation
+    if sort:
+        is_fields_exist(model, [sort.field])
 
     # Perform a query on the model
     queryset = model.objects.all()
@@ -165,6 +176,8 @@ def fetch_data(
     # Apply filters dynamically
     if filters:
         query_filters = apply_filters(model, filters)
+        if len(query_filters.children) < 1:
+            return dict(total=0, data=[])
         # todo: length(query_filters) < 1
         # return empty results
         # return dict(total=0, data=[])
@@ -172,18 +185,22 @@ def fetch_data(
 
     # Select only specified fields
     queryset = queryset.values(*fields1)
+
+    # Sorting
     if sort:
         sort_fields = []
         prefix = "-" if sort.order_by == "desc" else ""
         sort_fields.append(f"{prefix}{sort.field}")
         queryset = queryset.order_by(*sort_fields)
 
+    # Distinct
     if distinct is not False:
         # Apply distinct to ensure no duplicates
         queryset = queryset.distinct()
     # Fetch the total count of the records (without pagination)
     total_records = queryset.count()
 
+    # pagination
     if page_number and page_size:
         # SQL-level pagination using slicing
         start_index = (page_number - 1) * page_size
@@ -202,8 +219,8 @@ def apply_filters(model, filters):
         value = filter_item.value
         operation = filter_item.operation
 
-        if not validate_field_value(model, field_name, value):
-            continue
+        if not check_field_value(model, field_name, value):
+            raise ValueError(f"Invalid data {value}")
 
         if operation == "or":
             if operator == "eq":
@@ -224,18 +241,30 @@ def apply_filters(model, filters):
 def handle_save_input(model, record_id, save_input):
     """Handle creating or updating a record."""
 
-    schema = get_config_schema(model)
-    schema = json.loads(schema)
-    # info: if schema validate fails, it will throw an error
-    validate(instance=save_input, schema=schema)
+    model_schema = get_config_schema(model)
+    # model_schema = json.loads(model_schema)
+    # Validate against schema
+    try:
+        model_schema.model_validate_json(json.dumps(save_input))
+    except Exception as e:
+        raise ValueError(e)
 
-    if record_id:
-        instance = model.objects.get(id=record_id)
-        for field, value in save_input.items():
-            setattr(instance, field, value)
-        instance.save()
-        message = "Record updated successfully."
-    else:
-        instance = model.objects.create(**save_input)
-        message = "Record created successfully."
+    try:
+        if record_id:
+            # Fetch the instance if record_id is provided
+            instance = model.objects.get(id=record_id)
+
+            for field1, value in save_input.items():
+                setattr(instance, field1, value)
+            instance.save()
+            message = "Record updated successfully."
+        else:
+            # Validate save_input fields for creating a new record
+            instance = model.objects.create(**save_input)
+            message = "Record created successfully."
+    except model.DoesNotExist:
+        raise ValueError(f"Record with ID {record_id} does not exist.")
+    except Exception as s:
+        raise TypeError(str(s))
+
     return instance, message

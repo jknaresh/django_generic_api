@@ -5,7 +5,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="django_generic_api",
-    version="0.1.0a25",
+    version="0.1.0a261",
     packages=find_packages(),
     include_package_data=True,
     license="MIT",

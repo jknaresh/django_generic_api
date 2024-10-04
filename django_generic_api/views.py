@@ -112,7 +112,7 @@ class GenericFetchAPIView(APIView):
             validated_data = FetchPayload(**payload)
         except ValidationError as e:
             return Response(
-                {"error": e.errors(), "code": "DGA-0E"},
+                {"error": e.errors()[0].get("msg"), "code": "DGA-0E"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -146,7 +146,7 @@ class GenericFetchAPIView(APIView):
 
         try:
             data = fetch_data(
-                model_name,
+                model,
                 filters,
                 fields,
                 page_number,
@@ -178,7 +178,7 @@ class GenericSaveAPIView(APIView):
             validated_data = SavePayload(**payload)
         except ValidationError as e:
             return Response(
-                {"error": e.errors(), "code": "DGA-0A"},
+                {"error": e.errors()[0].get("msg"), "code": "DGA-0A"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -208,7 +208,7 @@ class GenericSaveAPIView(APIView):
         try:
             instance, message = handle_save_input(model, record_id, save_input)
             return Response(
-                {"status": "success", "data": instance.id, "message": message},
+                {"data": [{"id": instance.id}], "message": message},
                 status=status.HTTP_200_OK,
             )
         except Exception as e:

@@ -1,29 +1,16 @@
 from enum import Enum
 from typing import Optional, Any, List, Union
 
-from pydantic import (
-    BaseModel,
-    EmailStr,
-    field_validator,
-    JsonValue,
-    ConfigDict,
-)
+from pydantic import BaseModel, field_validator, JsonValue, ConfigDict
 
 
-class SaveInputTemplate(BaseModel):
-    first_name: str
-    last_name: str
-    email: EmailStr
-    organization_id: str
-    phone_number: Optional[str] = None
-    job_title: Optional[str] = None
-    description: Optional[str] = None
-
-
-class SavePayload(BaseModel):
+class SavePayload(BaseModel, str_strip_whitespace=True):
     modelName: str
     id: Optional[Union[int, str]] = None
     saveInput: JsonValue
+
+    # does not allow extra attributes
+    model_config = ConfigDict(extra="forbid")
 
     # Additional validations if needed
     @field_validator("modelName")
@@ -50,7 +37,7 @@ class OperationByEnum(str, Enum):
     AND = "and"
 
 
-class FetchFilter(BaseModel):
+class FetchFilter(BaseModel, str_strip_whitespace=True):
     operator: OperatorByEnum
     name: str
     value: List[Any]
@@ -66,12 +53,12 @@ class OrderByEnum(str, Enum):
     desc = "desc"
 
 
-class FetchSort(BaseModel):
+class FetchSort(BaseModel, str_strip_whitespace=True):
     field: str
     order_by: OrderByEnum
 
 
-class FetchPayload(BaseModel):
+class FetchPayload(BaseModel, str_strip_whitespace=True):
     modelName: str
     fields: List[str]
     filters: Optional[List[FetchFilter]] = None
@@ -79,6 +66,10 @@ class FetchPayload(BaseModel):
     pageSize: Optional[int] = None
     sort: Optional[FetchSort] = None
     distinct: Optional[bool] = None
+
+    model_config = ConfigDict(
+        extra="forbid"
+    )  # does not allow extra attributes
 
     @field_validator("modelName")
     def validate_model_name(cls, v):
@@ -104,5 +95,4 @@ class FetchPayload(BaseModel):
                     raise ValueError("Filters must have at least one value")
                 elif len_value > 1 and operator != OperatorByEnum.IN:
                     raise ValueError("Multiple filters not supported")
-
         return v
