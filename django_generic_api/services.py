@@ -83,7 +83,6 @@ def validate_access_token(view_function):
                         status=status.HTTP_401_UNAUTHORIZED,
                     )
 
-
         return view_function(request, *args, **kwargs)
 
     return _wrapped_view
@@ -134,13 +133,13 @@ def get_config_schema(model):
 def check_field_value(model, field1, value):
     is_fields_exist(model, [field1])
 
-    model_fields  = get_model_fields_with_properties(model)
+    model_fields = get_model_fields_with_properties(model)
     field_properties = model_fields[field1]
-    field_type = field_properties['type']
+    field_type = field_properties["type"]
 
     if field_type == "IntegerField" and not value[0].isdigit():
         return False
-    if field_type == "BooleanField" and value[0] not in ["True","False"]:
+    if field_type == "BooleanField" and value[0] not in ["True", "False"]:
         return False
 
     return True
@@ -224,7 +223,6 @@ def apply_filters(model, filters):
 
         if not check_field_value(model, field_name, value):
             raise ValueError(f"Invalid data: {value}. SERV-02")
-
 
         if operation == "or":
             if operator == "eq":

@@ -1,3 +1,7 @@
+import time
+from django.conf import settings
+import hashlib
+
 actions = {
     "fetch": "view",
     "save": "add",
@@ -37,6 +41,7 @@ def make_permission_str(model, action):
 #
 #     return field_type
 
+
 def get_model_fields_with_properties(model):
     """
     Returns a dictionary where the keys are field names and the values are a dictionary
@@ -50,12 +55,12 @@ def get_model_fields_with_properties(model):
 
     field_dict = {}
     for field1 in field_obj:
-        #collecr properties of fields.
+        # collecr properties of fields.
         field_properties = {
-            'type': field1.get_internal_type(),
-            'null': field1.null,
-            'blank': field1.blank,
-            'max_length': getattr(field1, 'max_length', None),
+            "type": field1.get_internal_type(),
+            "null": field1.null,
+            "blank": field1.blank,
+            "max_length": getattr(field1, "max_length", None),
             # Only exists for certain fields
         }
         field_dict[field1.attname] = field_properties
@@ -70,3 +75,9 @@ def is_fields_exist(model, fields):
         # todo: if any foreign key validate field.
         raise ValueError(f"Extra field {result}. UTI-01")
     return True
+
+
+def registration_token(user_id):
+    timestamp = int(time.time())
+    token = f"{user_id}:{timestamp}"
+    return token

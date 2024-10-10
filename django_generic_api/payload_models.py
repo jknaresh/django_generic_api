@@ -43,6 +43,7 @@ class FetchFilter(BaseModel):
         smart_union = True
         extra = "forbid"
 
+
 class OrderByEnum(str, Enum):
     asc = "asc"
     desc = "desc"

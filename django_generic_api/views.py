@@ -8,7 +8,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.core.mail import send_mail
 from django.conf import settings
-import random
 from .payload_models import (
     FetchPayload,
     SavePayload,
@@ -22,8 +21,12 @@ from .services import (
     fetch_data,
     generate_token,
 )
-from .utils import make_permission_str
-
+from .utils import make_permission_str, registration_token
+from django.utils import timezone
+import hashlib
+import time
+from django.urls import reverse
+from django.utils.http import urlencode
 
 
 class GenericSaveAPIView(APIView):
@@ -39,10 +42,9 @@ class GenericSaveAPIView(APIView):
         record_count = payload.get("saveInput", {})
 
         # Does not allow to save more than 10 records at once
-        if len(record_count)>10:
+        if len(record_count) > 10:
             return Response(
-                {"error": "Only 10 records at once.",
-                 "code": "DGA-0E"},
+                {"error": "Only 10 records at once.", "code": "DGA-0A"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -51,7 +53,7 @@ class GenericSaveAPIView(APIView):
             validated_data = SavePayload(**payload)
         except ValidationError as e:
             return Response(
-                {"error": e.errors()[0].get("msg"), "code": "DGA-0A"},
+                {"error": e.errors()[0].get("msg"), "code": "DGA-0B"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -64,7 +66,7 @@ class GenericSaveAPIView(APIView):
             model = get_model_by_name(model_name)
         except ValueError:
             return Response(
-                {"error": "Model not found", "code": "DGA-0B"},
+                {"error": "Model not found", "code": "DGA-0C"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -75,13 +77,13 @@ class GenericSaveAPIView(APIView):
                 {
                     "error": "Something went wrong!!! Please contact the "
                     "administrator.",
-                    "code": "DGA-0C",
+                    "code": "DGA-0D",
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         try:
-            instances, message  = handle_save_input(model, record_id, save_input)
+            instances, message = handle_save_input(model, record_id, save_input)
             instance_ids = [{"id": instance.id} for instance in instances]
             return Response(
                 {"data": [{"id": instance_ids}], "message": message},
@@ -89,7 +91,7 @@ class GenericSaveAPIView(APIView):
             )
         except Exception as e:
             return Response(
-                {"error": str(e), "code": "DGA-0D"},
+                {"error": str(e), "code": "DGA-0E"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -115,10 +117,7 @@ class GenericFetchAPIView(APIView):
             error = f"{error_msg}{error_loc}"
 
             return Response(
-                {
-                    "error": error,
-                    "code": "DGA-0E"
-                },
+                {"error": error, "code": "DGA-0F"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -137,7 +136,7 @@ class GenericFetchAPIView(APIView):
             model = get_model_by_name(model_name)
         except Exception as e:
             return Response(
-                {"error": str(e), "code": "DGA-0F"},
+                {"error": str(e), "code": "DGA-0G"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         if not self.request.user.has_perm(make_permission_str(model, "fetch")):
@@ -145,7 +144,7 @@ class GenericFetchAPIView(APIView):
                 {
                     "error": "Something went wrong!!! Please contact the "
                     "administrator.",
-                    "code": "DGA-0G",
+                    "code": "DGA-0H",
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )
@@ -163,7 +162,7 @@ class GenericFetchAPIView(APIView):
             return Response(data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
-                {"error": str(e), "code": "DGA-0H"},
+                {"error": str(e), "code": "DGA-0I"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -175,7 +174,7 @@ class GenericLoginAPIView(APIView):
             validated_userdata = GenericLoginPayload(**payload)
         except ValidationError as e:
             return Response(
-                {"error": e.errors()[0].get("msg"), "code": "DGA-0I"},
+                {"error": e.errors()[0].get("msg"), "code": "DGA-0J"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -191,7 +190,7 @@ class GenericLoginAPIView(APIView):
             )
         else:
             return Response(
-                {"error": "Invalid credentials", "code": "DGA-0J"},
+                {"error": "Invalid credentials", "code": "DGA-0K"},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
@@ -203,7 +202,7 @@ class GenericRegisterAPIView(APIView):
             validate_register_data = GenericRegisterPayload(**payload)
         except ValidationError as e:
             return Response(
-                {"error": e.errors()[0].get("msg"), "code": "DGA-0K"},
+                {"error": e.errors()[0].get("msg"), "code": "DGA-0L"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -213,14 +212,14 @@ class GenericRegisterAPIView(APIView):
 
         if not password == password1:
             return Response(
-                {"error": "passwords does not match", "code": "DGA-0L"},
+                {"error": "passwords does not match", "code": "DGA-0M"},
                 status=status.HTTP_200_OK,
             )
+
         user = User.objects.filter(username=email).exists()
         if user:
             return Response(
-                {"error": "Account already exists with this email.", "code":
-                    "DGA-0M"},
+                {"error": "Account already exists with this email.", "code": "DGA-0N"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         else:
@@ -232,22 +231,24 @@ class GenericRegisterAPIView(APIView):
             new_user.is_active = False
             new_user.save()
 
-            otp = random.randint(0000, 9999)
-            user_name = new_user.email.split('@')
+            token = registration_token(new_user.id)
 
             try:
                 subject = "Verify your email address for SignUp"
-                message = f"Your verification OTP is {otp}"
+                message = f"Your verification link is {token}"
                 from_email = settings.EMAIL_HOST_USER
                 recipient_list = [email]
                 fail_silently = False
 
-                send_mail(subject,message,from_email,recipient_list,fail_silently)
-                return Response({"message": "Email sent successfully."},
-                                status=status.HTTP_200_OK)
+                send_mail(subject, message, from_email, recipient_list, fail_silently)
+                return Response(
+                    {"message": "Email sent successfully."}, status=status.HTTP_200_OK
+                )
             except Exception as e:
-                return Response({"error": str(e),"code":"DGA-0N"},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"error": str(e), "code": "DGA-0O"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
 
 class GenericForgotPasswordAPIView(APIView):
@@ -257,7 +258,7 @@ class GenericForgotPasswordAPIView(APIView):
             validated_email = ForgotPasswordPayload(**payload)
         except ValidationError as e:
             return Response(
-                {"error": e.errors()[0].get("msg"), "code": "DGA-0N"},
+                {"error": e.errors()[0].get("msg"), "code": "DGA-0P"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
