@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
-from .utils import get_model_field_type, is_fields_exist
+from .utils import is_fields_exist, get_model_fields_with_properties
 
 DEFAULT_APPS = {
     "django.contrib.admin": True,
@@ -35,7 +35,7 @@ DJANGO_TO_PYDANTIC_TYPE_MAP = {
 
 class PydanticModelConfigV1:
     str_strip_whitespace = True
-    smart_union = True
+    # smart_union = True
     extra = "forbid"
 
 
@@ -46,7 +46,7 @@ def get_model_by_name(model_name):
             model = app_config.models.get(model_name.lower())
             if model:
                 return model
-    raise ValueError("Dataset not found.")
+    raise ValueError
 
 
 def generate_token(user):
@@ -73,15 +73,17 @@ def validate_access_token(view_function):
                     user_id = token["user_id"]
                     user_model = get_user_model()
                     user = user_model.objects.get(id=user_id)
-                    # login(request, user)
-                    # todo: instead of login user user.check_password if
-                    #  possible.
+                    # todo: instead of login user user.check_password if possible.
+                    # if user.check_password(password):
+                    #     setattr(request, "user", user)
                     setattr(request, "user", user)
                 except Exception as e:
                     return Response(
-                        {"error": f"Authentication failed: {str(e)}"},
+                        {"error": f"Authentication failed: {str(e)} SERV-01"},
                         status=status.HTTP_401_UNAUTHORIZED,
                     )
+
+
         return view_function(request, *args, **kwargs)
 
     return _wrapped_view
@@ -112,11 +114,7 @@ def get_config_schema(model):
                     )
                 else:
                     field_type = (
-                        (
-                            Optional[pydantic_type]
-                            if is_optional
-                            else pydantic_type
-                        ),
+                        (Optional[pydantic_type] if is_optional else pydantic_type),
                         ...,
                     )
                 break
@@ -136,8 +134,13 @@ def get_config_schema(model):
 def check_field_value(model, field1, value):
     is_fields_exist(model, [field1])
 
-    data_type = get_model_field_type(model, field1)
-    if data_type == "IntegerField" and not value[0].isdigit():
+    model_fields  = get_model_fields_with_properties(model)
+    field_properties = model_fields[field1]
+    field_type = field_properties['type']
+
+    if field_type == "IntegerField" and not value[0].isdigit():
+        return False
+    if field_type == "BooleanField" and value[0] not in ["True","False"]:
         return False
 
     return True
@@ -220,7 +223,8 @@ def apply_filters(model, filters):
         operation = filter_item.operation
 
         if not check_field_value(model, field_name, value):
-            raise ValueError(f"Invalid data {value}")
+            raise ValueError(f"Invalid data: {value}. SERV-02")
+
 
         if operation == "or":
             if operator == "eq":
@@ -232,8 +236,6 @@ def apply_filters(model, filters):
             query1 &= Q(**{f"{field_name}__exact": value[0]})
         elif operator == "in":
             query1 &= Q(**{f"{field_name}__in": value})
-        else:
-            raise ValueError(f"Unsupported operator: {operator}")
 
     return query1
 
@@ -242,29 +244,41 @@ def handle_save_input(model, record_id, save_input):
     """Handle creating or updating a record."""
 
     model_schema = get_config_schema(model)
-    # model_schema = json.loads(model_schema)
-    # Validate against schema
-    try:
-        model_schema.model_validate_json(json.dumps(save_input))
-    except Exception as e:
-        raise ValueError(e)
+    instances = []
+    messages = []
 
-    try:
-        if record_id:
-            # Fetch the instance if record_id is provided
-            instance = model.objects.get(id=record_id)
+    for saveInput in save_input:
+        # Validate against schema
+        try:
+            # model_schema.model_validate_json(json.dumps(saveInput))
+            model_schema(**saveInput)
 
-            for field1, value in save_input.items():
-                setattr(instance, field1, value)
-            instance.save()
-            message = "Record updated successfully."
-        else:
-            # Validate save_input fields for creating a new record
-            instance = model.objects.create(**save_input)
-            message = "Record created successfully."
-    except model.DoesNotExist:
-        raise ValueError(f"Record with ID {record_id} does not exist.")
-    except Exception as s:
-        raise TypeError(str(s))
+        except Exception as e:
+            error_msg = e.errors()[0].get("msg")
+            error_loc = e.errors()[0].get("loc")
 
-    return instance, message
+            raise ValueError(f"{error_msg}. {error_loc}. SERV-03")
+
+        try:
+            if record_id:
+                # Fetch the instance if record_id is provided
+                instance = model.objects.get(id=record_id)
+
+                for field1, value in saveInput.items():
+                    setattr(instance, field1, value)
+                instance.save()
+                message = "Record updated successfully."
+            else:
+                # Validate save_input fields for creating a new record
+                instance = model.objects.create(**saveInput)
+                message = "Record created successfully."
+
+            instances.append(instance)
+            messages.append(message)
+        except model.DoesNotExist:
+            raise ValueError(f"Record with ID {record_id} does not exist. SERV-04")
+        except Exception as s:
+            raise TypeError(f"{str(s)}. SERV-05")
+
+    message = list(set(messages))
+    return instances, message

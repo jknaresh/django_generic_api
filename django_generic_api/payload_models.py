@@ -1,7 +1,14 @@
 from enum import Enum
 from typing import Optional, Any, List, Union
 
-from pydantic import BaseModel, field_validator, JsonValue, ConfigDict
+from pydantic import (
+    BaseModel,
+    field_validator,
+    JsonValue,
+    ConfigDict,
+    SecretStr,
+    EmailStr,
+)
 
 
 class SavePayload(BaseModel, str_strip_whitespace=True):
@@ -11,20 +18,6 @@ class SavePayload(BaseModel, str_strip_whitespace=True):
 
     # does not allow extra attributes
     model_config = ConfigDict(extra="forbid")
-
-    # Additional validations if needed
-    @field_validator("modelName")
-    def validate_model_name(cls, v):
-        if not v:
-            raise ValueError("modelName is required")
-        return v
-
-    # only allows str and int for id
-    @field_validator("id")
-    def validate_value_type(cls, v):
-        if not isinstance(v, (int, str, type(None))):
-            raise ValueError("id must be an integer or a string")
-        return v
 
 
 class OperatorByEnum(str, Enum):
@@ -37,16 +30,18 @@ class OperationByEnum(str, Enum):
     AND = "and"
 
 
-class FetchFilter(BaseModel, str_strip_whitespace=True):
+class FetchFilter(BaseModel):
     operator: OperatorByEnum
     name: str
     value: List[Any]
     operation: Optional[OperationByEnum] = OperationByEnum.AND
 
-    model_config = ConfigDict(
-        extra="forbid"
-    )  # does not allow extra attributes
-
+    # model_config = ConfigDict(extra="forbid")  # does not allow extra attributes
+    class Config:
+        # Set configuration options here
+        str_strip_whitespace = True
+        smart_union = True
+        extra = "forbid"
 
 class OrderByEnum(str, Enum):
     asc = "asc"
@@ -67,21 +62,7 @@ class FetchPayload(BaseModel, str_strip_whitespace=True):
     sort: Optional[FetchSort] = None
     distinct: Optional[bool] = None
 
-    model_config = ConfigDict(
-        extra="forbid"
-    )  # does not allow extra attributes
-
-    @field_validator("modelName")
-    def validate_model_name(cls, v):
-        if not v:
-            raise ValueError("modelName is required")
-        return v
-
-    @field_validator("fields")
-    def validate_fields(cls, v):
-        if not v:
-            raise ValueError("fields must not be empty")
-        return v
+    model_config = ConfigDict(extra="forbid")  # does not allow extra attributes
 
     @field_validator("filters")
     def validate_filters(cls, v):
@@ -96,3 +77,18 @@ class FetchPayload(BaseModel, str_strip_whitespace=True):
                 elif len_value > 1 and operator != OperatorByEnum.IN:
                     raise ValueError("Multiple filters not supported")
         return v
+
+
+class GenericLoginPayload(BaseModel, str_strip_whitespace=True):
+    email: str
+    password: SecretStr
+
+    model_config = ConfigDict(extra="forbid")  # does not allow extra attributes
+
+
+class GenericRegisterPayload(BaseModel, str_strip_whitespace=True):
+    email: EmailStr
+    password: SecretStr
+    password1: SecretStr
+
+    model_config = ConfigDict(extra="forbid")  # does not allow extra attributes
