@@ -18,30 +18,6 @@ def make_permission_str(model, action):
     return permission
 
 
-# def get_model_field_names(model):
-#     model_meta = getattr(model, "_meta")
-#     field_obj = model_meta.fields
-#
-#     field_dict = {}
-#     for field1 in field_obj:
-#         field_dict[field1.attname] = field1
-#
-#     return field_dict
-#
-#
-# def get_model_field_type(model, field1):
-#     """
-#     :param model:   string
-#     :param field1: string
-#     :return:
-#     """
-#     model_meta = getattr(model, "_meta")
-#     field_type1 = model_meta.get_field(field1)
-#     field_type = field_type1.get_internal_type()
-#
-#     return field_type
-
-
 def get_model_fields_with_properties(model):
     """
     Returns a dictionary where the keys are field names and the values are a dictionary
