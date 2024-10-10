@@ -25,31 +25,38 @@ pip install django_generic_api
 - In settings.py file, integrate the following
 
 ```bash
-#Set allowed hosts to all cross origin references
+# Set allowed hosts to all cross origin references
 ALLOWED_HOSTS = ["*"]
 
-CORS_ALLOWED_ORIGINS = ["*"]
+## Adding CORS headers allows your resources to be accessed on other domains
+## This allows in-browser requests to your Django application from other origins.
+
+# A list of origins that are authorized to make cross-site HTTP requests.
+CORS_ALLOWED_ORIGINS = ["*"]  # ex: "https://example.com","http://localhost:8080"
+
+# If True, all origins will be allowed.
 CORS_ALLOW_ALL_ORIGINS = True
 
+# Additional apps to be added in your INSTALLED_APPS
 INSTALLED_APPS =[
       ...
-  "django_generic_api", #package
-  "rest_framework", 
-  "rest_framework_simplejwt",
-  "corsheaders",
+  "django_generic_api", # Package
+  "rest_framework", # API framework package
+  "rest_framework_simplejwt", # Token based authorization package
+  "corsheaders", # CORS package
 ] 
 
-# cross origin middleware settings
+# cross origin middleware settings,add middleware class to listen in on responses:
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
           ...
 ]
 
-#rest framework settings
+# Rest framework settings
 
-##Session authentication is for on form based submission
-## JWT authentication is for token based submission
+## Session authentication is for on form based submission
+## Non Session authentication is for token based submission
 
 #add the settings as per your requirement 
 REST_FRAMEWORK = {
@@ -91,10 +98,10 @@ path("<url prefix>", include('django_generic_api.urls'))
 ### Header:
 
 ```header
-Header["X-CSRFToken"]=csrfvalue
+header["X-CSRFToken"]=csrfvalue
 ```
 
-### Payload:
+### Login Payload:
 
 ```json
 
@@ -127,7 +134,7 @@ Header["X-CSRFToken"]=csrfvalue
 ### Header
 
 ```header
-Header["X-CSRFToken"]=csrfvalue
+header["X-CSRFToken"]=csrfvalue
 ```
 
 ## Save data
@@ -139,9 +146,9 @@ Header["X-CSRFToken"]=csrfvalue
 ### Header:
 
 ```header
-Header["Content-Type"]=application/json,
-Header["X-CSRFToken"]=csrfvalue,
-Header["Authorization"]=Bearer <access token>
+header["Content-Type"]=application/json,
+header["X-CSRFToken"]=csrfvalue,
+header["Authorization"]=Bearer <access token>
 ```
 
 ### Payload for single record:
@@ -222,9 +229,9 @@ Header["Authorization"]=Bearer <access token>
 ### Header:
 
 ```bash
-Header["Content-Type"]=application/json,
-Header["X-CSRFToken"]=csrfvalue,
-Header["Authorization"]=Bearer <access token>
+header["Content-Type"]=application/json,
+header["X-CSRFToken"]=csrfvalue,
+header["Authorization"]=Bearer <access token>
 ```
 
 ### Payload:

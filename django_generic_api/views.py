@@ -38,7 +38,6 @@ class GenericSaveAPIView(APIView):
     def post(self, *args, **kwargs):
         payload = self.request.data.get("payload", {}).get("variables", {})
 
-        # payload.get("saveInput", {}).pop("csrfmiddlewaretoken", "")
         record_count = payload.get("saveInput", {})
 
         # Does not allow to save more than 10 records at once
@@ -146,7 +145,15 @@ class GenericFetchAPIView(APIView):
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )
-
+        data = fetch_data(
+            model,
+            filters,
+            fields,
+            page_number,
+            page_size,
+            sort,
+            distinct,
+        )
         try:
             data = fetch_data(
                 model,

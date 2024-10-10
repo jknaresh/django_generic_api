@@ -35,7 +35,6 @@ DJANGO_TO_PYDANTIC_TYPE_MAP = {
 
 class PydanticModelConfigV1:
     str_strip_whitespace = True
-    # smart_union = True
     extra = "forbid"
 
 
