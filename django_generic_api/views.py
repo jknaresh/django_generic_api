@@ -83,7 +83,9 @@ class GenericSaveAPIView(APIView):
             )
 
         try:
-            instances, message = handle_save_input(model, record_id, save_input)
+            instances, message = handle_save_input(
+                model, record_id, save_input
+            )
             instance_ids = [{"id": instance.id} for instance in instances]
             return Response(
                 {"data": [{"id": instance_ids}], "message": message},
@@ -108,10 +110,6 @@ class GenericFetchAPIView(APIView):
             # Validate the payload using the Pydantic model
             validated_data = FetchPayload(**payload)
         except ValidationError as e:
-            # return Response(
-            #     {"error": e.errors()[0].get("msg"), "code": "DGA-0E"},
-            #     status=status.HTTP_400_BAD_REQUEST,
-            # )
             error_msg = e.errors()[0].get("msg")
             error_loc = e.errors()[0].get("loc")
             error = f"{error_msg}{error_loc}"
@@ -219,7 +217,10 @@ class GenericRegisterAPIView(APIView):
         user = User.objects.filter(username=email).exists()
         if user:
             return Response(
-                {"error": "Account already exists with this email.", "code": "DGA-0N"},
+                {
+                    "error": "Account already exists with this email.",
+                    "code": "DGA-0N",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         else:
@@ -240,9 +241,12 @@ class GenericRegisterAPIView(APIView):
                 recipient_list = [email]
                 fail_silently = False
 
-                send_mail(subject, message, from_email, recipient_list, fail_silently)
+                send_mail(
+                    subject, message, from_email, recipient_list, fail_silently
+                )
                 return Response(
-                    {"message": "Email sent successfully."}, status=status.HTTP_200_OK
+                    {"message": "Email sent successfully."},
+                    status=status.HTTP_200_OK,
                 )
             except Exception as e:
                 return Response(

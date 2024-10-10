@@ -63,7 +63,9 @@ class FetchPayload(BaseModel, str_strip_whitespace=True):
     sort: Optional[FetchSort] = None
     distinct: Optional[bool] = None
 
-    model_config = ConfigDict(extra="forbid")  # does not allow extra attributes
+    model_config = ConfigDict(
+        extra="forbid"
+    )  # does not allow extra attributes
 
     @field_validator("filters")
     def validate_filters(cls, v):
@@ -84,7 +86,9 @@ class GenericLoginPayload(BaseModel, str_strip_whitespace=True):
     email: str
     password: SecretStr
 
-    model_config = ConfigDict(extra="forbid")  # does not allow extra attributes
+    model_config = ConfigDict(
+        extra="forbid"
+    )  # does not allow extra attributes
 
 
 class GenericRegisterPayload(BaseModel, str_strip_whitespace=True):
@@ -92,4 +96,6 @@ class GenericRegisterPayload(BaseModel, str_strip_whitespace=True):
     password: SecretStr
     password1: SecretStr
 
-    model_config = ConfigDict(extra="forbid")  # does not allow extra attributes
+    model_config = ConfigDict(
+        extra="forbid"
+    )  # does not allow extra attributes

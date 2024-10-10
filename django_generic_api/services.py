@@ -113,7 +113,11 @@ def get_config_schema(model):
                     )
                 else:
                     field_type = (
-                        (Optional[pydantic_type] if is_optional else pydantic_type),
+                        (
+                            Optional[pydantic_type]
+                            if is_optional
+                            else pydantic_type
+                        ),
                         ...,
                     )
                 break
@@ -274,7 +278,9 @@ def handle_save_input(model, record_id, save_input):
             instances.append(instance)
             messages.append(message)
         except model.DoesNotExist:
-            raise ValueError(f"Record with ID {record_id} does not exist. SERV-04")
+            raise ValueError(
+                f"Record with ID {record_id} does not exist. SERV-04"
+            )
         except Exception as s:
             raise TypeError(f"{str(s)}. SERV-05")
 
