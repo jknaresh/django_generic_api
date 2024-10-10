@@ -30,6 +30,7 @@ class SavePayload(BaseModel, str_strip_whitespace=True):
 class OperatorByEnum(str, Enum):
     EQ = "eq"
     IN = "in"
+    NOT = "not"
 
 
 class OperationByEnum(str, Enum):

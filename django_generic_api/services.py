@@ -227,13 +227,15 @@ def apply_filters(model, filters):
                 query1 |= Q(**{f"{field_name}__exact": value[0]})
             elif operator == "in":
                 query1 |= Q(**{f"{field_name}__in": value})
+            elif operator == "not":
+                query1 |= ~Q(**{f"{field_name}": value})
 
         elif operator == "eq":
             query1 &= Q(**{f"{field_name}__exact": value[0]})
         elif operator == "in":
             query1 &= Q(**{f"{field_name}__in": value})
-        else:
-            raise ValueError(f"Unsupported operator: {operator}")
+        elif operator == "not":
+            query1 &= ~Q(**{f"{field_name}": value})
 
     return query1
 
