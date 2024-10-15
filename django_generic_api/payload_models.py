@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Optional, Any, List, Union
-
+from abc import ABC
 from pydantic import (
     BaseModel,
     field_validator,
@@ -11,19 +11,24 @@ from pydantic import (
 )
 
 
-class SavePayload(BaseModel, str_strip_whitespace=True):
+class PayloadModelConfig(ABC):
+    model_config = ConfigDict(
+        str_strip_whitespace=True,  # Remove white spaces
+        extra="forbid",  # Forbid extra fields
+    )
+
+
+class SavePayload(BaseModel, PayloadModelConfig):
     modelName: str
     id: Optional[Union[int, str]] = None
     saveInput: JsonValue
-
-    # does not allow extra attributes
-    model_config = ConfigDict(extra="forbid")
 
 
 class OperatorByEnum(str, Enum):
     EQ = "eq"
     IN = "in"
     NOT = "not"
+    GT = "gt"
 
 
 class OperationByEnum(str, Enum):
@@ -31,18 +36,14 @@ class OperationByEnum(str, Enum):
     AND = "and"
 
 
-class FetchFilter(BaseModel):
+class FetchFilter(BaseModel, PayloadModelConfig):
     operator: OperatorByEnum
     name: str
     value: List[Any]
     operation: Optional[OperationByEnum] = OperationByEnum.AND
 
-    # model_config = ConfigDict(extra="forbid")  # does not allow extra attributes
     class Config:
-        # Set configuration options here
-        str_strip_whitespace = True
         smart_union = True
-        extra = "forbid"
 
 
 class OrderByEnum(str, Enum):
@@ -50,12 +51,12 @@ class OrderByEnum(str, Enum):
     desc = "desc"
 
 
-class FetchSort(BaseModel, str_strip_whitespace=True):
+class FetchSort(BaseModel, PayloadModelConfig):
     field: str
     order_by: OrderByEnum
 
 
-class FetchPayload(BaseModel, str_strip_whitespace=True):
+class FetchPayload(BaseModel, PayloadModelConfig):
     modelName: str
     fields: List[str]
     filters: Optional[List[FetchFilter]] = None
@@ -63,10 +64,6 @@ class FetchPayload(BaseModel, str_strip_whitespace=True):
     pageSize: Optional[int] = None
     sort: Optional[FetchSort] = None
     distinct: Optional[bool] = None
-
-    model_config = ConfigDict(
-        extra="forbid"
-    )  # does not allow extra attributes
 
     @field_validator("filters")
     def validate_filters(cls, v):
@@ -83,20 +80,12 @@ class FetchPayload(BaseModel, str_strip_whitespace=True):
         return v
 
 
-class GenericLoginPayload(BaseModel, str_strip_whitespace=True):
+class GenericLoginPayload(BaseModel, PayloadModelConfig):
     email: str
     password: SecretStr
 
-    model_config = ConfigDict(
-        extra="forbid"
-    )  # does not allow extra attributes
 
-
-class GenericRegisterPayload(BaseModel, str_strip_whitespace=True):
+class GenericRegisterPayload(BaseModel, PayloadModelConfig):
     email: EmailStr
     password: SecretStr
     password1: SecretStr
-
-    model_config = ConfigDict(
-        extra="forbid"
-    )  # does not allow extra attributes

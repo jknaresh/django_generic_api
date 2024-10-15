@@ -1,6 +1,5 @@
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.models import User
-from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from pydantic import ValidationError
 from rest_framework import status
@@ -22,11 +21,8 @@ from .services import (
     generate_token,
 )
 from .utils import make_permission_str, registration_token
-from django.utils import timezone
-import hashlib
 import time
-from django.urls import reverse
-from django.utils.http import urlencode
+from urllib.parse import quote, unquote
 
 
 class GenericSaveAPIView(APIView):
@@ -36,6 +32,14 @@ class GenericSaveAPIView(APIView):
         return super().dispatch(*args, **kwargs)
 
     def post(self, *args, **kwargs):
+
+        # raises error if user is not authenticated by session
+        if not self.request.user.is_authenticated:
+            return Response(
+                {"error": "Unauthorized access", "code": "DGA-0V"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
         payload = self.request.data.get("payload", {}).get("variables", {})
 
         record_count = payload.get("saveInput", {})
@@ -82,9 +86,7 @@ class GenericSaveAPIView(APIView):
             )
 
         try:
-            instances, message = handle_save_input(
-                model, record_id, save_input
-            )
+            instances, message = handle_save_input(model, record_id, save_input)
             instance_ids = [{"id": instance.id} for instance in instances]
             return Response(
                 {"data": [{"id": instance_ids}], "message": message},
@@ -99,11 +101,20 @@ class GenericSaveAPIView(APIView):
 
 class GenericFetchAPIView(APIView):
 
+    # authenticates user by token
     @method_decorator(validate_access_token)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
     def post(self, *args, **kwargs):
+
+        # raises error if user is not authenticated by session
+        if not self.request.user.is_authenticated:
+            return Response(
+                {"error": "Unauthorized access", "code": "DGA-0U"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
         payload = self.request.data.get("payload", {}).get("variables", {})
         try:
             # Validate the payload using the Pydantic model
@@ -145,15 +156,6 @@ class GenericFetchAPIView(APIView):
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )
-        data = fetch_data(
-            model,
-            filters,
-            fields,
-            page_number,
-            page_size,
-            sort,
-            distinct,
-        )
         try:
             data = fetch_data(
                 model,
@@ -234,25 +236,26 @@ class GenericRegisterAPIView(APIView):
             new_user = User(
                 username=email,
                 email=email,
+                is_active=False,
             )
             new_user.set_password(password)
-            new_user.is_active = False
             new_user.save()
 
             token = registration_token(new_user.id)
+            encoded_token = quote(token)
+            email_verify = f"{settings.BACKEND_URL}/api/activate/{encoded_token}/"
 
             try:
                 subject = "Verify your email address for SignUp"
-                message = f"Your verification link is {token}"
+                message = f"Please click the link below to verify your account:\n\n{email_verify}"
                 from_email = settings.EMAIL_HOST_USER
                 recipient_list = [email]
-                fail_silently = False
 
                 send_mail(
-                    subject, message, from_email, recipient_list, fail_silently
+                    subject, message, from_email, recipient_list, fail_silently=False
                 )
                 return Response(
-                    {"message": "Email sent successfully."},
+                    {"message": f"Email sent successfully. {email_verify}"},
                     status=status.HTTP_200_OK,
                 )
             except Exception as e:
@@ -278,5 +281,47 @@ class LogoutAPIView(APIView):
     def post(self, *args, **kwargs):
         logout(self.request)
         return Response(
-            {"status": "Successfully logged out."}, status=status.HTTP_200_OK
+            {"message": "Successfully logged out."}, status=status.HTTP_200_OK
         )
+
+
+class EmailActivateAPIView(APIView):
+    def get(self, request, encoded_token, *args, **kwargs):
+        try:
+            # Decode token and get the user ID
+            token = unquote(encoded_token)
+            user_id, timestamp = token.split(":")
+
+            # Token expires after 24 hours
+            if int(time.time()) - int(timestamp) > 24 * 3600:  # 24 hours
+                return Response(
+                    {"error": "The activation link has expired.", "code": "DGA-0Q"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Fetch user by ID
+            user = User.objects.get(id=user_id)
+            if user.is_active:
+                return Response(
+                    {"error": "Account is already active.", "code": "DGA-0R"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Activate user account
+            user.is_active = True
+            user.save()
+
+            return Response(
+                {"message": "Your account has been activated successfully."},
+                status=status.HTTP_200_OK,
+            )
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User not found.", "code": "DGA-0S"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e), "code": "DGA-0T"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

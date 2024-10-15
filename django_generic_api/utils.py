@@ -1,6 +1,6 @@
 import time
-from django.conf import settings
-import hashlib
+from django.db.models.fields import NOT_PROVIDED
+
 
 actions = {
     "fetch": "view",
@@ -37,7 +37,7 @@ def get_model_fields_with_properties(model):
             "null": field1.null,
             "blank": field1.blank,
             "max_length": getattr(field1, "max_length", None),
-            # Only exists for certain fields
+            "default": None if field1.default is NOT_PROVIDED else field1.default,
         }
         field_dict[field1.attname] = field_properties
 
@@ -49,7 +49,7 @@ def is_fields_exist(model, fields):
     result = set(fields) - set(model_fields.keys())
     if len(result) > 0:
         # todo: if any foreign key validate field.
-        raise ValueError(f"Extra field {result}. UTI-01")
+        raise ValueError(f"Extra field {result}", "UNKNOWN_FIELD")
     return True
 
 
@@ -57,3 +57,15 @@ def registration_token(user_id):
     timestamp = int(time.time())
     token = f"{user_id}:{timestamp}"
     return token
+
+
+def validate_integer_field(value):
+    return int(value) if value.isdigit() else False
+
+
+def validate_bool_field(value):
+    return value in ["True", "False", "true", "false", "0", "1"]
+
+
+def validate_char_field(value):
+    return True

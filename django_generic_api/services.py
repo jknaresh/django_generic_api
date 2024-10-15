@@ -5,12 +5,13 @@ from typing import Dict, Optional
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.db.models import *
+from django.views.decorators.http import condition
 from pydantic import BaseModel, create_model, EmailStr
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
-from .utils import is_fields_exist, get_model_fields_with_properties
+from .utils import *
 
 DEFAULT_APPS = {
     "django.contrib.admin": True,
@@ -30,6 +31,12 @@ DJANGO_TO_PYDANTIC_TYPE_MAP = {
     FloatField: float,
     TextField: str,
     ForeignKey: int,
+}
+
+FIELD_VALIDATION_MAP = {
+    "IntegerField": validate_integer_field,
+    "BooleanField": validate_bool_field,
+    "CharField": validate_char_field,
 }
 
 
@@ -72,13 +79,13 @@ def validate_access_token(view_function):
                     user_id = token["user_id"]
                     user_model = get_user_model()
                     user = user_model.objects.get(id=user_id)
-                    # todo: instead of login user user.check_password if possible.
-                    # if user.check_password(password):
-                    #     setattr(request, "user", user)
                     setattr(request, "user", user)
                 except Exception as e:
                     return Response(
-                        {"error": f"Authentication failed: {str(e)} SERV-01"},
+                        {
+                            "error": f"Authentication failed: {str(e)}",
+                            "code": "TOKENAUTH",
+                        },
                         status=status.HTTP_401_UNAUTHORIZED,
                     )
 
@@ -112,11 +119,7 @@ def get_config_schema(model):
                     )
                 else:
                     field_type = (
-                        (
-                            Optional[pydantic_type]
-                            if is_optional
-                            else pydantic_type
-                        ),
+                        (Optional[pydantic_type] if is_optional else pydantic_type),
                         ...,
                     )
                 break
@@ -140,12 +143,10 @@ def check_field_value(model, field1, value):
     field_properties = model_fields[field1]
     field_type = field_properties["type"]
 
-    if field_type == "IntegerField" and not value[0].isdigit():
-        return False
-    if field_type == "BooleanField" and value[0] not in ["True", "False"]:
-        return False
+    validation_func = FIELD_VALIDATION_MAP.get(field_type)
 
-    return True
+    for value_i in value:
+        return validation_func(value_i)
 
 
 def fetch_data(
@@ -168,7 +169,7 @@ def fetch_data(
     :param filters: Dictionary of filters for the query
     :param fields1: List of fields to return
     """
-    # todo: validate field names from payload against config
+    # info: validate field names from payload against config
     is_fields_exist(model, fields1)
 
     # sort field validation
@@ -183,9 +184,6 @@ def fetch_data(
         query_filters = apply_filters(model, filters)
         if len(query_filters.children) < 1:
             return dict(total=0, data=[])
-        # todo: length(query_filters) < 1
-        # return empty results
-        # return dict(total=0, data=[])
         queryset = queryset.filter(query_filters)
 
     # Select only specified fields
@@ -218,6 +216,7 @@ def fetch_data(
 def apply_filters(model, filters):
     """Apply dynamic filters using Q objects."""
     query1 = Q()
+    last_logical_operation = "and"
     for filter_item in filters:
         operator = filter_item.operator
         field_name = filter_item.name
@@ -225,26 +224,24 @@ def apply_filters(model, filters):
         operation = filter_item.operation
 
         if not check_field_value(model, field_name, value):
-            raise ValueError(f"Invalid data: {value}. SERV-02")
+            raise ValueError(f"Invalid data: {value}. code: FIELD_VAL")
 
-        if operation == "or":
-            if operator == "eq":
-                query1 |= Q(**{f"{field_name}__exact": value[0]})
-            elif operator == "in":
-                query1 |= Q(**{f"{field_name}__in": value})
-            elif operator == "not":
-                query1 |= ~Q(**{f"{field_name}": value[0]})
-            elif operator == "gt":
-                query1 |= Q(**{f"{field_name}__gt": value[0]})
+        condition1 = None
 
-        elif operator == "eq":
-            query1 &= Q(**{f"{field_name}__exact": value[0]})
+        if operator == "eq":
+            condition1 = Q(**{f"{field_name}__exact": value[0]})
         elif operator == "in":
-            query1 &= Q(**{f"{field_name}__in": value})
+            condition1 = Q(**{f"{field_name}__in": value})
         elif operator == "not":
-            query1 &= ~Q(**{f"{field_name}": value[0]})
+            condition1 = ~Q(**{f"{field_name}": value[0]})
         elif operator == "gt":
-            query1 |= Q(**{f"{field_name}__gt": value[0]})
+            condition1 = Q(**{f"{field_name}__gt": value[0]})
+
+        if last_logical_operation == "or":
+            query1 |= condition1
+        else:
+            query1 &= condition1
+        last_logical_operation = operation.value
 
     return query1
 
@@ -256,17 +253,19 @@ def handle_save_input(model, record_id, save_input):
     instances = []
     messages = []
 
+    if record_id and len(save_input) > 1:
+        raise ValueError(f"Only 1 record to update at once. ONE_UPDATE")
+
     for saveInput in save_input:
         # Validate against schema
         try:
-            # model_schema.model_validate_json(json.dumps(saveInput))
             model_schema(**saveInput)
 
         except Exception as e:
             error_msg = e.errors()[0].get("msg")
             error_loc = e.errors()[0].get("loc")
 
-            raise ValueError(f"{error_msg}. {error_loc}. SERV-03")
+            raise ValueError(f"{error_msg}. {error_loc}. BAD_INPUT")
 
         try:
             if record_id:
@@ -285,11 +284,9 @@ def handle_save_input(model, record_id, save_input):
             instances.append(instance)
             messages.append(message)
         except model.DoesNotExist:
-            raise ValueError(
-                f"Record with ID {record_id} does not exist. SERV-04"
-            )
+            raise ValueError(f"Record with ID {record_id} does not exist. NO_RECORD")
         except Exception as s:
-            raise TypeError(f"{str(s)}. SERV-05")
+            raise ValueError(f"Invalid ID. SAVE_ERROR")
 
     message = list(set(messages))
     return instances, message

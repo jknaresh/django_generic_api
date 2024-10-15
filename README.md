@@ -125,6 +125,7 @@ header["X-CSRFToken"]=csrfvalue
     }
 }
 ```
+---
 
 ## Log Out
 
@@ -136,10 +137,11 @@ header["X-CSRFToken"]=csrfvalue
 ```header
 header["X-CSRFToken"]=csrfvalue
 ```
+---
 
 ## Save data
 
-- This api supports saving multiple(upto 10) records at once.
+- This api supports saving 1 to 10 records at once.
 - To save data, post data on the url '/< url prefix >/save/' and set header as
   well prepare payload as following
 
@@ -201,7 +203,7 @@ header["Authorization"]=Bearer <access token>
               "field5": "value5",
               "field6": "value6",
               "field7": "value7",
-              "field_fk_id": "fk value"
+              "field_fk_name": "fk value"
             }
             ]
         }
@@ -213,14 +215,15 @@ header["Authorization"]=Bearer <access token>
 
 ### Description for Fields
 
-| Field Name | Datatype     | Description                                         | Required / Optional |
-|------------|--------------|-----------------------------------------------------|---------------------|
-| modelName  | String       | Name of Django Model to Save                        | Required            |
-| id         | String / Int | ID of the record to be updated                      | Optional            |
-| SaveInput  | Dictionary   | Contains list of fields and their values            | Required            |
-| field      | String       | Name of field in table in Database , ex:field1      | Required            |
-| value      | Any          | Value of corresponding column in table , ex: value1 | Required            |
+| Field Name | Datatype           | Description                                         | Example                                   | Required |
+|------------|--------------------|-----------------------------------------------------|-------------------------------------------|----------|
+| modelName  | String             | Name of Django Model to Save                        | Employees                                 | True     |
+| id         | String / Int       | ID of the record to be updated                      | null                                      | --       |
+| SaveInput  | List( Dictionary ) | Contains list of fields and their values            | [{ "field1": "emp_id","field2": "789 " }] | True     |
+| field      | String             | Name of field in table in Database , ex:field1      | "emp_id"                                  | True     |
+| value      | Any                | Value of corresponding column in table , ex: value1 | "789"                                     | True     |
 
+---
 ## Fetch data
 
 - To fetch the data, post on the url '/< url prefix >/fetch/' and set
@@ -244,7 +247,7 @@ header["Authorization"]=Bearer <access token>
       "fields": ["field1", "field2", "field3"],
       "filters": [
         {
-          "operator": "eq / in",
+          "operator": "eq / in / not / gt",
           "name": "field",
           "value": ["field-value"]  
         }
@@ -263,20 +266,21 @@ header["Authorization"]=Bearer <access token>
 
 ### Description of Fields
 
-| Field Name | Datatype | Description                                                                    | Required / Optional |
-|------------|----------|--------------------------------------------------------------------------------|---------------------|
-| modelName  | String   | Name of Django model to fetch                                                  | Required            |
-| fields     | List     | List of database field names, ex: field1, field2, field3                       | Required            |
-| filters    | List     | Consists 3 filter objects (operator, name, value)                              | Optional            |
-| operator   | Enum     | Specifies the comparison operation to be applied, Only considers 'eq' and 'in' | Required            |
-| name       | String   | Name of Database field to perform fetch from                                   | Required            |
-| value      | Any      | Value of field to perform fetch                                                | Required            |
-| pageNumber | Int      | Page number of filtered data after pagination is applied                       | Optional            |  
-| pageSize   | Int      | Number of records displayed in a page after pagination                         | Optional            |
-| Sort       | Dict     | Consists of 2 sort options (field, order_by)                                   | Optional            |
-| Field      | String   | Name of filter to orderby                                                      | Required            |
-| order_by   | Enum     | Specifies order_by options ( asc: Ascending order, desc: Descending order)     | Required            |
+| Field Name | Datatype | Description                                                                                       | Example                                             | Required |
+|------------|----------|---------------------------------------------------------------------------------------------------|-----------------------------------------------------|----------|
+| modelName  | String   | Name of Django model to fetch                                                                     | Employees                                           | True     |
+| fields     | List     | List of database field names, ex: field1, field2,                                                 | ["name","age","emp_id"]                             | True     |
+| filters    | List     | Consists 3 filter objects (operator, name, value)                                                 | [{ "operator": "eq","name": "age","value": ["25"] }]| --       |
+| operator   | Enum     | Specifies the comparison operation to be applied, Only considers one of ('eq', 'in', 'not', 'gt') | eq                                                  | True     |
+| name       | String   | Name of Database field to perform fetch from                                                      | age                                                 | True     |
+| value      | Any      | Value of field to perform fetch                                                                   | ["25"]                                              | True     |
+| pageNumber | Int      | Page number of filtered data after pagination is applied                                          | 4                                                   | --       |  
+| pageSize   | Int      | Number of records displayed in a page after pagination                                            | 10                                                  | True     |
+| Sort       | Dict     | Consists of 2 sort options (field, order_by)                                                      | { "field":"id","order_by":"asc" }                   | True     |
+| Field      | String   | Name of filter to orderby                                                                         | id                                                  | True     |
+| order_by   | Enum     | Specifies order_by options ( asc: Ascending order, desc: Descending order)                        | asc                                                 | True     |
 
+---
 ## Update data
 
 - To update data, post data on the url '/< url prefix >/save/' and set
@@ -317,10 +321,11 @@ Value 2 : Bearer <access token>
 
 ### Description for Fields
 
-| Field Name | Datatype   | Description                                         | Required / Optional |
-|------------|------------|-----------------------------------------------------|---------------------|
-| modelName  | String     | Name of Django Model to Save                        | Required            |
-| id         | Int        | id value of record to update, ex: 1                 | Required            |
-| SaveInput  | Dictionary | Contains list of fields and their values            | Required            |
-| field      | String     | Name of field in table in Database , ex:field1      | Required            |
-| value      | Any        | Value of corresponding column in table , ex: value1 | Required            |
+| Field Name | Datatype   | Description                                         | Example                                 | Required |
+|------------|------------|-----------------------------------------------------|-----------------------------------------|----------|
+| modelName  | String     | Name of Django Model to Save                        | Employees                               | True     |
+| id         | Int        | id value of record to update, ex: 1                 | 5                                       | True     |
+| SaveInput  | Dictionary | Contains list of fields and their values            | [{ "field1": "emp_id","field2": "963" }]| True     |
+| field      | String     | Name of field in table in Database , ex:field1      | emp_id                                  | True     |
+| value      | Any        | Value of corresponding column in table , ex: value1 | 963                                     | True     |
+---
