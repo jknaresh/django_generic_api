@@ -213,6 +213,7 @@ def fetch_data(
 def apply_filters(model, filters):
     """Apply dynamic filters using Q objects."""
     query1 = Q()
+    last_logical_operation = "and"
     for filter_item in filters:
         operator = filter_item.operator
         field_name = filter_item.name
@@ -222,24 +223,22 @@ def apply_filters(model, filters):
         if not check_field_value(model, field_name, value):
             raise ValueError(f"Invalid data {value}")
 
-        if operation == "or":
-            if operator == "eq":
-                query1 |= Q(**{f"{field_name}__exact": value[0]})
-            elif operator == "in":
-                query1 |= Q(**{f"{field_name}__in": value})
-            elif operator == "not":
-                query1 |= ~Q(**{f"{field_name}": value[0]})
-            elif operator == "gt":
-                query1 |= Q(**{f"{field_name}__gt": value[0]})
+        condition1 = None
 
-        elif operator == "eq":
-            query1 &= Q(**{f"{field_name}__exact": value[0]})
+        if operator == "eq":
+            condition1 = Q(**{f"{field_name}__exact": value[0]})
         elif operator == "in":
-            query1 &= Q(**{f"{field_name}__in": value})
+            condition1 = Q(**{f"{field_name}__in": value})
         elif operator == "not":
-            query1 &= ~Q(**{f"{field_name}": value[0]})
+            condition1 = ~Q(**{f"{field_name}": value[0]})
         elif operator == "gt":
-            query1 |= Q(**{f"{field_name}__gt": value[0]})
+            condition1 = Q(**{f"{field_name}__gt": value[0]})
+
+        if last_logical_operation == "or":
+            query1 |= condition1
+        else:
+            query1 &= condition1
+        last_logical_operation = operation.value
 
     return query1
 
