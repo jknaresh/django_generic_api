@@ -31,6 +31,7 @@ class OperatorByEnum(str, Enum):
     EQ = "eq"
     IN = "in"
     NOT = "not"
+    GT = "gt"
 
 
 class OperationByEnum(str, Enum):
