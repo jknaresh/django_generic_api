@@ -232,11 +232,19 @@ def apply_filters(model, filters):
                 query1 |= Q(**{f"{field_name}__exact": value[0]})
             elif operator == "in":
                 query1 |= Q(**{f"{field_name}__in": value})
+            elif operator == "not":
+                query1 |= ~Q(**{f"{field_name}": value[0]})
+            elif operator == "gt":
+                query1 |= Q(**{f"{field_name}__gt": value[0]})
 
         elif operator == "eq":
             query1 &= Q(**{f"{field_name}__exact": value[0]})
         elif operator == "in":
             query1 &= Q(**{f"{field_name}__in": value})
+        elif operator == "not":
+            query1 &= ~Q(**{f"{field_name}": value[0]})
+        elif operator == "gt":
+            query1 |= Q(**{f"{field_name}__gt": value[0]})
 
     return query1
 
