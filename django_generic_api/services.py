@@ -5,12 +5,13 @@ from typing import Dict, Optional
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.db.models import *
+from django.views.decorators.http import condition
 from pydantic import BaseModel, create_model, EmailStr
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
-from .utils import get_model_field_type, is_fields_exist
+from .utils import *
 
 DEFAULT_APPS = {
     "django.contrib.admin": True,
@@ -32,10 +33,15 @@ DJANGO_TO_PYDANTIC_TYPE_MAP = {
     ForeignKey: int,
 }
 
+FIELD_VALIDATION_MAP = {
+    "IntegerField": validate_integer_field,
+    "BooleanField": validate_bool_field,
+    "CharField": validate_char_field,
+}
+
 
 class PydanticModelConfigV1:
     str_strip_whitespace = True
-    smart_union = True
     extra = "forbid"
 
 
@@ -46,7 +52,7 @@ def get_model_by_name(model_name):
             model = app_config.models.get(model_name.lower())
             if model:
                 return model
-    raise ValueError("Dataset not found.")
+    raise ValueError
 
 
 def generate_token(user):
@@ -73,15 +79,16 @@ def validate_access_token(view_function):
                     user_id = token["user_id"]
                     user_model = get_user_model()
                     user = user_model.objects.get(id=user_id)
-                    # login(request, user)
-                    # todo: instead of login user user.check_password if
-                    #  possible.
                     setattr(request, "user", user)
                 except Exception as e:
                     return Response(
-                        {"error": f"Authentication failed: {str(e)}"},
+                        {
+                            "error": f"Authentication failed: {str(e)}",
+                            "code": "TOKENAUTH",
+                        },
                         status=status.HTTP_401_UNAUTHORIZED,
                     )
+
         return view_function(request, *args, **kwargs)
 
     return _wrapped_view
@@ -136,11 +143,18 @@ def get_config_schema(model):
 def check_field_value(model, field1, value):
     is_fields_exist(model, [field1])
 
-    data_type = get_model_field_type(model, field1)
-    if data_type == "IntegerField" and not value[0].isdigit():
-        return False
+    model_fields = get_model_fields_with_properties(model)
+    field_properties = model_fields[field1]
+    field_type = field_properties["type"]
 
-    return True
+    validation_func = FIELD_VALIDATION_MAP.get(field_type)
+
+    for value_i in value:
+        # as all field validations arent done, passing true for non validated values
+        if validation_func:
+            return validation_func(value_i)
+        else:
+            return True
 
 
 def fetch_data(
@@ -163,7 +177,7 @@ def fetch_data(
     :param filters: Dictionary of filters for the query
     :param fields1: List of fields to return
     """
-    # todo: validate field names from payload against config
+    # info: validate field names from payload against config
     is_fields_exist(model, fields1)
 
     # sort field validation
@@ -178,9 +192,6 @@ def fetch_data(
         query_filters = apply_filters(model, filters)
         if len(query_filters.children) < 1:
             return dict(total=0, data=[])
-        # todo: length(query_filters) < 1
-        # return empty results
-        # return dict(total=0, data=[])
         queryset = queryset.filter(query_filters)
 
     # Select only specified fields
@@ -221,7 +232,9 @@ def apply_filters(model, filters):
         operation = filter_item.operation
 
         if not check_field_value(model, field_name, value):
-            raise ValueError(f"Invalid data {value}")
+            raise ValueError(
+                {"error": f"Invalid data: {value}", "code": "FIELD_VAL"}
+            )
 
         condition1 = None
 
@@ -247,29 +260,52 @@ def handle_save_input(model, record_id, save_input):
     """Handle creating or updating a record."""
 
     model_schema = get_config_schema(model)
-    # model_schema = json.loads(model_schema)
-    # Validate against schema
-    try:
-        model_schema.model_validate_json(json.dumps(save_input))
-    except Exception as e:
-        raise ValueError(e)
+    instances = []
+    messages = []
 
-    try:
-        if record_id:
-            # Fetch the instance if record_id is provided
-            instance = model.objects.get(id=record_id)
+    if record_id and len(save_input) > 1:
+        raise ValueError(
+            {"error": "Only 1 record to update at once", "code": "ONE_UPDATE"}
+        )
 
-            for field1, value in save_input.items():
-                setattr(instance, field1, value)
-            instance.save()
-            message = "Record updated successfully."
-        else:
-            # Validate save_input fields for creating a new record
-            instance = model.objects.create(**save_input)
-            message = "Record created successfully."
-    except model.DoesNotExist:
-        raise ValueError(f"Record with ID {record_id} does not exist.")
-    except Exception as s:
-        raise TypeError(str(s))
+    for saveInput in save_input:
+        # Validate against schema
+        try:
+            model_schema(**saveInput)
 
-    return instance, message
+        except Exception as e:
+            error_msg = e.errors()[0].get("msg")
+            error_loc = e.errors()[0].get("loc")
+
+            raise ValueError(
+                {"error": f"{error_msg}. {error_loc}", "code": "BAD_INPUT"}
+            )
+
+        try:
+            if record_id:
+                # Fetch the instance if record_id is provided
+                instance = model.objects.get(id=record_id)
+
+                for field1, value in saveInput.items():
+                    setattr(instance, field1, value)
+                instance.save()
+                message = "Record updated successfully."
+            else:
+                # Validate save_input fields for creating a new record
+                instance = model.objects.create(**saveInput)
+                message = "Record created successfully."
+
+            instances.append(instance)
+            messages.append(message)
+        except model.DoesNotExist:
+            raise ValueError(
+                {
+                    "error": f"Record with (ID) {record_id} does not exist",
+                    "code": "NO_RECORD",
+                }
+            )
+        except Exception:
+            raise ValueError({"error": "Invalid ID", "code": "SAVE_ERROR"})
+
+    message = list(set(messages))
+    return instances, message
