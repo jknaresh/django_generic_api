@@ -38,7 +38,9 @@ class GenericFetchAPITest(TestCase):
             }
         }
 
-        response = self.client.post("/api/fetch/", fetch_payload, format="json")
+        response = self.client.post(
+            "/api/fetch/", fetch_payload, format="json"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("data", response.data)
         self.assertEqual(response.data["data"][0]["first_name"], "John")
@@ -62,7 +64,9 @@ class GenericFetchAPITest(TestCase):
             }
         }
 
-        response = self.client.post("/api/fetch/", fetch_payload, format="json")
+        response = self.client.post(
+            "/api/fetch/", fetch_payload, format="json"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("data", response.data)
         self.assertEqual(response.data["data"][0]["first_name"], "Jane")

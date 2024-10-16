@@ -21,6 +21,8 @@ urlpatterns = [
     path("register/", GenericRegisterAPIView.as_view(), name="register"),
     path("refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path(
-        "activate/<str:encoded_token>/", EmailActivateAPIView.as_view(), name="activate"
+        "activate/<str:encoded_token>/",
+        EmailActivateAPIView.as_view(),
+        name="activate",
     ),
 ]

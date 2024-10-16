@@ -28,8 +28,8 @@ pip install django_generic_api
 # Set allowed hosts to all cross origin references
 ALLOWED_HOSTS = ["*"]
 
-## Adding CORS headers allows your resources to be accessed on other domains
-## This allows in-browser requests to your Django application from other origins.
+# Adding CORS headers allows your resources to be accessed on other domains
+# This allows in-browser requests to your Django application from other origins.
 
 # A list of origins that are authorized to make cross-site HTTP requests.
 CORS_ALLOWED_ORIGINS = ["*"]  # ex: "https://example.com","http://localhost:8080"
@@ -46,7 +46,7 @@ INSTALLED_APPS =[
   "corsheaders", # CORS package
 ] 
 
-# cross origin middleware settings,add middleware class to listen in on responses:
+# Cross origin middleware settings,add middleware class to listen in on responses:
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -55,10 +55,10 @@ MIDDLEWARE = [
 
 # Rest framework settings
 
-## Session authentication is for on form based submission
-## Non Session authentication is for token based submission
+# Session authentication is for on form based submission
+# Non Session authentication is for token based submission
 
-#add the settings as per your requirement 
+# Add the settings as per your requirement 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         #This is for form submission based authentication
@@ -69,7 +69,7 @@ REST_FRAMEWORK = {
 }
 
 from datetime import timedelta
-#customize your token validity time
+# Customize your token validity time
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=5),
 }
@@ -119,7 +119,7 @@ header["X-CSRFToken"]=csrfvalue
 
 ```json
 {
-    "token": {
+    "data": {
         "refresh": ".....",
         "access": "......"
     }
@@ -136,6 +136,14 @@ header["X-CSRFToken"]=csrfvalue
 
 ```header
 header["X-CSRFToken"]=csrfvalue
+```
+
+### Response:
+
+```json
+{
+    "message": "Successfully logged out."
+}
 ```
 ---
 
@@ -176,6 +184,24 @@ header["Authorization"]=Bearer <access token>
 }
 
 ```
+### Response for single payload :
+
+```json
+{
+    "data": [
+        {
+            "id": [
+                {
+                    "id": id
+                }
+            ]
+        }
+    ],
+    "message": [
+        "Record created successfully."
+    ]
+}
+```
 
 ### Payload for multiple records:
 
@@ -210,6 +236,28 @@ header["Authorization"]=Bearer <access token>
     }
 }
 
+```
+### Response for multiple payload :
+
+```json
+{
+    "data": [
+        {
+            "id": [
+                {
+                    "id": id
+                },
+                {
+                    "id": id
+                },
+                ...
+            ]
+        }
+    ],
+    "message": [
+        "Record created successfully."
+    ]
+}
 ```
 
 
@@ -261,6 +309,22 @@ header["Authorization"]=Bearer <access token>
         }
     }
   }
+}
+```
+### Response for fetch payload :
+
+```json
+{
+    "total": 1,
+    "data": [
+        {
+            "id": id,
+            "field1": "abc",
+            "field2": "def",
+            "field3": "ghi",
+            
+        }
+    ]
 }
 ```
 
@@ -317,6 +381,24 @@ Value 2 : Bearer <access token>
     }
 }
 
+```
+### Response for update payload :
+
+```json
+{
+    "data": [
+        {
+            "id": [
+                {
+                    "id": id
+                }
+            ]
+        }
+    ],
+    "message": [
+        "Record updated successfully."
+    ]
+}
 ```
 
 ### Description for Fields

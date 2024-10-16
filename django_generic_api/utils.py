@@ -1,6 +1,7 @@
 import time
 from django.db.models.fields import NOT_PROVIDED
-
+import json
+import os
 
 actions = {
     "fetch": "view",
@@ -31,13 +32,15 @@ def get_model_fields_with_properties(model):
 
     field_dict = {}
     for field1 in field_obj:
-        # collecr properties of fields.
+        # collect properties of fields.
         field_properties = {
             "type": field1.get_internal_type(),
             "null": field1.null,
             "blank": field1.blank,
             "max_length": getattr(field1, "max_length", None),
-            "default": None if field1.default is NOT_PROVIDED else field1.default,
+            "default": (
+                None if field1.default is NOT_PROVIDED else field1.default
+            ),
         }
         field_dict[field1.attname] = field_properties
 
@@ -49,7 +52,9 @@ def is_fields_exist(model, fields):
     result = set(fields) - set(model_fields.keys())
     if len(result) > 0:
         # todo: if any foreign key validate field.
-        raise ValueError(f"Extra field {result}", "UNKNOWN_FIELD")
+        raise ValueError(
+            {"error": f"Extra field {result}", "code": "UNKNOWN_FIELD"}
+        )
     return True
 
 
@@ -57,6 +62,22 @@ def registration_token(user_id):
     timestamp = int(time.time())
     token = f"{user_id}:{timestamp}"
     return token
+
+
+def store_user_ip(user_id, user_ip):
+    json_file_path = os.path.join(os.getcwd(), "user_ips.json")
+
+    user_data = {}
+
+    if os.path.exists(json_file_path):
+        with open(json_file_path, "r") as f:
+            # Load existing data
+            user_data = json.load(f)
+
+    user_data[user_id] = user_ip
+
+    with open(json_file_path, "w") as f:
+        json.dump(user_data, f, indent=4)
 
 
 def validate_integer_field(value):
@@ -68,4 +89,5 @@ def validate_bool_field(value):
 
 
 def validate_char_field(value):
-    return True
+    if isinstance(value, str) and value.isascii():
+        return True

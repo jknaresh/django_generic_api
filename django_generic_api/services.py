@@ -119,7 +119,11 @@ def get_config_schema(model):
                     )
                 else:
                     field_type = (
-                        (Optional[pydantic_type] if is_optional else pydantic_type),
+                        (
+                            Optional[pydantic_type]
+                            if is_optional
+                            else pydantic_type
+                        ),
                         ...,
                     )
                 break
@@ -146,7 +150,11 @@ def check_field_value(model, field1, value):
     validation_func = FIELD_VALIDATION_MAP.get(field_type)
 
     for value_i in value:
-        return validation_func(value_i)
+        # as all field validations arent done, passing true for non validated values
+        if validation_func:
+            return validation_func(value_i)
+        else:
+            return True
 
 
 def fetch_data(
@@ -224,7 +232,9 @@ def apply_filters(model, filters):
         operation = filter_item.operation
 
         if not check_field_value(model, field_name, value):
-            raise ValueError(f"Invalid data: {value}. code: FIELD_VAL")
+            raise ValueError(
+                {"error": f"Invalid data: {value}", "code": "FIELD_VAL"}
+            )
 
         condition1 = None
 
@@ -254,7 +264,9 @@ def handle_save_input(model, record_id, save_input):
     messages = []
 
     if record_id and len(save_input) > 1:
-        raise ValueError(f"Only 1 record to update at once. ONE_UPDATE")
+        raise ValueError(
+            {"error": "Only 1 record to update at once", "code": "ONE_UPDATE"}
+        )
 
     for saveInput in save_input:
         # Validate against schema
@@ -265,7 +277,9 @@ def handle_save_input(model, record_id, save_input):
             error_msg = e.errors()[0].get("msg")
             error_loc = e.errors()[0].get("loc")
 
-            raise ValueError(f"{error_msg}. {error_loc}. BAD_INPUT")
+            raise ValueError(
+                {"error": f"{error_msg}. {error_loc}", "code": "BAD_INPUT"}
+            )
 
         try:
             if record_id:
@@ -284,9 +298,14 @@ def handle_save_input(model, record_id, save_input):
             instances.append(instance)
             messages.append(message)
         except model.DoesNotExist:
-            raise ValueError(f"Record with ID {record_id} does not exist. NO_RECORD")
-        except Exception as s:
-            raise ValueError(f"Invalid ID. SAVE_ERROR")
+            raise ValueError(
+                {
+                    "error": f"Record with (ID) {record_id} does not exist",
+                    "code": "NO_RECORD",
+                }
+            )
+        except Exception:
+            raise ValueError({"error": "Invalid ID", "code": "SAVE_ERROR"})
 
     message = list(set(messages))
     return instances, message

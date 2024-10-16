@@ -20,7 +20,7 @@ from .services import (
     fetch_data,
     generate_token,
 )
-from .utils import make_permission_str, registration_token
+from .utils import make_permission_str, registration_token, store_user_ip
 import time
 from urllib.parse import quote, unquote
 
@@ -86,7 +86,9 @@ class GenericSaveAPIView(APIView):
             )
 
         try:
-            instances, message = handle_save_input(model, record_id, save_input)
+            instances, message = handle_save_input(
+                model, record_id, save_input
+            )
             instance_ids = [{"id": instance.id} for instance in instances]
             return Response(
                 {"data": [{"id": instance_ids}], "message": message},
@@ -243,7 +245,9 @@ class GenericRegisterAPIView(APIView):
 
             token = registration_token(new_user.id)
             encoded_token = quote(token)
-            email_verify = f"{settings.BACKEND_URL}/api/activate/{encoded_token}/"
+            email_verify = (
+                f"{settings.BACKEND_URL}/api/activate/{encoded_token}/"
+            )
 
             try:
                 subject = "Verify your email address for SignUp"
@@ -252,7 +256,11 @@ class GenericRegisterAPIView(APIView):
                 recipient_list = [email]
 
                 send_mail(
-                    subject, message, from_email, recipient_list, fail_silently=False
+                    subject,
+                    message,
+                    from_email,
+                    recipient_list,
+                    fail_silently=False,
                 )
                 return Response(
                     {"message": f"Email sent successfully. {email_verify}"},
@@ -293,9 +301,12 @@ class EmailActivateAPIView(APIView):
             user_id, timestamp = token.split(":")
 
             # Token expires after 24 hours
-            if int(time.time()) - int(timestamp) > 24 * 3600:  # 24 hours
+            if int(time.time()) - int(timestamp) > 24 * 3600:
                 return Response(
-                    {"error": "The activation link has expired.", "code": "DGA-0Q"},
+                    {
+                        "error": "The activation link has expired.",
+                        "code": "DGA-0Q",
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -310,6 +321,10 @@ class EmailActivateAPIView(APIView):
             # Activate user account
             user.is_active = True
             user.save()
+
+            # info : store user's IP address when email is activated
+            user_ip = request.META.get("REMOTE_ADDR")
+            store_user_ip(user_id, user_ip)
 
             return Response(
                 {"message": "Your account has been activated successfully."},
