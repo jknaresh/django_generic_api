@@ -1,24 +1,16 @@
 from enum import Enum
 from typing import Optional, Any, List, Union
-from abc import ABC
 from pydantic import (
     BaseModel,
     field_validator,
     JsonValue,
-    ConfigDict,
     SecretStr,
     EmailStr,
 )
+from utils import PydanticConfigV1
 
 
-class PayloadModelConfig(ABC):
-    model_config = ConfigDict(
-        str_strip_whitespace=True,  # Remove white spaces
-        extra="forbid",  # Forbid extra fields
-    )
-
-
-class SavePayload(BaseModel, PayloadModelConfig):
+class SavePayload(BaseModel, PydanticConfigV1):
     modelName: str
     id: Optional[Union[int, str]] = None
     saveInput: JsonValue
@@ -36,14 +28,11 @@ class OperationByEnum(str, Enum):
     AND = "and"
 
 
-class FetchFilter(BaseModel, PayloadModelConfig):
+class FetchFilter(BaseModel, PydanticConfigV1):
     operator: OperatorByEnum
     name: str
     value: List[Any]
     operation: Optional[OperationByEnum] = OperationByEnum.AND
-
-    class Config:
-        smart_union = True
 
 
 class OrderByEnum(str, Enum):
@@ -51,15 +40,15 @@ class OrderByEnum(str, Enum):
     desc = "desc"
 
 
-class FetchSort(BaseModel, PayloadModelConfig):
+class FetchSort(BaseModel, PydanticConfigV1):
     field: str
     order_by: OrderByEnum
 
 
-class FetchPayload(BaseModel, PayloadModelConfig):
+class FetchPayload(BaseModel, PydanticConfigV1):
     modelName: str
     fields: List[str]
-    filters: Optional[List[FetchFilter]] = None
+    filters: List[FetchFilter]
     pageNumber: Optional[int] = None
     pageSize: Optional[int] = None
     sort: Optional[FetchSort] = None
@@ -80,12 +69,12 @@ class FetchPayload(BaseModel, PayloadModelConfig):
         return v
 
 
-class GenericLoginPayload(BaseModel, PayloadModelConfig):
+class GenericLoginPayload(BaseModel, PydanticConfigV1):
     email: str
     password: SecretStr
 
 
-class GenericRegisterPayload(BaseModel, PayloadModelConfig):
+class GenericRegisterPayload(BaseModel, PydanticConfigV1):
     email: EmailStr
     password: SecretStr
     password1: SecretStr

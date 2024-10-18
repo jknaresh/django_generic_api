@@ -108,7 +108,7 @@ header["X-CSRFToken"]=csrfvalue
 {
   "payload": {
       "variables": {
-          "username": "name",
+          "email": "user.username",
           "password": "****"
       }
   }

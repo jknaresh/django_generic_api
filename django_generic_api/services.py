@@ -1,17 +1,23 @@
-import json
 from functools import wraps
 from typing import Dict, Optional
 
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.db.models import *
-from django.views.decorators.http import condition
 from pydantic import BaseModel, create_model, EmailStr
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-
-from .utils import *
+from rest_framework.exceptions import AuthenticationFailed
+from django.http import JsonResponse
+from .utils import (
+    get_model_fields_with_properties,
+    is_fields_exist,
+    PydanticConfigV1,
+    validate_integer_field,
+    validate_bool_field,
+    validate_char_field,
+)
 
 DEFAULT_APPS = {
     "django.contrib.admin": True,
@@ -40,11 +46,6 @@ FIELD_VALIDATION_MAP = {
 }
 
 
-class PydanticModelConfigV1:
-    str_strip_whitespace = True
-    extra = "forbid"
-
-
 def get_model_by_name(model_name):
     """Fetch a model dynamically by searching all installed apps."""
     for app_config in apps.get_app_configs():
@@ -67,40 +68,55 @@ def generate_token(user):
 def validate_access_token(view_function):
     @wraps(view_function)
     def _wrapped_view(request, *args, **kwargs):
-
-        if not request.user.is_authenticated:
-            auth_header = request.headers.get("Authorization")
-            if auth_header and auth_header.startswith("Bearer "):
+        try:
+            if not request.user.is_authenticated:
+                auth_header = request.headers.get("Authorization")
+                if not auth_header:
+                    raise AuthenticationFailed(
+                        {"detail": "Unauthorized access", "code": "DGA-S001"}
+                    )
+                if auth_header and not auth_header.startswith("Bearer "):
+                    raise AuthenticationFailed(
+                        {"detail": "Invalid Token", "code": "DGA-S002"}
+                    )
                 token_str = auth_header.split(" ")[1]
 
-                try:
-                    # Decoding token
-                    token = AccessToken(token_str)
-                    user_id = token["user_id"]
-                    user_model = get_user_model()
-                    user = user_model.objects.get(id=user_id)
-                    setattr(request, "user", user)
-                except Exception as e:
-                    return Response(
-                        {
-                            "error": f"Authentication failed: {str(e)}",
-                            "code": "TOKENAUTH",
-                        },
-                        status=status.HTTP_401_UNAUTHORIZED,
-                    )
+                token = AccessToken(token_str)  # Decoding token
+                user_id = token["user_id"]
+                user_model = get_user_model()
+                user = user_model.objects.get(id=user_id)
+                setattr(request, "user", user)
+        except AuthenticationFailed as e:
+            return JsonResponse(
+                {
+                    "error": e.detail["detail"],
+                    "code": e.detail["code"],
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        except Exception as e:
+            return JsonResponse(
+                {
+                    "error": f"Authentication failed: {str(e)}",
+                    "code": "DGA-S003",
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         return view_function(request, *args, **kwargs)
 
     return _wrapped_view
 
 
-def get_config_schema(model):
+def get_model_config_schema(model):
     model_fields: Dict[str, tuple] = {}
 
+    # todo: validate nested fields(foreign key fields for time being "__")
     model_meta = getattr(model, "_meta", None)
     for field1 in model_meta.fields:
         if field1.name == "id":
             continue
+
         field_type = None
         is_optional = field1.null or field1.blank
 
@@ -136,25 +152,28 @@ def get_config_schema(model):
         **model_fields,  # Model fields passed as keyword arguments
         __base__=BaseModel,  # Base class for Pydantic models
     )
-    pydantic_model.__config__ = PydanticModelConfigV1
+    pydantic_model.__config__ = PydanticConfigV1
     return pydantic_model
 
 
 def check_field_value(model, field1, value):
     is_fields_exist(model, [field1])
 
-    model_fields = get_model_fields_with_properties(model)
+    model_fields = get_model_fields_with_properties(model, [field1])
     field_properties = model_fields[field1]
     field_type = field_properties["type"]
 
     validation_func = FIELD_VALIDATION_MAP.get(field_type)
+    if not validation_func:
+        return True
 
+    is_valid_value = None
     for value_i in value:
-        # as all field validations arent done, passing true for non validated values
-        if validation_func:
-            return validation_func(value_i)
+        if not is_valid_value:
+            is_valid_value = validation_func(value_i)
         else:
-            return True
+            is_valid_value *= validation_func(value_i)
+    return is_valid_value
 
 
 def fetch_data(
@@ -233,7 +252,7 @@ def apply_filters(model, filters):
 
         if not check_field_value(model, field_name, value):
             raise ValueError(
-                {"error": f"Invalid data: {value}", "code": "FIELD_VAL"}
+                {"error": f"Invalid data: {value}", "code": "DGA-S004"}
             )
 
         condition1 = None
@@ -259,26 +278,26 @@ def apply_filters(model, filters):
 def handle_save_input(model, record_id, save_input):
     """Handle creating or updating a record."""
 
-    model_schema = get_config_schema(model)
+    model_schema_pydantic_model = get_model_config_schema(model)
     instances = []
     messages = []
 
     if record_id and len(save_input) > 1:
         raise ValueError(
-            {"error": "Only 1 record to update at once", "code": "ONE_UPDATE"}
+            {"error": "Only 1 record to update at once", "code": "DGA-S005"}
         )
 
     for saveInput in save_input:
         # Validate against schema
         try:
-            model_schema(**saveInput)
+            model_schema_pydantic_model(**saveInput)
 
         except Exception as e:
             error_msg = e.errors()[0].get("msg")
             error_loc = e.errors()[0].get("loc")
 
             raise ValueError(
-                {"error": f"{error_msg}. {error_loc}", "code": "BAD_INPUT"}
+                {"error": f"{error_msg}. {error_loc}", "code": "DGA-S006"}
             )
 
         try:
@@ -301,11 +320,11 @@ def handle_save_input(model, record_id, save_input):
             raise ValueError(
                 {
                     "error": f"Record with (ID) {record_id} does not exist",
-                    "code": "NO_RECORD",
+                    "code": "DGA-S007",
                 }
             )
         except Exception:
-            raise ValueError({"error": "Invalid ID", "code": "SAVE_ERROR"})
+            raise ValueError({"error": "Invalid ID", "code": "DGA-S008"})
 
     message = list(set(messages))
     return instances, message
