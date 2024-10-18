@@ -65,7 +65,7 @@ def is_fields_exist(model, fields):
     if len(result) > 0:
         # todo: if any foreign key validate field.
         raise ValueError(
-            {"error": f"Extra field {result}", "code": "UNKNOWN_FIELD"}
+            {"error": f"Extra field {result}", "code": "DGA-U001"}
         )
     return True
 

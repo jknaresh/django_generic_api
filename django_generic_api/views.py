@@ -88,7 +88,7 @@ class GenericSaveAPIView(APIView):
             instance_ids = [instance.id for instance in instances]
             return Response(
                 {"data": [{"id": instance_ids}], "message": message},
-                status=status.HTTP_200_OK,
+                status=status.HTTP_201_CREATED,
             )
         except Exception as e:
             return Response(
@@ -197,13 +197,21 @@ class GenericLoginAPIView(APIView):
 
         if auth_user:
             if (
-                self.request.headers.get("X-Requested-With")
+                not self.request.headers.get("X-Requested-With")
                 == "XMLHttpRequest"
             ):
                 token = generate_token(user)
                 return Response(
                     {"data": token},
                     status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {
+                        "error": "Token generation not allowed.",
+                        "code": "DGA-V021",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
 
@@ -225,7 +233,7 @@ class GenericRegisterAPIView(APIView):
         if not password == password1:
             return Response(
                 {"error": "passwords does not match", "code": "DGA-V014"},
-                status=status.HTTP_200_OK,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         user = User.objects.filter(username=email).exists()
@@ -263,6 +271,7 @@ class GenericRegisterAPIView(APIView):
                     recipient_list,
                     fail_silently=False,
                 )
+                # todo: Remove "email_verify' variable after whole process.
                 return Response(
                     {"message": f"Email sent successfully. {email_verify}"},
                     status=status.HTTP_200_OK,
@@ -329,15 +338,15 @@ class EmailActivateAPIView(APIView):
 
             return Response(
                 {"message": "Your account has been activated successfully."},
-                status=status.HTTP_200_OK,
+                status=status.HTTP_201_CREATED,
             )
         except User.DoesNotExist:
             return Response(
-                {"error": "User not found.", "code": "DGA-V020"},
+                {"error": "User not found.", "code": "DGA-V019"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
             return Response(
-                {"error": str(e), "code": "DGA-V021"},
+                {"error": str(e), "code": "DGA-V020"},
                 status=status.HTTP_400_BAD_REQUEST,
             )

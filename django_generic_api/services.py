@@ -58,10 +58,12 @@ def get_model_by_name(model_name):
 
 def generate_token(user):
     refresh = RefreshToken.for_user(user)
-    return {
-        "refresh": str(refresh),
-        "access": str(refresh.access_token),
-    }
+    return [
+        {
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        }
+    ]
 
 
 # Define your token validation function as a decorator
