@@ -1,9 +1,24 @@
+import time
+from unittest import expectedFailure
+
+from django.db.models.fields import NOT_PROVIDED
+import csv
+import os
+from pydantic import ConfigDict
+
 actions = {
     "fetch": "view",
     "save": "add",
     "edit": "change",
     "remove": "delete",
 }
+
+
+class PydanticConfigV1:
+    model_config = ConfigDict(
+        str_strip_whitespace=True,  # Remove white spaces
+        extra="forbid",  # Forbid extra fields
+    )
 
 
 def make_permission_str(model, action):
@@ -14,34 +29,92 @@ def make_permission_str(model, action):
     return permission
 
 
-def get_model_field_names(model):
+def get_model_fields_with_properties(model, input_fields):
+    """
+    Returns a dictionary where the keys are field names and the values are a dictionary
+    of field properties such as 'type', 'nullability', etc.
+
+    :param model: Django model class
+    :return: dict
+    """
     model_meta = getattr(model, "_meta")
     field_obj = model_meta.fields
-
+    # todo: as per input read only those fields
+    required_attributes = ["null", "blank", "max_length", "default"]
     field_dict = {}
+    field_properties = {}
+
+    # todo: separate function to get field properties
     for field1 in field_obj:
-        field_dict[field1.attname] = field1
+        # collect properties of fields.
+        field_properties["type"] = field1.get_internal_type()
+
+        for attr in required_attributes:
+            if hasattr(field1, attr):
+                field_properties[attr] = getattr(field1, attr)
+
+        field_dict[field1.attname] = field_properties
+        field_properties = {}
 
     return field_dict
 
 
-def get_model_field_type(model, field1):
-    """
-    :param model:
-    :param field1: string
-    :return:
-    """
-    model_meta = getattr(model, "_meta")
-    field_type1 = model_meta.get_field(field1)
-    field_type = field_type1.get_internal_type()
-
-    return field_type
-
-
 def is_fields_exist(model, fields):
-    model_fields = get_model_field_names(model)
+    model_fields = get_model_fields_with_properties(model, fields)
     result = set(fields) - set(model_fields.keys())
     if len(result) > 0:
         # todo: if any foreign key validate field.
-        raise ValueError(f"Extra field {result}.")
+        raise ValueError(
+            {"error": f"Extra field {result}", "code": "DGA-U001"}
+        )
     return True
+
+
+def registration_token(user_id):
+    timestamp = int(time.time())
+    token = f"{user_id}:{timestamp}"
+    return token
+
+
+def store_user_ip(user_id, user_ip):
+    csv_file_path = os.path.join(os.getcwd(), "user_ips.csv")
+
+    file_exists = os.path.isfile(csv_file_path)
+
+    with open(csv_file_path, mode="a+", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+
+        if not file_exists:
+            writer.writerow(["user_id", "user_ip"])
+
+        writer.writerow([user_id, user_ip])
+
+
+def validate_integer_field(value):
+    return int(value) if value.isdigit() else False
+
+
+def validate_bool_field(value):
+    return value in [
+        "True",
+        "False",
+        "true",
+        "false",
+        "0",
+        "1",
+        True,
+        False,
+        0,
+        1,
+    ]
+
+
+def validate_char_field(value):
+    try:
+        if isinstance(value, str):
+            value.encode("utf-8")
+            return True
+        else:
+            return False
+    except UnicodeEncodeError:
+        return False
