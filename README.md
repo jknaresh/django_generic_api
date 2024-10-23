@@ -159,7 +159,7 @@ path("<url prefix>", include('django_generic_api.urls'))
 ### Method:
 
 ```bash
-type: "POST"
+HTTP Method: "POST"
 ```
  
 
@@ -207,7 +207,7 @@ header["X-CSRFToken"]=csrfvalue
 
 ### Method:
 ```bash
-type: "POST"
+HTTP Method: "POST"
 ```
 
 ### URL construction:
@@ -245,7 +245,7 @@ header["Content-Type"]="application/json"
 
 ### Method:
 ```bash
-type: "POST"
+HTTP Method: "POST"
 ```
 
 ### URL construction:
@@ -281,7 +281,7 @@ url: "http://domain-name/api/register/",
 
 ### Method:
 ```bash
-type: "POST"
+HTTP Method: "POST"
 ```
 
 ### URL construction:
@@ -313,7 +313,7 @@ header["X-CSRFToken"]=csrfvalue
 
 ### Method:
 ```bash
-type: "POST"
+HTTP Method: "POST"
 ```
 ### URL construction:
 ```bash
@@ -438,7 +438,7 @@ header["Authorization"]="Bearer <access token>"
 
 ### Method:
 ```bash
-type: "POST"
+HTTP Method: "POST"
 ```
 ### URL construction:
 ```bash
@@ -521,7 +521,7 @@ header["Authorization"]="Bearer <access token>"
 
 ### Method:
 ```bash
-type: "POST"
+HTTP Method: "POST"
 ```
 ### URL construction:
 ```bash
