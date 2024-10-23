@@ -5,6 +5,7 @@ from django.db.models.fields import NOT_PROVIDED
 import csv
 import os
 from pydantic import ConfigDict
+from django.core.exceptions import FieldDoesNotExist
 
 actions = {
     "fetch": "view",
@@ -60,12 +61,29 @@ def get_model_fields_with_properties(model, input_fields):
 
 
 def is_fields_exist(model, fields):
-    model_fields = get_model_fields_with_properties(model, fields)
-    result = set(fields) - set(model_fields.keys())
+    valid_fields = []
+    for field in fields:
+        if "__" not in field:
+            valid_fields.append(field)
+        else:
+            fk_field, related_field = field.split("__", 1)
+            try:
+                model_meta = getattr(model, "_meta")  # data of model
+                fk = model_meta.get_field(fk_field)  # data of fk field
+                # data of fk field model
+                related_model_meta = getattr(fk.related_model, "_meta")
+                related_model_meta.get_field(related_field)
+            except FieldDoesNotExist:
+                raise ValueError(
+                    {"error": f"Invalid field {field}", "code": "DGA-U001"}
+                )
+
+    model_fields = get_model_fields_with_properties(model, valid_fields)
+    result = set(valid_fields) - set(model_fields.keys())
     if len(result) > 0:
         # todo: if any foreign key validate field.
         raise ValueError(
-            {"error": f"Extra field {result}", "code": "DGA-U001"}
+            {"error": f"Extra field {result}", "code": "DGA-U002"}
         )
     return True
 
