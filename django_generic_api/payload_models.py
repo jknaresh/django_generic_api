@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Optional, Any, List, Union
+
 from pydantic import (
     BaseModel,
     field_validator,
@@ -7,7 +8,8 @@ from pydantic import (
     SecretStr,
     EmailStr,
 )
-from utils import PydanticConfigV1
+
+from .utils import PydanticConfigV1
 
 
 class SavePayload(BaseModel, PydanticConfigV1):

@@ -1,6 +1,7 @@
 # ERROR CODES
 
-- In this project, error codes are defined to indicate the level at which an error is raised. 
+- In this project, error codes are defined to indicate the level at which an
+  error is raised.
 - The format of the error codes is as follows:
 
 ```bash
@@ -8,7 +9,8 @@ DGA-V: Errors raised at the views level (views.py)
 DGA-S: Errors raised at the services level (services.py)
 DGA-U: Errors raised at the utilities level (utils.py)
 ```
-## Error code description table 
+
+## Error code description table
 
 | ERROR CODE | Action          | DESCRIPTION                                                                                |
 |------------|-----------------|--------------------------------------------------------------------------------------------|

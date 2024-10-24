@@ -1,12 +1,17 @@
-from django.contrib.auth import authenticate, logout
+import time
+from urllib.parse import quote, unquote
+
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth import logout
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.utils.decorators import method_decorator
 from pydantic import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.core.mail import send_mail
-from django.conf import settings
+
 from .payload_models import (
     FetchPayload,
     SavePayload,
@@ -21,11 +26,6 @@ from .services import (
     generate_token,
 )
 from .utils import make_permission_str, registration_token, store_user_ip
-import time
-from urllib.parse import quote, unquote
-from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class GenericSaveAPIView(APIView):
@@ -260,7 +260,10 @@ class GenericRegisterAPIView(APIView):
 
             try:
                 subject = "Verify your email address for SignUp"
-                message = f"Please click the link below to verify your account:\n\n{email_verify}"
+                message = (
+                    f"Please click the link below to verify your "
+                    f"account:\n\n{email_verify}"
+                )
                 from_email = settings.EMAIL_HOST_USER
                 recipient_list = [email]
 

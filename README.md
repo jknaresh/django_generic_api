@@ -1,9 +1,11 @@
 # Django Generic API
 
-## Overview 
+## Overview
 
-- Django Generic API is a reusable Django app designed to perform dynamic CRUD operations based on payloads. 
-- It provides a flexible way to handle database operations for any Django model through REST API endpoints.
+- Django Generic API is a reusable Django app designed to perform dynamic CRUD
+  operations based on payloads.
+- It provides a flexible way to handle database operations for any Django model
+  through REST API endpoints.
 
 ## Features
 
@@ -11,15 +13,19 @@
 - Dynamic save operation (create or update records) for any Django model.
 - Supports relationships and complex data.
 - Enabled with pagination and order by features.
-- User authentication and management (Login, Registration, Logout, Forgot Password).
+- User authentication and management (Login, Registration, Logout, Forgot
+  Password).
 
 ## Installation
 
 - Install the package
+
 ```bash
 pip install django_generic_api
 ```
+
 - Add the app in settings.py
+
 ```bash
 INSTALLED_APPS = [
         ...
@@ -27,20 +33,19 @@ INSTALLED_APPS = [
 ]
 
 ```
+
 ---
+
 # Integration
 
-
 - In settings.py file, integrate the following.
-
 
 ### CORS Setup
 
 - To allow request from other domains, add these CORS settings.
 - Adding CORS headers allows your resources to be accessed on other domains.
-- This allows in-browser requests to your Django application from other 
+- This allows in-browser requests to your Django application from other
   origins.
-
 
 ```bash
 # CORS Settings
@@ -68,8 +73,10 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 
 ```
+
 ---
-### Token based authentication settings 
+
+### Token based authentication settings
 
 - This package uses rest_framework_simplejwt for token based authentication.
 - To allow requests by token, add these settings.
@@ -101,8 +108,11 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
 }
 ```
+
 ---
+
 ### Email settings
+
 - When a user registers themselves, a user activation link is sent to them.
 - To integrate the email activation, add these seetings.
 - [Get your EMAIL_HOST_PASSWORD](https://letscodemore.medium.com/solved-smtplib-smtpauthenticationerror-535-b5-7-8-username-and-password-not-accepted-2b26110f9f3b)
@@ -117,7 +127,9 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "shrijancstech@gmail.com"  # Your Gmail address
 EMAIL_HOST_PASSWORD = "srcp yqyu xteg nzfe"  # Your Gmail password
 ```
+
 - Set you BASE_URL which includes http protocol and domain name
+
 ```bash
 BASE_URL = "..."
 
@@ -135,6 +147,7 @@ path("<url prefix>", include('django_generic_api.urls'))
 
 # example : path("api/", include("django_generic_api.urls")),
 ```
+
 ---
 
 # Parameters for requests
@@ -144,9 +157,13 @@ path("<url prefix>", include('django_generic_api.urls'))
 
 ## Fetching and Saving Data
 
-- To fetch or save data, the user must be authenticated with either a session or a token.
-- If the user is making a request via AJAX (page submission), they must be logged in using a session.
-- If the user is fetching or saving data using a non-session method (not via AJAX), they must provide an access token.
+- To fetch or save data, the user must be authenticated with either a session
+  or a token.
+- If the user is making a request via AJAX (page submission), they must be
+  logged in using a session.
+- If the user is fetching or saving data using a non-session method (not via
+  AJAX), they must provide an access token.
+
 ---
 
 # Model APIs
@@ -161,9 +178,9 @@ path("<url prefix>", include('django_generic_api.urls'))
 ```bash
 HTTP Method: "POST"
 ```
- 
 
 ### URL construction:
+
 ```bash
 url: "http://domain-name/api/login/",
 ```
@@ -174,7 +191,7 @@ url: "http://domain-name/api/login/",
 header["X-CSRFToken"]=csrfvalue
 ```
 
-###  <span style="color: red;">Payload for Login:</span>  
+### <span style="color: red;">Payload for Login:</span>
 
 ```json
 
@@ -187,6 +204,7 @@ header["X-CSRFToken"]=csrfvalue
   }
 }
 ```
+
 ### <span style="color: green;">Response for Login:</span>
 
 ```json
@@ -199,21 +217,25 @@ header["X-CSRFToken"]=csrfvalue
 ```
 
 ---
+
 ## Refresh Token API
 
 - To get a efresh token, post data on url '/< prefix >/refresh/' .
-- As the access token expires after given time, use refresh token to get 
+- As the access token expires after given time, use refresh token to get
   new access token.
 
 ### Method:
+
 ```bash
 HTTP Method: "POST"
 ```
 
 ### URL construction:
+
 ```bash
 url: "http://domain-name/api/refresh/",
 ```
+
 ### Header
 
 ```header
@@ -237,18 +259,22 @@ header["Content-Type"]="application/json"
 ```
 
 ---
+
 ## Register API
 
 - To register a user, post the data on url '/< prefix >/register/'.
-- As user sends registration request, a user activation link is sent to their email, as user clicks on 
+- As user sends registration request, a user activation link is sent to their
+  email, as user clicks on
   that link user is activated.
 
 ### Method:
+
 ```bash
 HTTP Method: "POST"
 ```
 
 ### URL construction:
+
 ```bash
 url: "http://domain-name/api/register/",
 ```
@@ -274,21 +300,24 @@ url: "http://domain-name/api/register/",
     "message": "Email sent successfully."
 }
 ```
+
 ---
+
 ## Log Out
 
 - To log out a user, post data on the url '/< url prefix >/logout/'.
 
 ### Method:
+
 ```bash
 HTTP Method: "POST"
 ```
 
 ### URL construction:
+
 ```bash
 url: "http://domain-name/api/logout/",
 ```
-
 
 ### Header
 
@@ -303,6 +332,7 @@ header["X-CSRFToken"]=csrfvalue
     "message": "Successfully logged out."
 }
 ```
+
 ---
 
 ## Save data
@@ -312,13 +342,17 @@ header["X-CSRFToken"]=csrfvalue
   well prepare payload as following.
 
 ### Method:
+
 ```bash
 HTTP Method: "POST"
 ```
+
 ### URL construction:
+
 ```bash
 url: "http://domain-name/api/save/",
 ```
+
 ### Header:
 
 ```bash
@@ -327,7 +361,7 @@ header["X-CSRFToken"]=csrfvalue
 header["Authorization"]="Bearer <access token>"
 ```
 
-### <span style="color: red;">Payload for single record:</span>  
+### <span style="color: red;">Payload for single record:</span>
 
 ```json
 {
@@ -350,6 +384,7 @@ header["Authorization"]="Bearer <access token>"
 }
 
 ```
+
 ### <span style="color: green;">Response for single record:</span>
 
 ```json
@@ -401,6 +436,7 @@ header["Authorization"]="Bearer <access token>"
 }
 
 ```
+
 ### <span style="color: green;">Response for multiple record:</span>
 
 ```json
@@ -419,7 +455,6 @@ header["Authorization"]="Bearer <access token>"
 }
 ```
 
-
 ### Description for Fields
 
 | Field Name      | Datatype           | Description                                         | Required | Default Value                                 | Example                                   |
@@ -431,16 +466,20 @@ header["Authorization"]="Bearer <access token>"
 | SaveInput.value | Any                | Value of corresponding column in table , ex: value1 | True     | "default_value"                               | "789"                                     |
 
 ---
+
 ## Fetch data
 
 - To fetch the data, post on the url '/< url prefix >/fetch/' and set
   header as well prepare payload as following.
 
 ### Method:
+
 ```bash
 HTTP Method: "POST"
 ```
+
 ### URL construction:
+
 ```bash
 url: "http://domain-name/api/fetch/",
 ```
@@ -480,6 +519,7 @@ header["Authorization"]="Bearer <access token>"
   }
 }
 ```
+
 ### <span style="color: green;">Response for Fetch Data:</span>
 
 ```json
@@ -514,19 +554,24 @@ header["Authorization"]="Bearer <access token>"
 | Sort.order_by | Enum       | Sorting order ('asc' for ascending, 'desc' for descending)                                        | True     | "asc"                                                      | asc                                                  |
 
 ---
+
 ## Update data
 
 - To update data, post data on the url '/< url prefix >/save/' and set
   header as well prepare payload as following.
 
 ### Method:
+
 ```bash
 HTTP Method: "POST"
 ```
+
 ### URL construction:
+
 ```bash
 url: "http://domain-name/api/save/",
 ```
+
 ### Header:
 
 ```bash
@@ -558,6 +603,7 @@ header["Authorization"]="Bearer <access token>"
 }
 
 ```
+
 ### <span style="color: green;">Response for Update Record:</span>
 
 ```json
@@ -577,11 +623,12 @@ header["Authorization"]="Bearer <access token>"
 
 ### Description for Fields
 
-| Field Name      | Datatype         | Description                                         | Required | Default Value                               | Example                                 |
-|-----------------|------------------|-----------------------------------------------------|----------|---------------------------------------------|-----------------------------------------|
-| modelName       | String           | Name of Django Model to Save                        | True     | "model name"                                | Employees                               |
-| id              | Int              | id value of record to update, ex: 1                 | True     | 1                                           | 5                                       |
-| SaveInput       | List[Dictionary] | Contains list of fields and their values            | True     | [{ "field1": "field1","field2": "value1" }] | [{ "field1": "emp_id","field2": "963" }]|
-| SaveInput.field | String           | Name of field in table in Database , ex:field1      | True     | "field1"                                    | emp_id                                  |
-| SaveInput.value | Any              | Value of corresponding column in table , ex: value1 | True     | "value1"                                    | 963                                     |
+| Field Name      | Datatype         | Description                                         | Required | Default Value                               | Example                                  |
+|-----------------|------------------|-----------------------------------------------------|----------|---------------------------------------------|------------------------------------------|
+| modelName       | String           | Name of Django Model to Save                        | True     | "model name"                                | Employees                                |
+| id              | Int              | id value of record to update, ex: 1                 | True     | 1                                           | 5                                        |
+| SaveInput       | List[Dictionary] | Contains list of fields and their values            | True     | [{ "field1": "field1","field2": "value1" }] | [{ "field1": "emp_id","field2": "963" }] |
+| SaveInput.field | String           | Name of field in table in Database , ex:field1      | True     | "field1"                                    | emp_id                                   |
+| SaveInput.value | Any              | Value of corresponding column in table , ex: value1 | True     | "value1"                                    | 963                                      |
+
 ---

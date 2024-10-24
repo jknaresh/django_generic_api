@@ -4,12 +4,12 @@ from typing import Dict, Optional
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.db.models import *
+from django.http import JsonResponse
 from pydantic import BaseModel, create_model, EmailStr
 from rest_framework import status
-from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework.exceptions import AuthenticationFailed
-from django.http import JsonResponse
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+
 from .utils import (
     get_model_fields_with_properties,
     is_fields_exist,

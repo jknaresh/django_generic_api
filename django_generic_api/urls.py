@@ -1,4 +1,7 @@
 from django.urls import path
+from rest_framework_simplejwt.views import (
+    TokenRefreshView,
+)
 
 from .views import (
     GenericFetchAPIView,
@@ -8,10 +11,6 @@ from .views import (
     GenericRegisterAPIView,
     AccountActivateAPIView,
 )
-from rest_framework_simplejwt.views import (
-    TokenRefreshView,
-)
-
 
 urlpatterns = [
     path("fetch/", GenericFetchAPIView.as_view(), name="generic-fetch"),

@@ -1,11 +1,9 @@
-import time
-from unittest import expectedFailure
-
-from django.db.models.fields import NOT_PROVIDED
 import csv
 import os
-from pydantic import ConfigDict
+import time
+
 from django.core.exceptions import FieldDoesNotExist
+from pydantic import ConfigDict
 
 actions = {
     "fetch": "view",
@@ -32,7 +30,8 @@ def make_permission_str(model, action):
 
 def get_model_fields_with_properties(model, input_fields):
     """
-    Returns a dictionary where the keys are field names and the values are a dictionary
+    Returns a dictionary where the keys are field names and the values are a
+    dictionary
     of field properties such as 'type', 'nullability', etc.
 
     :param model: Django model class
