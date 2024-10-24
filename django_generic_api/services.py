@@ -168,7 +168,6 @@ def check_field_value(model, field1, value):
         return True
 
     field_type = field_properties["type"]
-
     validation_func = FIELD_VALIDATION_MAP.get(field_type)
     if not validation_func:
         return True
