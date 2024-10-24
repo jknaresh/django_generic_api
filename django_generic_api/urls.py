@@ -6,7 +6,7 @@ from .views import (
     LogoutAPIView,
     GenericLoginAPIView,
     GenericRegisterAPIView,
-    EmailActivateAPIView,
+    AccountActivateAPIView,
 )
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
@@ -22,7 +22,7 @@ urlpatterns = [
     path("refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path(
         "activate/<str:encoded_token>/",
-        EmailActivateAPIView.as_view(),
+        AccountActivateAPIView.as_view(),
         name="activate",
     ),
 ]

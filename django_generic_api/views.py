@@ -303,7 +303,7 @@ class LogoutAPIView(APIView):
         )
 
 
-class EmailActivateAPIView(APIView):
+class AccountActivateAPIView(APIView):
     def get(self, request, encoded_token, *args, **kwargs):
         try:
             # Decode token and get the user ID

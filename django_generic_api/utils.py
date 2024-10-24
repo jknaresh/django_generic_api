@@ -17,8 +17,8 @@ actions = {
 
 class PydanticConfigV1:
     model_config = ConfigDict(
-        str_strip_whitespace=True,  # Remove white spaces
         extra="forbid",  # Forbid extra fields
+        str_strip_whitespace=True,  # Remove white spaces
     )
 
 
@@ -136,3 +136,10 @@ def validate_char_field(value):
             return False
     except UnicodeEncodeError:
         return False
+
+
+FIELD_VALIDATION_MAP = {
+    "IntegerField": validate_integer_field,
+    "BooleanField": validate_bool_field,
+    "CharField": validate_char_field,
+}

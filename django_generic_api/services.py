@@ -14,9 +14,7 @@ from .utils import (
     get_model_fields_with_properties,
     is_fields_exist,
     PydanticConfigV1,
-    validate_integer_field,
-    validate_bool_field,
-    validate_char_field,
+    FIELD_VALIDATION_MAP,
 )
 
 DEFAULT_APPS = {
@@ -37,12 +35,6 @@ DJANGO_TO_PYDANTIC_TYPE_MAP = {
     FloatField: float,
     TextField: str,
     ForeignKey: int,
-}
-
-FIELD_VALIDATION_MAP = {
-    "IntegerField": validate_integer_field,
-    "BooleanField": validate_bool_field,
-    "CharField": validate_char_field,
 }
 
 
