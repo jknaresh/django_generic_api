@@ -3,7 +3,16 @@ from typing import Dict, Optional
 
 from django.apps import apps
 from django.contrib.auth import get_user_model
-from django.db.models import *
+from django.db.models import (
+    Q,
+    IntegerField,
+    CharField,
+    EmailField,
+    BooleanField,
+    FloatField,
+    TextField,
+    ForeignKey,
+)
 from django.http import JsonResponse
 from pydantic import BaseModel, create_model, EmailStr
 from rest_framework import status
@@ -155,6 +164,9 @@ def check_field_value(model, field1, value):
 
     model_fields = get_model_fields_with_properties(model, [field1])
     field_properties = model_fields[field1]
+    if field_properties.get("null") and value[0] is None:
+        return True
+
     field_type = field_properties["type"]
 
     validation_func = FIELD_VALIDATION_MAP.get(field_type)
