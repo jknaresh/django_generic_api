@@ -112,6 +112,14 @@ def validate_access_token(view_function):
 
 
 def get_model_config_schema(model):
+    """
+    Converts a Django ORM model into a Pydantic model object.
+
+    The resulting Pydantic model includes fields with their corresponding types,
+    `max_length` constraints (if applicable), and an indication of whether fields are required.
+
+    :param model: Django model class to convert into a Pydantic model.
+    """
     model_fields: Dict[str, tuple] = {}
 
     # info: validates nested fields(foreign key fields for time being "__")
