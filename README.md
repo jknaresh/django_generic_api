@@ -124,7 +124,7 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "shrijancstech@gmail.com"  # Your Gmail address
+EMAIL_HOST_USER = "user@example.com"  # Your Gmail address
 EMAIL_HOST_PASSWORD = "srcp yqyu xteg nzfe"  # Your Gmail password
 ```
 
@@ -146,6 +146,37 @@ BASE_URL = "..."
 path("<url prefix>", include('django_generic_api.urls'))
 
 # example : path("api/", include("django_generic_api.urls")),
+```
+
+---
+
+### Limiting User Requests
+
+- This package allows you to limit the number of requests that can be sent
+  within a specified time period.
+- The default request limits are set as follows:
+
+```bash
+  Authenticated users: 2000 requests per 1 hour
+  Anonymous users: 20 requests per 1 hour
+```
+
+- To customize these default settings, add the following to settings.py:
+
+```bash
+# Set 'user' for authenticated users
+# Set 'anon' for unauthenticated users
+
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '.../day',
+        'user': '.../day'
+    }
+}
 ```
 
 ---
@@ -529,8 +560,7 @@ header["Authorization"]="Bearer <access token>"
         {
             "field1": "abc",
             "field2": "def",
-            "field3": "ghi",
-            
+            "field3": "ghi"
         }
     ]
 }

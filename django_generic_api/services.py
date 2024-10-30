@@ -14,7 +14,7 @@ from django.db.models import (
     ForeignKey,
 )
 from django.http import JsonResponse
-from pydantic import BaseModel, create_model, EmailStr
+from pydantic import BaseModel, create_model, EmailStr, Field
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
@@ -112,16 +112,27 @@ def validate_access_token(view_function):
 
 
 def get_model_config_schema(model):
+    """
+    Converts a Django ORM model into a Pydantic model object.
+
+    The resulting Pydantic model includes fields with their corresponding
+    types, `max_length` constraints (if applicable), and an indication of
+    whether fields are required.
+
+    :param model: Django model class to convert into a Pydantic model.
+    """
     model_fields: Dict[str, tuple] = {}
 
-    # todo: validate nested fields(foreign key fields for time being "__")
+    # info: validates nested fields(foreign key fields for time being "__")
     model_meta = getattr(model, "_meta", None)
+
     for field1 in model_meta.fields:
         if field1.name == "id":
             continue
 
         field_type = None
         is_optional = field1.null or field1.blank
+        field_constraints = {}
 
         # Check if the field type exists in the mapping dictionary
         for django_field, pydantic_type in DJANGO_TO_PYDANTIC_TYPE_MAP.items():
@@ -134,7 +145,6 @@ def get_model_config_schema(model):
                             if is_optional
                             else related_model_pk_type
                         ),
-                        ...,
                     )
                 else:
                     field_type = (
@@ -143,11 +153,26 @@ def get_model_config_schema(model):
                             if is_optional
                             else pydantic_type
                         ),
-                        ...,
                     )
+
+                if (
+                    hasattr(field1, "max_length")
+                    and field1.max_length is not None
+                ):
+                    field_constraints["max_length"] = field1.max_length
                 break
+
         if field_type:
-            model_fields[field1.column] = field_type
+            if is_optional:
+                model_fields[field1.column] = (
+                    field_type[0],  # Optional type
+                    Field(None, **field_constraints),
+                )
+            else:
+                model_fields[field1.column] = (
+                    field_type[0],  # Required type
+                    Field(..., **field_constraints),
+                )
 
     # Dynamically create a Pydantic model
     pydantic_model = create_model(
@@ -284,6 +309,9 @@ def handle_save_input(model, record_id, save_input):
     """Handle creating or updating a record."""
 
     model_schema_pydantic_model = get_model_config_schema(model)
+    model_schema = model_schema_pydantic_model.model_json_schema()
+    model_fields = set(model_schema["properties"].keys())
+
     instances = []
     messages = []
 
@@ -293,6 +321,14 @@ def handle_save_input(model, record_id, save_input):
         )
 
     for saveInput in save_input:
+
+        # info: restricts extra fields in saveInput
+        results = set(saveInput.keys()) - model_fields
+        if len(results) > 0:
+            raise ValueError(
+                {"error": f"Extra field {results}", "code": "DGA-S009"}
+            )
+
         # Validate against schema
         try:
             model_schema_pydantic_model(**saveInput)

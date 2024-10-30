@@ -171,6 +171,7 @@ class GenericFetchAPIView(APIView):
 
 
 class GenericLoginAPIView(APIView):
+
     def post(self, *args, **kwargs):
         payload = self.request.data.get("payload", {}).get("variables", {})
         try:
@@ -221,6 +222,7 @@ class GenericLoginAPIView(APIView):
 
 
 class GenericRegisterAPIView(APIView):
+
     def post(self, *args, **kwargs):
         payload = self.request.data.get("payload", {}).get("variables", {})
         try:
@@ -299,6 +301,7 @@ class GenericRegisterAPIView(APIView):
 
 
 class GenericForgotPasswordAPIView(APIView):
+
     def post(self, *args, **kwargs):
         payload = self.request.data.get("payload", {}).get("variables", {})
         try:
@@ -311,6 +314,7 @@ class GenericForgotPasswordAPIView(APIView):
 
 
 class LogoutAPIView(APIView):
+
     def post(self, *args, **kwargs):
         logout(self.request)
         return Response(
@@ -319,6 +323,7 @@ class LogoutAPIView(APIView):
 
 
 class AccountActivateAPIView(APIView):
+
     def get(self, request, encoded_token, *args, **kwargs):
         try:
             # Decode token and get the user ID

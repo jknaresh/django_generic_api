@@ -4,6 +4,9 @@ import time
 
 from django.core.exceptions import FieldDoesNotExist
 from pydantic import ConfigDict
+from rest_framework.exceptions import Throttled
+from rest_framework.response import Response
+from rest_framework.views import exception_handler
 
 actions = {
     "fetch": "view",
@@ -142,6 +145,20 @@ FIELD_VALIDATION_MAP = {
     "BooleanField": validate_bool_field,
     "CharField": validate_char_field,
 }
+
+
+def custom_exception_handler(exc, context):
+    response = exception_handler(exc, context)
+
+    if isinstance(exc, Throttled):
+        response = Response(
+            {
+                "error": "Too many requests. Please try after sometime.",
+                "code": "DGA-U003",
+            },
+            status=exc.status_code,
+        )
+    return response
 
 
 def is_valid_domain(domain):
