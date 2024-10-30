@@ -153,7 +153,7 @@ def custom_exception_handler(exc, context):
     if isinstance(exc, Throttled):
         response = Response(
             {
-                "error": "Too many requests. Please wait for sometime.",
+                "error": "Too many requests. Please try after sometime.",
                 "code": "DGA-U003",
             },
             status=exc.status_code,
