@@ -284,6 +284,9 @@ def handle_save_input(model, record_id, save_input):
     """Handle creating or updating a record."""
 
     model_schema_pydantic_model = get_model_config_schema(model)
+    model_schema = model_schema_pydantic_model.model_json_schema()
+    model_fields = set(model_schema["properties"].keys())
+
     instances = []
     messages = []
 
@@ -293,6 +296,14 @@ def handle_save_input(model, record_id, save_input):
         )
 
     for saveInput in save_input:
+
+        # info: restricts extra fields in saveInput
+        results = set(saveInput.keys()) - model_fields
+        if len(results) > 0:
+            raise ValueError(
+                {"error": f"Extra field {results}", "code": "DGA-S009"}
+            )
+
         # Validate against schema
         try:
             model_schema_pydantic_model(**saveInput)
