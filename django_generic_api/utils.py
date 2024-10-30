@@ -4,8 +4,9 @@ import time
 
 from django.core.exceptions import FieldDoesNotExist
 from pydantic import ConfigDict
-from django.utils.dateparse import parse_duration
-from rest_framework.throttling import AnonRateThrottle
+from rest_framework.views import exception_handler
+from rest_framework.exceptions import Throttled
+from rest_framework.response import Response
 
 actions = {
     "fetch": "view",
@@ -146,33 +147,15 @@ FIELD_VALIDATION_MAP = {
 }
 
 
-def timeparse(period):
-    """
-    Logic to convert '10m' into seconds, e.g., 600 for 10 minutes.
-    """
-    if period.endswith("m"):
-        return int(period[:-1]) * 60
-    elif period.endswith("h"):
-        return int(period[:-1]) * 3600
-    elif period.endswith("d"):
-        return int(period[:-1]) * 86400
-    raise ValueError("Unsupported time format")
+def custom_exception_handler(exc, context):
+    response = exception_handler(exc, context)
 
-
-class ExtendedRateThrottle(AnonRateThrottle):
-    """
-    Predefining a rate limit for Anonymous user, 'anon'.
-    """
-
-    def parse_rate(self, rate):
-        """
-        Given the request rate string, return a two-tuple of:
-        <allowed number of requests>, <period of time in seconds>
-        """
-        if rate is None:
-            return None, None
-
-        num, period = rate.split("/")
-        num_requests = int(num)
-        duration = timeparse(period)
-        return num_requests, duration
+    if isinstance(exc, Throttled):
+        response = Response(
+            {
+                "error": "Too many requests. Please wait for sometime.",
+                "code": "DGA-U003",
+            },
+            status=exc.status_code,
+        )
+    return response

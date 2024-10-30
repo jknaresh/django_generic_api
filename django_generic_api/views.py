@@ -11,11 +11,6 @@ from pydantic import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.throttling import (
-    BaseThrottle,
-    UserRateThrottle,
-    AnonRateThrottle,
-)
 from .payload_models import (
     FetchPayload,
     SavePayload,
@@ -30,7 +25,6 @@ from .services import (
     generate_token,
 )
 from .utils import (
-    ExtendedRateThrottle,
     make_permission_str,
     registration_token,
     store_user_ip,
@@ -38,7 +32,6 @@ from .utils import (
 
 
 class GenericSaveAPIView(APIView):
-    throttle_classes = [UserRateThrottle]
 
     @method_decorator(validate_access_token)
     def dispatch(self, *args, **kwargs):
@@ -108,7 +101,6 @@ class GenericSaveAPIView(APIView):
 
 
 class GenericFetchAPIView(APIView):
-    throttle_classes = [UserRateThrottle]
 
     # authenticates user by token
     @method_decorator(validate_access_token)
@@ -177,7 +169,6 @@ class GenericFetchAPIView(APIView):
 
 
 class GenericLoginAPIView(APIView):
-    throttle_classes = [ExtendedRateThrottle]
 
     def post(self, *args, **kwargs):
         payload = self.request.data.get("payload", {}).get("variables", {})
@@ -229,7 +220,6 @@ class GenericLoginAPIView(APIView):
 
 
 class GenericRegisterAPIView(APIView):
-    throttle_classes = [ExtendedRateThrottle]
 
     def post(self, *args, **kwargs):
         payload = self.request.data.get("payload", {}).get("variables", {})
@@ -302,7 +292,6 @@ class GenericRegisterAPIView(APIView):
 
 
 class GenericForgotPasswordAPIView(APIView):
-    throttle_classes = [ExtendedRateThrottle]
 
     def post(self, *args, **kwargs):
         payload = self.request.data.get("payload", {}).get("variables", {})
@@ -316,7 +305,6 @@ class GenericForgotPasswordAPIView(APIView):
 
 
 class LogoutAPIView(APIView):
-    throttle_classes = [UserRateThrottle]
 
     def post(self, *args, **kwargs):
         logout(self.request)
@@ -326,7 +314,6 @@ class LogoutAPIView(APIView):
 
 
 class AccountActivateAPIView(APIView):
-    throttle_classes = [ExtendedRateThrottle]
 
     def get(self, request, encoded_token, *args, **kwargs):
         try:
