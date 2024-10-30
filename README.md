@@ -152,13 +152,17 @@ path("<url prefix>", include('django_generic_api.urls'))
 
 ### Limiting User Requests
 
-- This package allows you to limit the number of requests that can be sent within a specified time period. 
+- This package allows you to limit the number of requests that can be sent
+  within a specified time period.
 - The default request limits are set as follows:
+
 ```bash
   Authenticated users: 2000 requests per 1 hour
   Anonymous users: 20 requests per 1 hour
 ```
+
 - To customize these default settings, add the following to settings.py:
+
 ```bash
 # Set 'user' for authenticated users
 # Set 'anon' for unauthenticated users
@@ -176,6 +180,7 @@ REST_FRAMEWORK = {
 ```
 
 ---
+
 # Parameters for requests
 
 - This API supports both session-based and token-based authentication.
@@ -555,8 +560,7 @@ header["Authorization"]="Bearer <access token>"
         {
             "field1": "abc",
             "field2": "def",
-            "field3": "ghi",
-            
+            "field3": "ghi"
         }
     ]
 }

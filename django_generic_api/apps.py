@@ -2,7 +2,6 @@
 
 from django.apps import AppConfig
 from django.conf import settings
-from rest_framework.settings import api_settings
 
 
 class DjangoGenericApiConfig(AppConfig):
