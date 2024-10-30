@@ -44,4 +44,6 @@ DGA-U: Errors raised at the utilities level (utils.py)
 | DGA-S008   | Save(Update)    | User Error! The ID is invalid.                                                            |
 | DGA-S009   | Save            | User Error! The user has included an extra field in saveInput.                            |
 | DGA-U001   | Field search    | User Error! Field not found.                                                              |
+| DGA-U002   | Field search    | User Error! An extra field has been passed by the user.                                   |
+| DGA-U003   | Request Rate    | User Error! The user has exceeded the request rate.                                       |
  
