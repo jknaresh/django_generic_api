@@ -142,3 +142,15 @@ FIELD_VALIDATION_MAP = {
     "BooleanField": validate_bool_field,
     "CharField": validate_char_field,
 }
+
+
+def is_valid_domain(domain):
+
+    domain_file = "../domains.txt"
+    with open(domain_file, "r") as file:
+        valid_domains = file.read()
+
+    if valid_domains.__contains__(domain):
+        return True
+    else:
+        return False

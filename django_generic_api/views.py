@@ -25,7 +25,12 @@ from .services import (
     fetch_data,
     generate_token,
 )
-from .utils import make_permission_str, registration_token, store_user_ip
+from .utils import (
+    make_permission_str,
+    registration_token,
+    store_user_ip,
+    is_valid_domain,
+)
 
 
 class GenericSaveAPIView(APIView):
@@ -233,6 +238,13 @@ class GenericRegisterAPIView(APIView):
         if not password == password1:
             return Response(
                 {"error": "passwords does not match", "code": "DGA-V014"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        email_domain = email.split("@")[-1]
+        if not is_valid_domain(email_domain):
+            return Response(
+                {"error": "Invalid email domain", "code": "DGA-V022"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
