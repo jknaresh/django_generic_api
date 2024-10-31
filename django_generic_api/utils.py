@@ -163,11 +163,8 @@ def custom_exception_handler(exc, context):
 
 def is_valid_domain(domain):
 
-    domain_file = "../domains.txt"
+    domain_file = "valid_domains.txt"
     with open(domain_file, "r") as file:
-        valid_domains = file.read()
+        valid_domains = {line.strip() for line in file}
 
-    if valid_domains.__contains__(domain):
-        return True
-    else:
-        return False
+    return domain in valid_domains
