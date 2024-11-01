@@ -165,6 +165,8 @@ def is_valid_domain(domain):
 
     domain_file = "valid_domains.txt"
     with open(domain_file, "r") as file:
-        valid_domains = {line.strip() for line in file}
+        for index, line in enumerate(file):
+            if domain.lower() == line.strip():
+                return True
 
-    return domain in valid_domains
+    return False

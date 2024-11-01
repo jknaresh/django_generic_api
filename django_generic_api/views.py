@@ -234,6 +234,7 @@ class GenericRegisterAPIView(APIView):
             )
 
         email = validate_register_data.email
+        # todo: password strength
         password = validate_register_data.password.get_secret_value()
         password1 = validate_register_data.password1.get_secret_value()
 
@@ -270,12 +271,15 @@ class GenericRegisterAPIView(APIView):
 
             token = registration_token(new_user.id)
             encoded_token = quote(token)
-            email_verify = f"{settings.BASE_URL}/api/activate/{encoded_token}/"
+            email_verify = (
+                f"{settings.BASE_URL}/api/activate/" f"{encoded_token}/"
+            )  # todo: throw error if no
+            # base url
 
             try:
                 subject = "Verify your email address for SignUp"
                 message = (
-                    f"Please click the link below to verify your "
+                    "Please click the link below to verify your "
                     f"account:\n\n{email_verify}"
                 )
                 from_email = settings.EMAIL_HOST_USER
@@ -288,7 +292,8 @@ class GenericRegisterAPIView(APIView):
                     recipient_list,
                     fail_silently=False,
                 )
-                # todo: Remove "email_verify' variable after whole process.
+                # todo: Remove "email_verify' variable after whole process,
+                #  only for dev, remove in prod.
                 return Response(
                     {"message": f"Email sent successfully. {email_verify}"},
                     status=status.HTTP_200_OK,
@@ -301,7 +306,7 @@ class GenericRegisterAPIView(APIView):
 
 
 class GenericForgotPasswordAPIView(APIView):
-
+    # WIP: continue process
     def post(self, *args, **kwargs):
         payload = self.request.data.get("payload", {}).get("variables", {})
         try:
@@ -330,7 +335,7 @@ class AccountActivateAPIView(APIView):
             token = unquote(encoded_token)
             user_id, timestamp = token.split(":")
 
-            # Token expires after 24 hours
+            # todo: set as user customizable time
             if int(time.time()) - int(timestamp) > 24 * 3600:
                 return Response(
                     {
