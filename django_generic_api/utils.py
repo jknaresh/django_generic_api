@@ -7,6 +7,7 @@ from pydantic import ConfigDict
 from rest_framework.exceptions import Throttled
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
+import mmap
 
 actions = {
     "fetch": "view",
@@ -159,3 +160,16 @@ def custom_exception_handler(exc, context):
             status=exc.status_code,
         )
     return response
+
+
+def is_valid_domain(domain):
+
+    domain_file = "valid_domains.txt"
+    domain_bytes = domain.lower().encode("utf-8")
+
+    with open(domain_file, "rb", 0) as file:
+        s = mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ)
+        if s.find(domain_bytes) != -1:
+            return True
+
+    return False
