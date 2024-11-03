@@ -1,3 +1,4 @@
+from dataclasses import field
 from functools import wraps
 from typing import Dict, Optional
 
@@ -172,9 +173,7 @@ def get_model_config_schema(model):
             else:
                 model_fields[field1.column] = (
                     field_type,
-                    Field(
-                        ..., **field_constraints
-                    ),  # Required without default
+                    Field(default=default_value, **field_constraints),  # Required without default
                 )
 
     # Dynamically create a Pydantic model
