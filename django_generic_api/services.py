@@ -44,6 +44,7 @@ DJANGO_TO_PYDANTIC_TYPE_MAP = {
     FloatField: float,
     TextField: str,
     ForeignKey: int,
+    DateField: str,
 }
 
 
