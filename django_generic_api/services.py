@@ -12,6 +12,7 @@ from django.db.models import (
     FloatField,
     TextField,
     ForeignKey,
+    DateField,
 )
 from django.http import JsonResponse
 from pydantic import BaseModel, create_model, EmailStr, Field
