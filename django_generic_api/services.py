@@ -116,8 +116,8 @@ def get_model_config_schema(model):
     Converts a Django ORM model into a Pydantic model object.
 
     The resulting Pydantic model includes fields with their corresponding
-    types, `max_length` constraints (if applicable), and an indication of
-    whether fields are required.
+    types, `max_length,default` constraints (if applicable), and an
+    indication of whether fields are required.
 
     :param model: Django model class to convert into a Pydantic model.
     """
@@ -131,28 +131,28 @@ def get_model_config_schema(model):
             continue
 
         field_type = None
-        is_optional = field1.null or field1.blank
         field_constraints = {}
+
+        is_optional = field1.null or field1.blank or field1.has_default()
+        default_value = field1.default if field1.has_default() else None
 
         # Check if the field type exists in the mapping dictionary
         for django_field, pydantic_type in DJANGO_TO_PYDANTIC_TYPE_MAP.items():
             if isinstance(field1, django_field):
                 if isinstance(field1, ForeignKey):
-                    related_model_pk_type = int
+                    related_model_pk_type = (
+                        int  # Assuming PK type as int for related fields
+                    )
                     field_type = (
-                        (
-                            Optional[related_model_pk_type]
-                            if is_optional
-                            else related_model_pk_type
-                        ),
+                        Optional[related_model_pk_type]
+                        if is_optional
+                        else related_model_pk_type
                     )
                 else:
                     field_type = (
-                        (
-                            Optional[pydantic_type]
-                            if is_optional
-                            else pydantic_type
-                        ),
+                        Optional[pydantic_type]
+                        if is_optional
+                        else pydantic_type
                     )
 
                 if (
@@ -163,27 +163,19 @@ def get_model_config_schema(model):
                 break
 
         if field_type:
+            # Set field with default if optional, or required if no default
             if is_optional:
-                default_value = field1.default if field1.has_default() else None
                 model_fields[field1.column] = (
-                    field_type[0],  # Optional type
-                    Field(default_value, **field_constraints),
-                    # not required with default
+                    field_type,
+                    Field(default=default_value, **field_constraints),
                 )
             else:
-                if field1.has_default():
-                    default_value = field1.default
-                    model_fields[field1.column] = (
-                        field_type[0],
-                        Field(default=default_value, **field_constraints),
-                        # required with default
-                    )
-                else:
-                    model_fields[field1.column] = (
-                        field_type[0],
-                        Field(..., **field_constraints),
-                        # required without default
-                    )
+                model_fields[field1.column] = (
+                    field_type,
+                    Field(
+                        ..., **field_constraints
+                    ),  # Required without default
+                )
 
     # Dynamically create a Pydantic model
     pydantic_model = create_model(
@@ -193,6 +185,7 @@ def get_model_config_schema(model):
     )
     pydantic_model.__config__ = PydanticConfigV1
     return pydantic_model
+
 
 def check_field_value(model, field1, value):
     is_fields_exist(model, [field1])
