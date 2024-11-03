@@ -164,15 +164,26 @@ def get_model_config_schema(model):
 
         if field_type:
             if is_optional:
+                default_value = field1.default if field1.has_default() else None
                 model_fields[field1.column] = (
                     field_type[0],  # Optional type
-                    Field(None, **field_constraints),
+                    Field(default_value, **field_constraints),
+                    # not required with default
                 )
             else:
-                model_fields[field1.column] = (
-                    field_type[0],  # Required type
-                    Field(..., **field_constraints),
-                )
+                if field1.has_default():
+                    default_value = field1.default
+                    model_fields[field1.column] = (
+                        field_type[0],
+                        Field(default=default_value, **field_constraints),
+                        # required with default
+                    )
+                else:
+                    model_fields[field1.column] = (
+                        field_type[0],
+                        Field(..., **field_constraints),
+                        # required without default
+                    )
 
     # Dynamically create a Pydantic model
     pydantic_model = create_model(
@@ -182,7 +193,6 @@ def get_model_config_schema(model):
     )
     pydantic_model.__config__ = PydanticConfigV1
     return pydantic_model
-
 
 def check_field_value(model, field1, value):
     is_fields_exist(model, [field1])
