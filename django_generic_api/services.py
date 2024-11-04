@@ -1,4 +1,3 @@
-from dataclasses import field
 from functools import wraps
 from typing import Dict, Optional
 
@@ -137,7 +136,9 @@ def get_model_config_schema(model):
         field_constraints = {}
 
         is_optional = field1.null or field1.blank or field1.has_default()
-        default_value = field1.default if field1.has_default() else None
+        default_value = (
+            field1.default() if callable(field1.default) else field1.default
+        )
 
         # Check if the field type exists in the mapping dictionary
         for django_field, pydantic_type in DJANGO_TO_PYDANTIC_TYPE_MAP.items():
@@ -152,6 +153,7 @@ def get_model_config_schema(model):
                         else related_model_pk_type
                     )
                 else:
+
                     field_type = (
                         Optional[pydantic_type]
                         if is_optional
@@ -166,7 +168,6 @@ def get_model_config_schema(model):
                 break
 
         if field_type:
-            # Set field with default if optional, or required if no default
             if is_optional:
                 model_fields[field1.column] = (
                     field_type,
@@ -175,7 +176,7 @@ def get_model_config_schema(model):
             else:
                 model_fields[field1.column] = (
                     field_type,
-                    Field(default=default_value, **field_constraints),  # Required without default
+                    Field(default=default_value, **field_constraints),
                 )
 
     # Dynamically create a Pydantic model
@@ -332,6 +333,22 @@ def handle_save_input(model, record_id, save_input):
             raise ValueError(
                 {"error": f"Extra field {results}", "code": "DGA-S009"}
             )
+
+        for field_name, value in list(saveInput.items()):
+            model_meta = getattr(model, "_meta", None)
+            model_field = model_meta.get_field(field_name)
+
+            if (
+                model_field.has_default()
+                and not value
+                and not model_field.null
+            ):
+                saveInput.pop(field_name)
+
+            try:
+                model_field.get_prep_value(value)
+            except Exception as e:
+                raise ValueError({"error": e, "code": "DGA-S010"})
 
         # Validate against schema
         try:
