@@ -12,6 +12,7 @@ from django.db.models import (
     FloatField,
     TextField,
     ForeignKey,
+    DateField,
 )
 from django.http import JsonResponse
 from pydantic import BaseModel, create_model, EmailStr, Field
@@ -44,6 +45,7 @@ DJANGO_TO_PYDANTIC_TYPE_MAP = {
     FloatField: float,
     TextField: str,
     ForeignKey: int,
+    DateField: str,
 }
 
 
