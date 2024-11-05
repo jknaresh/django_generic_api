@@ -136,9 +136,7 @@ def get_model_config_schema(model):
         field_constraints = {}
 
         is_optional = field1.null or field1.blank or field1.has_default()
-        default_value = (
-            field1.default() if callable(field1.default) else field1.default
-        )
+        default_value = field1.get_default() if field1.has_default() else None
 
         # Check if the field type exists in the mapping dictionary
         for django_field, pydantic_type in DJANGO_TO_PYDANTIC_TYPE_MAP.items():
@@ -153,31 +151,21 @@ def get_model_config_schema(model):
                         else related_model_pk_type
                     )
                 else:
-
                     field_type = (
                         Optional[pydantic_type]
                         if is_optional
                         else pydantic_type
                     )
 
-                if (
-                    hasattr(field1, "max_length")
-                    and field1.max_length is not None
-                ):
+                if hasattr(field1, "max_length"):
                     field_constraints["max_length"] = field1.max_length
                 break
 
         if field_type:
-            if is_optional:
-                model_fields[field1.column] = (
-                    field_type,
-                    Field(default=default_value, **field_constraints),
-                )
-            else:
-                model_fields[field1.column] = (
-                    field_type,
-                    Field(default=default_value, **field_constraints),
-                )
+            model_fields[field1.column] = (
+                field_type,
+                Field(default=default_value, **field_constraints),
+            )
 
     # Dynamically create a Pydantic model
     pydantic_model = create_model(
@@ -334,6 +322,18 @@ def handle_save_input(model, record_id, save_input):
                 {"error": f"Extra field {results}", "code": "DGA-S009"}
             )
 
+        # Validate against schema
+        try:
+            model_schema_pydantic_model(**saveInput)
+
+        except Exception as e:
+            error_msg = e.errors()[0].get("msg")
+            error_loc = e.errors()[0].get("loc")
+
+            raise ValueError(
+                {"error": f"{error_msg}. {error_loc}", "code": "DGA-S006"}
+            )
+
         for field_name, value in list(saveInput.items()):
             model_meta = getattr(model, "_meta", None)
             model_field = model_meta.get_field(field_name)
@@ -349,18 +349,6 @@ def handle_save_input(model, record_id, save_input):
                 model_field.get_prep_value(value)
             except Exception as e:
                 raise ValueError({"error": e, "code": "DGA-S010"})
-
-        # Validate against schema
-        try:
-            model_schema_pydantic_model(**saveInput)
-
-        except Exception as e:
-            error_msg = e.errors()[0].get("msg")
-            error_loc = e.errors()[0].get("loc")
-
-            raise ValueError(
-                {"error": f"{error_msg}. {error_loc}", "code": "DGA-S006"}
-            )
 
         try:
             if record_id:
@@ -385,8 +373,8 @@ def handle_save_input(model, record_id, save_input):
                     "code": "DGA-S007",
                 }
             )
-        except Exception:
-            raise ValueError({"error": "Invalid ID", "code": "DGA-S008"})
+        except Exception as e:
+            raise ValueError({"error": e.args[0], "code": "DGA-S008"})
 
     message = list(set(messages))
     return instances, message
