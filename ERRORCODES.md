@@ -12,38 +12,38 @@ DGA-U: Errors raised at the utilities level (utils.py)
 
 ## Error code description table
 
-| ERROR CODE | Action          | DESCRIPTION                                                                               |
-|------------|-----------------|-------------------------------------------------------------------------------------------|
-| DGA-V001   | Save            | User Error! The user is trying to insert more than 10 records at once.                    |
-| DGA-V002   | Save            | User Error! The user payload and predefined save payload do not match.                    |
-| DGA-V003   | Save            | User Error! The user is trying to insert data into a non-existing model or table.         |
-| DGA-V004   | Save            | User Error! The user does not have permission to save or update data.                     |
-| DGA-V005   | Save            | User Error! The user is providing invalid data to save or update.                         |
-| DGA-V006   | Fetch           | User Error! The user payload and predefined fetch payload do not match.                   |
-| DGA-V007   | Fetch           | User Error! The user is trying to fetch data from a non-existing table or model.          |
-| DGA-V008   | Fetch           | User Error! The user does not have permission to fetch data.                              |
-| DGA-V009   | Fetch           | User Error! The user is providing invalid data to fetch.                                  |
-| DGA-V010   | Login           | User Error! The user payload and predefined login payload do not match.                   |
-| DGA-V011   | Login           | User Error! The username does not exist.                                                  |
-| DGA-V012   | Login           | User Error! The user has entered an incorrect password.                                   |
-| DGA-V013   | Register        | User Error! The user payload and predefined register payload do not match.                |
-| DGA-V014   | Register        | User Error! The confirm password does not match the password.                             |
-| DGA-V015   | Register        | User Error! The email already exists.                                                     |
-| DGA-V016   | Register        | Server Error! User activation failed.                                                     |
-| DGA-V017   | Forgot password | User Error! The user payload and predefined forgot password payload do not match.         |
-| DGA-V018   | User activate   | Server Error! The activation link has expired.                                            |
-| DGA-V019   | User activate   | User Error! The user ID does not exist.                                                   |
-| DGA-V020   | User activate   | Server Error! User is not activated.                                                      |
-| DGA-S001   | Access Token    | User Error! The user is not logged in by session and does not have an access token.       |
-| DGA-S002   | Access Token    | User Error! The token format is invalid.                                                  |                                                                                                                        |
-| DGA-S003   | Access Token    | User Error! Access token authentication failed.                                           |
-| DGA-S004   | Fetch Filter    | User Error! Invalid data in fetch filter.                                                 |
-| DGA-S005   | Save(Update)    | User Error! The user is trying to update more than one record.                            |
-| DGA-S006   | Save            | User Error! The user's save input does not match the table or model fields configuration. |
-| DGA-S007   | Save(Update)    | User Error! The ID does not exist.                                                        |
-| DGA-S008   | Save(Update)    | User Error! The ID is invalid.                                                            |
-| DGA-S009   | Save            | User Error! The user has included an extra field in saveInput.                            |
-| DGA-U001   | Field search    | User Error! Field not found.                                                              |
-| DGA-U002   | Field search    | User Error! An extra field has been passed by the user.                                   |
-| DGA-U003   | Request Rate    | User Error! The user has exceeded the request rate.                                       |
+| ERROR CODE | Action          | DESCRIPTION                                                                         |
+|------------|-----------------|-------------------------------------------------------------------------------------|
+| DGA-V001   | Save            | User Error! The user is trying to insert more than 10 records at once.              |
+| DGA-V002   | Save            | User Error! The user payload does not match the predefined save payload.            |
+| DGA-V003   | Save            | User Error! The user does not have permission to save or update data.               | 
+| DGA-V004   | Fetch           | User Error! The user payload does not match the predefined fetch payload.           |
+| DGA-V005   | Fetch           | User Error! The user does not have permission to fetch data.                        |
+| DGA-V006   | Login           | User Error! The user payload does not match the predefined login payload.           |
+| DGA-V007   | Login           | User Error! The username does not exist.                                            |
+| DGA-V008   | Login           | User Error! The user has entered an incorrect password.                             |
+| DGA-V009   | Login           | User Error! The user cannot generate token using AJAX.                              |
+| DGA-V010   | Register        | User Error! The user payload does not match the predefined register payload.        |
+| DGA-V011   | Register        | User Error! The confirm password does not match the password.                       |
+| DGA-V012   | Register        | User Error! User is using a invalid email domain.                                   |
+| DGA-V013   | Register        | User Error! The email already exists.                                               |
+| DGA-V014   | Register        | Server Error! User activation failed.                                               |
+| DGA-V015   | Forgot password | User Error! The user payload does not match the predefined forgot password payload. |
+| DGA-V016   | User activate   | Server Error! The activation link has expired.                                      |
+| DGA-V017   | User activate   | User Error! The user ID does not exist.                                             |
+| DGA-V018   | User activate   | Server Error! The user is not activated.                                            |
+| DGA-S001   | Get Model       | User Error ! The model does not exist.                                              |
+| DGA-S002   | Access Token    | User Error! The user is not authenticated by session or does not have a token.      |
+| DGA-S003   | Access Token    | User Error! The token format is invalid.                                            |                                                                                                                        |
+| DGA-S004   | Access Token    | User Error! Access token authentication failed.                                     |
+| DGA-S005   | Fetch Filter    | User Error! Invalid data in the fetch filter.                                       |
+| DGA-S006   | Save(Update)    | User Error! The user is trying to update more than one record.                      |
+| DGA-S007   | Save            | User Error! User is passing an extra field in saveInput.                            |
+| DGA-S008   | Save            | User Error! The user's save input does not match the model field configuration.     |
+| DGA-S009   | Save(Update)    | User Error! The ID does not exist.                                                  |
+| DGA-S010   | Save(Update)    | User Error! The ID is invalid.                                                      |
+| DGA-S009   | Save            | User Error! The user has included an extra field in saveInput.                      |
+| DGA-U001   | Field search    | User Error! Field not found.                                                        |
+| DGA-U002   | Field search    | User Error! The user has passed an extra field.                                     |
+| DGA-U003   | Request Rate    | User Error! The user has exceeded the request rate.                                 |
  

@@ -24,6 +24,17 @@ class PydanticConfigV1:
     )
 
 
+# Custom Error
+class CustomAPIError(Exception):
+    def __init__(self, error, code, status_code):
+        self.error = error
+        self.code = code
+        self.status_code = status_code
+        super().__init__(
+            {"error": error, "code": code, "status_code": status_code}
+        )
+
+
 def make_permission_str(model, action):
     model_meta = getattr(model, "_meta")
     action = actions.get(action)
@@ -32,7 +43,7 @@ def make_permission_str(model, action):
     return permission
 
 
-def get_model_fields_with_properties(model, input_fields):
+def get_model_fields_with_properties(model):
     """
     Returns a dictionary where the keys are field names and the values are a
     dictionary
@@ -77,16 +88,18 @@ def is_fields_exist(model, fields):
                 related_model_meta = getattr(fk.related_model, "_meta")
                 related_model_meta.get_field(related_field)
             except FieldDoesNotExist:
-                raise ValueError(
-                    {"error": f"Invalid field {field}", "code": "DGA-U001"}
+                raise CustomAPIError(
+                    f"Invalid field {field}",
+                    "DGA-U001",
+                    status.HTTP_400_BAD_REQUEST,
                 )
 
-    model_fields = get_model_fields_with_properties(model, valid_fields)
+    model_fields = get_model_fields_with_properties(model)
     result = set(valid_fields) - set(model_fields.keys())
     if len(result) > 0:
         # todo: if any foreign key validate field.
-        raise ValueError(
-            {"error": f"Extra field {result}", "code": "DGA-U002"}
+        raise CustomAPIError(
+            f"Extra field {result}", "DGA-U002", status.HTTP_400_BAD_REQUEST
         )
     return True
 
@@ -152,12 +165,17 @@ def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
     if isinstance(exc, Throttled):
+        custom_error = CustomAPIError(
+            error="Too many requests. Please try after sometime.",
+            code="DGA-U003",
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        )
         response = Response(
             {
-                "error": "Too many requests. Please try after sometime.",
-                "code": "DGA-U003",
+                "error": custom_error.error,
+                "code": custom_error.code,
             },
-            status=exc.status_code,
+            status=custom_error.status_code,
         )
     return response
 

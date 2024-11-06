@@ -30,6 +30,7 @@ from .utils import (
     registration_token,
     store_user_ip,
     is_valid_domain,
+    CustomAPIError,
 )
 
 
@@ -47,18 +48,34 @@ class GenericSaveAPIView(APIView):
 
         # Does not allow to save more than 10 records at once
         if len(saveInput) > 10:
+            custom_error = CustomAPIError(
+                error="Only 10 records at once.",
+                code="DGA-V001",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
             return Response(
-                {"error": "Only 10 records at once.", "code": "DGA-V001"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {
+                    "error": custom_error.error,
+                    "code": custom_error.code,
+                },
+                status=custom_error.status_code,
             )
 
         try:
             # Validate the payload using the Pydantic model
             validated_payload_data = SavePayload(**payload)
         except ValidationError as e:
+            custom_error = CustomAPIError(
+                error=e.errors()[0]["msg"],
+                code="DGA-V002",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
             return Response(
-                {"error": e.errors()[0].get("msg"), "code": "DGA-V002"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {
+                    "error": custom_error.error,
+                    "code": custom_error.code,
+                },
+                status=custom_error.status_code,
             )
 
         # Proceed with saving the data using validated_payload_data
@@ -68,22 +85,29 @@ class GenericSaveAPIView(APIView):
 
         try:
             model = get_model_by_name(model_name)
-        except ValueError:
+        except CustomAPIError as e:
             return Response(
-                {"error": "Model not found", "code": "DGA-V003"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {
+                    "error": e.error,
+                    "code": e.code,
+                },
+                status=e.status_code,
             )
 
         action = "save" if not record_id else "edit"
         # checks if user has permission to add or change the data
         if not self.request.user.has_perm(make_permission_str(model, action)):
+            custom_error = CustomAPIError(
+                error="Something went wrong!!! Please contact the administrator.",
+                code="DGA-V003",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
             return Response(
                 {
-                    "error": "Something went wrong!!! Please contact the "
-                    "administrator.",
-                    "code": "DGA-V004",
+                    "error": custom_error.error,
+                    "code": custom_error.code,
                 },
-                status=status.HTTP_404_NOT_FOUND,
+                status=custom_error.status_code,
             )
 
         try:
@@ -95,10 +119,9 @@ class GenericSaveAPIView(APIView):
                 {"data": [{"id": instance_ids}], "message": message},
                 status=status.HTTP_201_CREATED,
             )
-        except Exception as e:
+        except CustomAPIError as e:
             return Response(
-                {"error": str(e), "code": "DGA-V005"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"error": e.error, "code": e.code}, status=e.status_code
             )
 
 
@@ -112,16 +135,18 @@ class GenericFetchAPIView(APIView):
     def post(self, *args, **kwargs):
 
         payload = self.request.data.get("payload", {}).get("variables", {})
+
         try:
             # Validate the payload using the Pydantic model
             validated_payload_data = FetchPayload(**payload)
         except ValidationError as e:
-            error_msg = e.errors()[0].get("msg")
-            error_loc = e.errors()[0].get("loc")
-            error = f"{error_msg}{error_loc}"
-
+            custom_error = CustomAPIError(
+                error=e.errors()[0]["msg"],
+                code="DGA-V004",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
             return Response(
-                {"error": error, "code": "DGA-V006"},
+                {"error": custom_error.error, "code": custom_error.code},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -135,20 +160,28 @@ class GenericFetchAPIView(APIView):
         sort = validated_payload_data.sort
         distinct = validated_payload_data.distinct
 
-        # check if user has permission to view the data.
         try:
             model = get_model_by_name(model_name)
-        except Exception as e:
-            return Response(
-                {"error": str(e), "code": "DGA-V007"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        if not self.request.user.has_perm(make_permission_str(model, "fetch")):
+        except CustomAPIError as e:
             return Response(
                 {
-                    "error": "Something went wrong!!! Please contact the "
-                    "administrator.",
-                    "code": "DGA-V008",
+                    "error": e.error,
+                    "code": e.code,
+                },
+                status=e.status_code,
+            )
+
+        # check if user has permission to view the data.
+        if not self.request.user.has_perm(make_permission_str(model, "fetch")):
+            custom_error = CustomAPIError(
+                error="Something went wrong!!! Please contact the administrator.",
+                code="DGA-V005",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+            return Response(
+                {
+                    "error": custom_error.error,
+                    "code": custom_error.code,
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )
@@ -163,10 +196,10 @@ class GenericFetchAPIView(APIView):
                 distinct,
             )
             return Response(data, status=status.HTTP_200_OK)
-        except Exception as e:
+        except CustomAPIError as e:
             return Response(
-                {"error": str(e), "code": "DGA-V009"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"error": e.error, "code": e.code},
+                status=e.status_code,
             )
 
 
@@ -177,9 +210,14 @@ class GenericLoginAPIView(APIView):
         try:
             validated_userdata = GenericLoginPayload(**payload)
         except ValidationError as e:
+            custom_error = CustomAPIError(
+                error=e.errors()[0]["msg"],
+                code="DGA-V006",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
             return Response(
-                {"error": e.errors()[0].get("msg"), "code": "DGA-V010"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"error": custom_error.error, "code": custom_error.code},
+                status=custom_error.status_code,
             )
 
         username = validated_userdata.email
@@ -189,19 +227,31 @@ class GenericLoginAPIView(APIView):
         try:
             user = user_model.objects.get(username=username)
         except user_model.DoesNotExist:
+            custom_error = CustomAPIError(
+                error="Username not found",
+                code="DGA-V007",
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
             return Response(
-                {"error": "Username not found", "code": "DGA-V011"},
-                status=status.HTTP_404_NOT_FOUND,
+                {"error": custom_error.error, "code": custom_error.code},
+                status=custom_error.status_code,
             )
 
         auth_user = user.check_password(password)
         if not auth_user:
+            custom_error = CustomAPIError(
+                error="Invalid password",
+                code="DGA-V008",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+            )
             return Response(
-                {"error": "Invalid password", "code": "DGA-V012"},
-                status=status.HTTP_401_UNAUTHORIZED,
+                {"error": custom_error.error, "code": custom_error.code},
+                status=custom_error.status_code,
             )
 
         if auth_user:
+            # info: Users cannot generate tokens via AJAX. Token generation
+            # is only allowed through tools like Postman.
             if (
                 not self.request.headers.get("X-Requested-With")
                 == "XMLHttpRequest"
@@ -212,12 +262,17 @@ class GenericLoginAPIView(APIView):
                     status=status.HTTP_200_OK,
                 )
             else:
+                custom_error = CustomAPIError(
+                    error="Token generation not allowed.",
+                    code="DGA-V009",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
                 return Response(
                     {
-                        "error": "Token generation not allowed.",
-                        "code": "DGA-V021",
+                        "error": custom_error.error,
+                        "code": custom_error.code,
                     },
-                    status=status.HTTP_400_BAD_REQUEST,
+                    status=custom_error.status_code,
                 )
 
 
@@ -228,9 +283,14 @@ class GenericRegisterAPIView(APIView):
         try:
             validate_register_data = GenericRegisterPayload(**payload)
         except ValidationError as e:
+            custom_error = CustomAPIError(
+                error=e.errors()[0]["msg"],
+                code="DGA-V010",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
             return Response(
-                {"error": e.errors()[0].get("msg"), "code": "DGA-V013"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"error": custom_error.error, "code": custom_error.code},
+                status=custom_error.status_code,
             )
 
         email = validate_register_data.email
@@ -239,26 +299,41 @@ class GenericRegisterAPIView(APIView):
         password1 = validate_register_data.password1.get_secret_value()
 
         if not password == password1:
+            custom_error = CustomAPIError(
+                error="Passwords does not match",
+                code="DGA-V011",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
             return Response(
-                {"error": "passwords does not match", "code": "DGA-V014"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"error": custom_error.error, "code": custom_error.code},
+                status=custom_error.status_code,
             )
 
         email_domain = email.split("@")[-1]
         if not is_valid_domain(email_domain):
+            custom_error = CustomAPIError(
+                error="Invalid email domain",
+                code="DGA-V012",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
             return Response(
-                {"error": "Invalid email domain", "code": "DGA-V022"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"error": custom_error.error, "code": custom_error.code},
+                status=custom_error.status_code,
             )
 
         user = User.objects.filter(username=email).exists()
         if user:
+            custom_error = CustomAPIError(
+                error="Account already exists with this email.",
+                code="DGA-V013",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
             return Response(
                 {
-                    "error": "Account already exists with this email.",
-                    "code": "DGA-V015",
+                    "error": custom_error.error,
+                    "code": custom_error.code,
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=custom_error.status_code,
             )
         else:
             new_user = User(
@@ -299,9 +374,14 @@ class GenericRegisterAPIView(APIView):
                     status=status.HTTP_200_OK,
                 )
             except Exception as e:
+                custom_error = CustomAPIError(
+                    error=str(e),
+                    code="DGA-V014",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
                 return Response(
-                    {"error": str(e), "code": "DGA-V016"},
-                    status=status.HTTP_400_BAD_REQUEST,
+                    {"error": custom_error.error, "code": custom_error.code},
+                    status=custom_error.status_code,
                 )
 
 
@@ -312,9 +392,14 @@ class GenericForgotPasswordAPIView(APIView):
         try:
             validated_email = ForgotPasswordPayload(**payload)
         except ValidationError as e:
+            custom_error = CustomAPIError(
+                error=e.errors()[0]["msg"],
+                code="DGA-V015",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
             return Response(
-                {"error": e.errors()[0].get("msg"), "code": "DGA-V017"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"error": custom_error.error, "code": custom_error.code},
+                status=custom_error.status_code,
             )
 
 
@@ -337,12 +422,17 @@ class AccountActivateAPIView(APIView):
 
             # todo: set as user customizable time
             if int(time.time()) - int(timestamp) > 24 * 3600:
+                custom_error = CustomAPIError(
+                    error="The activation link has expired.",
+                    code="DGA-V016",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
                 return Response(
                     {
-                        "error": "The activation link has expired.",
-                        "code": "DGA-V018",
+                        "error": custom_error.error,
+                        "code": custom_error.code,
                     },
-                    status=status.HTTP_400_BAD_REQUEST,
+                    status=custom_error.status_code,
                 )
 
             # Fetch user by ID
@@ -366,12 +456,22 @@ class AccountActivateAPIView(APIView):
                 status=status.HTTP_201_CREATED,
             )
         except User.DoesNotExist:
+            custom_error = CustomAPIError(
+                error="User not found.",
+                code="DGA-V017",
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
             return Response(
-                {"error": "User not found.", "code": "DGA-V019"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"error": custom_error.error, "code": custom_error.code},
+                status=custom_error.status_code,
             )
         except Exception as e:
+            custom_error = CustomAPIError(
+                error=str(e),
+                code="DGA-V018",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
             return Response(
-                {"error": str(e), "code": "DGA-V020"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"error": custom_error.error, "code": custom_error.code},
+                status=custom_error.status_code,
             )

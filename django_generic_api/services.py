@@ -25,6 +25,7 @@ from .utils import (
     is_fields_exist,
     PydanticConfigV1,
     FIELD_VALIDATION_MAP,
+    CustomAPIError,
 )
 
 DEFAULT_APPS = {
@@ -56,7 +57,9 @@ def get_model_by_name(model_name):
             model = app_config.models.get(model_name.lower())
             if model:
                 return model
-    raise ValueError
+    raise CustomAPIError(
+        "Model not found", "DGA-S001", status.HTTP_404_NOT_FOUND
+    )
 
 
 def generate_token(user):
@@ -75,37 +78,42 @@ def validate_access_token(view_function):
     def _wrapped_view(request, *args, **kwargs):
         try:
             if not request.user.is_authenticated:
+
                 auth_header = request.headers.get("Authorization")
                 if not auth_header:
-                    raise AuthenticationFailed(
-                        {"detail": "Unauthorized access", "code": "DGA-S001"}
+                    raise CustomAPIError(
+                        "Unauthorized access",
+                        "DGA-S002",
+                        status.HTTP_401_UNAUTHORIZED,
                     )
-                if auth_header and not auth_header.startswith("Bearer "):
-                    raise AuthenticationFailed(
-                        {"detail": "Invalid Token", "code": "DGA-S002"}
-                    )
-                token_str = auth_header.split(" ")[1]
 
+                if auth_header and not auth_header.startswith("Bearer "):
+                    raise CustomAPIError(
+                        "Invalid Token",
+                        "DGA-S003",
+                        status.HTTP_401_UNAUTHORIZED,
+                    )
+
+                token_str = auth_header.split(" ")[1]
                 token = AccessToken(token_str)  # Decoding token
                 user_id = token["user_id"]
                 user_model = get_user_model()
                 user = user_model.objects.get(id=user_id)
                 setattr(request, "user", user)
-        except AuthenticationFailed as e:
+
+        except CustomAPIError as e:
             return JsonResponse(
                 {
-                    "error": e.detail["detail"],
-                    "code": e.detail["code"],
+                    "error": e.error,
+                    "code": e.code,
                 },
-                status=status.HTTP_401_UNAUTHORIZED,
+                status=e.status_code,
             )
         except Exception as e:
-            return JsonResponse(
-                {
-                    "error": f"Authentication failed: {str(e)}",
-                    "code": "DGA-S003",
-                },
-                status=status.HTTP_401_UNAUTHORIZED,
+            raise CustomAPIError(
+                f"Authentication failed: {str(e)}",
+                "DGA-S004",
+                status.HTTP_401_UNAUTHORIZED,
             )
 
         return view_function(request, *args, **kwargs)
@@ -189,7 +197,7 @@ def get_model_config_schema(model):
 def check_field_value(model, field1, value):
     is_fields_exist(model, [field1])
 
-    model_fields = get_model_fields_with_properties(model, [field1])
+    model_fields = get_model_fields_with_properties(model)
     field_properties = model_fields[field1]
     if field_properties.get("null") and value[0] is None:
         return True
@@ -283,8 +291,10 @@ def apply_filters(model, filters):
         operation = filter_item.operation
 
         if not check_field_value(model, field_name, value):
-            raise ValueError(
-                {"error": f"Invalid data: {value}", "code": "DGA-S004"}
+            raise CustomAPIError(
+                f"Invalid data: {value}",
+                "DGA-S005",
+                status.HTTP_400_BAD_REQUEST,
             )
 
         condition1 = None
@@ -318,8 +328,10 @@ def handle_save_input(model, record_id, save_input):
     messages = []
 
     if record_id and len(save_input) > 1:
-        raise ValueError(
-            {"error": "Only 1 record to update at once", "code": "DGA-S005"}
+        raise CustomAPIError(
+            "Only 1 record to update at once",
+            "DGA-S006",
+            status.HTTP_400_BAD_REQUEST,
         )
 
     for saveInput in save_input:
@@ -327,8 +339,10 @@ def handle_save_input(model, record_id, save_input):
         # info: restricts extra fields in saveInput
         results = set(saveInput.keys()) - model_fields
         if len(results) > 0:
-            raise ValueError(
-                {"error": f"Extra field {results}", "code": "DGA-S009"}
+            raise CustomAPIError(
+                f"Extra field(s) {results}",
+                "DGA-S007",
+                status.HTTP_400_BAD_REQUEST,
             )
 
         # Validate against schema
@@ -339,8 +353,10 @@ def handle_save_input(model, record_id, save_input):
             error_msg = e.errors()[0].get("msg")
             error_loc = e.errors()[0].get("loc")
 
-            raise ValueError(
-                {"error": f"{error_msg}. {error_loc}", "code": "DGA-S006"}
+            raise CustomAPIError(
+                f"{error_msg}. {error_loc}",
+                "DGA-S008",
+                status.HTTP_400_BAD_REQUEST,
             )
 
         try:
@@ -360,14 +376,15 @@ def handle_save_input(model, record_id, save_input):
             instances.append(instance)
             messages.append(message)
         except model.DoesNotExist:
-            raise ValueError(
-                {
-                    "error": f"Record with (ID) {record_id} does not exist",
-                    "code": "DGA-S007",
-                }
+            raise CustomAPIError(
+                f"Record with ID {record_id} does not exist",
+                "DGA-S009",
+                status.HTTP_404_NOT_FOUND,
             )
-        except Exception:
-            raise ValueError({"error": "Invalid ID", "code": "DGA-S008"})
+        except Exception as e:
+            raise CustomAPIError(
+                str(e), "DGA-S010", status.HTTP_400_BAD_REQUEST
+            )
 
     message = list(set(messages))
     return instances, message
