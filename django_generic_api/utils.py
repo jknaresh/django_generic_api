@@ -32,7 +32,7 @@ def make_permission_str(model, action):
     return permission
 
 
-def get_model_fields_with_properties(model, input_fields):
+def get_model_fields_with_properties(model):
     """
     Returns a dictionary where the keys are field names and the values are a
     dictionary
@@ -81,7 +81,7 @@ def is_fields_exist(model, fields):
                     {"error": f"Invalid field {field}", "code": "DGA-U001"}
                 )
 
-    model_fields = get_model_fields_with_properties(model, valid_fields)
+    model_fields = get_model_fields_with_properties(model)
     result = set(valid_fields) - set(model_fields.keys())
     if len(result) > 0:
         # todo: if any foreign key validate field.
@@ -109,43 +109,6 @@ def store_user_ip(user_id, user_ip):
             writer.writerow(["user_id", "user_ip"])
 
         writer.writerow([user_id, user_ip])
-
-
-def validate_integer_field(value):
-    return int(value) if value.isdigit() else False
-
-
-def validate_bool_field(value):
-    return value in [
-        "True",
-        "False",
-        "true",
-        "false",
-        "0",
-        "1",
-        True,
-        False,
-        0,
-        1,
-    ]
-
-
-def validate_char_field(value):
-    try:
-        if isinstance(value, str):
-            value.encode("utf-8")
-            return True
-        else:
-            return False
-    except UnicodeEncodeError:
-        return False
-
-
-FIELD_VALIDATION_MAP = {
-    "IntegerField": validate_integer_field,
-    "BooleanField": validate_bool_field,
-    "CharField": validate_char_field,
-}
 
 
 def custom_exception_handler(exc, context):

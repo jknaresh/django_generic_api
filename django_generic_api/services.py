@@ -3,6 +3,7 @@ from typing import Dict, Optional
 
 from django.apps import apps
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models import (
     Q,
     IntegerField,
@@ -24,7 +25,6 @@ from .utils import (
     get_model_fields_with_properties,
     is_fields_exist,
     PydanticConfigV1,
-    FIELD_VALIDATION_MAP,
 )
 
 DEFAULT_APPS = {
@@ -189,22 +189,21 @@ def get_model_config_schema(model):
 def check_field_value(model, field1, value):
     is_fields_exist(model, [field1])
 
-    model_fields = get_model_fields_with_properties(model, [field1])
+    model_fields = get_model_fields_with_properties(model)
     field_properties = model_fields[field1]
     if field_properties.get("null") and value[0] is None:
         return True
 
-    field_type = field_properties["type"]
-    validation_func = FIELD_VALIDATION_MAP.get(field_type)
-    if not validation_func:
-        return True
+    model_meta = getattr(model, "_meta")
+    field_instance = model_meta.get_field(field1)
 
-    is_valid_value = None
+    is_valid_value = True
     for value_i in value:
-        if not is_valid_value:
-            is_valid_value = validation_func(value_i)
-        else:
-            is_valid_value *= validation_func(value_i)
+        try:
+            field_instance.get_prep_value(value_i)
+            is_valid_value *= True
+        except (ValueError, ValidationError):
+            is_valid_value *= False
     return is_valid_value
 
 
@@ -284,7 +283,10 @@ def apply_filters(model, filters):
 
         if not check_field_value(model, field_name, value):
             raise ValueError(
-                {"error": f"Invalid data: {value}", "code": "DGA-S004"}
+                {
+                    "error": f"Invalid data: {value} for {field_name}",
+                    "code": "DGA-S004",
+                }
             )
 
         condition1 = None
