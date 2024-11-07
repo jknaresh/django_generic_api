@@ -1,19 +1,14 @@
 from functools import wraps
-from typing import Dict, Optional, Any, List
+from typing import Dict, Optional
 
 from django.apps import apps
 from django.contrib.auth import get_user_model
-from django.core.validators import EMPTY_VALUES
-from django.db.models.fields import NOT_PROVIDED
 from django.db.models import Q
 from django.http import JsonResponse
 from pydantic import (
     BaseModel,
     create_model,
-    EmailStr,
     Field,
-    AnyUrl,
-    IPvAnyAddress,
 )
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
@@ -24,11 +19,8 @@ from .utils import (
     is_fields_exist,
     PydanticConfigV1,
     FIELD_VALIDATION_MAP,
+    DJANGO_TO_PYDANTIC_TYPE_MAP,
 )
-import datetime
-from uuid import UUID
-from decimal import Decimal
-from enum import Enum
 
 
 DEFAULT_APPS = {
@@ -38,45 +30,6 @@ DEFAULT_APPS = {
     "django.contrib.sessions": True,
     "django.contrib.messages": True,
     "django.contrib.staticfiles": True,
-}
-
-# Define a dictionary to map Django fields to Pydantic types
-DJANGO_TO_PYDANTIC_TYPE_MAP = {
-    "CharField": str,
-    "IntegerField": int,
-    "EmailField": EmailStr,
-    "BooleanField": bool,
-    "FloatField": float,
-    "TextField": str,
-    "ForeignKey": int,
-    "DateField": datetime.date,
-    "PositiveBigIntegerField": int,
-    "CommaSeparatedIntegerField": str,
-    "ImageField": str,
-    "BigAutoField": int,
-    "SlugField": str,
-    "FileField": str,
-    "FilePathField": str,
-    "URLField": AnyUrl,
-    "AutoField": int,
-    "UUIDField": UUID,
-    "PositiveIntegerField": int,
-    "PositiveSmallIntegerField": int,
-    "SmallIntegerField": int,
-    "BigIntegerField": int,
-    "BinaryField": bytes,
-    "IPAddressField": IPvAnyAddress,
-    "GenericIPAddressField": IPvAnyAddress,
-    "DecimalField": Decimal,
-    "NullBooleanField": bool,
-    "DurationField": datetime.timedelta,
-    "DateTimeField": datetime.datetime,
-    "TimeField": datetime.time,
-    "SmallAutoField": int,
-    "JSONField": dict,
-    "Field": Any,
-    "ManyToManyField": List[int],
-    "OneToOneField": int,
 }
 
 
@@ -168,34 +121,37 @@ def get_model_config_schema(model):
         is_optional = field1.null or field1.blank or field1.has_default()
         default_value = field1.get_default() if field1.has_default() else None
 
-        django_field_name = field1.get_internal_type()
+        django_field_type = field1.get_internal_type()
 
         # Retrieve the Pydantic type from the mapping
-        if django_field_name in DJANGO_TO_PYDANTIC_TYPE_MAP:
-            mapped_type = DJANGO_TO_PYDANTIC_TYPE_MAP[django_field_name]
-
-            if django_field_name == "ForeignKey":
-                related_model_pk_type = (
-                    int  # Assuming int PK for related fields
-                )
-                field_type = (
-                    Optional[related_model_pk_type]
-                    if is_optional
-                    else related_model_pk_type
-                )
-            else:
-                field_type = (
-                    Optional[mapped_type] if is_optional else mapped_type
-                )
-
-            # Apply constraints such as `max_length` if they exist for the field
-            if hasattr(field1, "max_length"):
-                field_constraints["max_length"] = field1.max_length
-
-            model_fields[field1.column] = (
-                field_type,
-                Field(default=default_value, **field_constraints),
+        if not DJANGO_TO_PYDANTIC_TYPE_MAP.get(django_field_type):
+            raise ValueError(
+                {
+                    "error": f"Field type mapping not found for: {field1.name}",
+                    "code": "DGA-S011",
+                }
             )
+
+        mapped_type = DJANGO_TO_PYDANTIC_TYPE_MAP.get(django_field_type)
+
+        if django_field_type == "ForeignKey":
+            related_model_pk_type = int  # Assuming int PK for related fields
+            field_type = (
+                Optional[related_model_pk_type]
+                if is_optional
+                else related_model_pk_type
+            )
+        else:
+            field_type = Optional[mapped_type] if is_optional else mapped_type
+
+        # Assigning attribute `max_length` if they exist for the field
+        if hasattr(field1, "max_length"):
+            field_constraints["max_length"] = field1.max_length
+
+        model_fields[field1.column] = (
+            field_type,
+            Field(default=default_value, **field_constraints),
+        )
 
     # Dynamically create a Pydantic model
     pydantic_model = create_model(
