@@ -1,4 +1,5 @@
 import time
+from symbol import raise_stmt
 from urllib.parse import quote, unquote
 
 from django.conf import settings
@@ -435,6 +436,13 @@ class AccountActivateAPIView(APIView):
                     status=custom_error.status_code,
                 )
 
+            if User.DoesNotExist:
+                raise CustomAPIError(
+                    error="User not found.",
+                    code="DGA-V017",
+                    status_code=status.HTTP_404_NOT_FOUND,
+                )
+
             # Fetch user by ID
             user = User.objects.get(id=user_id)
             if user.is_active:
@@ -455,16 +463,13 @@ class AccountActivateAPIView(APIView):
                 {"message": "Your account has been activated successfully."},
                 status=status.HTTP_201_CREATED,
             )
-        except User.DoesNotExist:
-            custom_error = CustomAPIError(
-                error="User not found.",
-                code="DGA-V017",
-                status_code=status.HTTP_404_NOT_FOUND,
-            )
+
+        except CustomAPIError as e:
             return Response(
-                {"error": custom_error.error, "code": custom_error.code},
-                status=custom_error.status_code,
+                {"error": e.error, "code": e.code},
+                status=e.status_code,
             )
+
         except Exception as e:
             custom_error = CustomAPIError(
                 error=str(e),

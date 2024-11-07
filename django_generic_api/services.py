@@ -58,7 +58,9 @@ def get_model_by_name(model_name):
             if model:
                 return model
     raise CustomAPIError(
-        "Model not found", "DGA-S001", status.HTTP_404_NOT_FOUND
+        error="Model not found",
+        code="DGA-S001",
+        status_code=status.HTTP_404_NOT_FOUND,
     )
 
 
@@ -82,16 +84,16 @@ def validate_access_token(view_function):
                 auth_header = request.headers.get("Authorization")
                 if not auth_header:
                     raise CustomAPIError(
-                        "Unauthorized access",
-                        "DGA-S002",
-                        status.HTTP_401_UNAUTHORIZED,
+                        error="Unauthorized access",
+                        code="DGA-S002",
+                        status_code=status.HTTP_401_UNAUTHORIZED,
                     )
 
                 if auth_header and not auth_header.startswith("Bearer "):
                     raise CustomAPIError(
-                        "Invalid Token",
-                        "DGA-S003",
-                        status.HTTP_401_UNAUTHORIZED,
+                        error="Invalid Token",
+                        code="DGA-S003",
+                        status_code=status.HTTP_401_UNAUTHORIZED,
                     )
 
                 token_str = auth_header.split(" ")[1]
@@ -111,9 +113,9 @@ def validate_access_token(view_function):
             )
         except Exception as e:
             raise CustomAPIError(
-                f"Authentication failed: {str(e)}",
-                "DGA-S004",
-                status.HTTP_401_UNAUTHORIZED,
+                error=f"Authentication failed: {str(e)}",
+                code="DGA-S004",
+                status_code=status.HTTP_401_UNAUTHORIZED,
             )
 
         return view_function(request, *args, **kwargs)
@@ -292,9 +294,9 @@ def apply_filters(model, filters):
 
         if not check_field_value(model, field_name, value):
             raise CustomAPIError(
-                f"Invalid data: {value}",
-                "DGA-S005",
-                status.HTTP_400_BAD_REQUEST,
+                error=f"Invalid data: {value}",
+                code="DGA-S005",
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
 
         condition1 = None
@@ -329,9 +331,9 @@ def handle_save_input(model, record_id, save_input):
 
     if record_id and len(save_input) > 1:
         raise CustomAPIError(
-            "Only 1 record to update at once",
-            "DGA-S006",
-            status.HTTP_400_BAD_REQUEST,
+            error="Only 1 record to update at once",
+            code="DGA-S006",
+            status_code=status.HTTP_400_BAD_REQUEST,
         )
 
     for saveInput in save_input:
@@ -340,9 +342,9 @@ def handle_save_input(model, record_id, save_input):
         results = set(saveInput.keys()) - model_fields
         if len(results) > 0:
             raise CustomAPIError(
-                f"Extra field(s) {results}",
-                "DGA-S007",
-                status.HTTP_400_BAD_REQUEST,
+                error=f"Extra field(s) {results}",
+                code="DGA-S007",
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
 
         # Validate against schema
@@ -354,9 +356,9 @@ def handle_save_input(model, record_id, save_input):
             error_loc = e.errors()[0].get("loc")
 
             raise CustomAPIError(
-                f"{error_msg}. {error_loc}",
-                "DGA-S008",
-                status.HTTP_400_BAD_REQUEST,
+                error=f"{error_msg}. {error_loc}",
+                code="DGA-S008",
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
@@ -377,13 +379,15 @@ def handle_save_input(model, record_id, save_input):
             messages.append(message)
         except model.DoesNotExist:
             raise CustomAPIError(
-                f"Record with ID {record_id} does not exist",
-                "DGA-S009",
-                status.HTTP_404_NOT_FOUND,
+                error=f"Record with ID {record_id} does not exist",
+                code="DGA-S009",
+                status_code=status.HTTP_404_NOT_FOUND,
             )
         except Exception as e:
             raise CustomAPIError(
-                str(e), "DGA-S010", status.HTTP_400_BAD_REQUEST
+                error=str(e),
+                code="DGA-S010",
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
 
     message = list(set(messages))

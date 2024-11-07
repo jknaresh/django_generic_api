@@ -4,10 +4,12 @@ import time
 
 from django.core.exceptions import FieldDoesNotExist
 from pydantic import ConfigDict
-from rest_framework.exceptions import Throttled
+from rest_framework import status
+from rest_framework.exceptions import Throttled, APIException
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 import mmap
+
 
 actions = {
     "fetch": "view",
@@ -89,9 +91,15 @@ def is_fields_exist(model, fields):
                 related_model_meta.get_field(related_field)
             except FieldDoesNotExist:
                 raise CustomAPIError(
-                    f"Invalid field {field}",
-                    "DGA-U001",
-                    status.HTTP_400_BAD_REQUEST,
+                    error=f"Invalid field {field}",
+                    code="DGA-U001",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+            except Exception as e:
+                raise CustomAPIError(
+                    error=e,
+                    code="DGA-U004",
+                    status_code=status.HTTP_400_BAD_REQUEST,
                 )
 
     model_fields = get_model_fields_with_properties(model)
@@ -99,7 +107,9 @@ def is_fields_exist(model, fields):
     if len(result) > 0:
         # todo: if any foreign key validate field.
         raise CustomAPIError(
-            f"Extra field {result}", "DGA-U002", status.HTTP_400_BAD_REQUEST
+            error=f"Extra field {result}",
+            code="DGA-U002",
+            status_code=status.HTTP_400_BAD_REQUEST,
         )
     return True
 
