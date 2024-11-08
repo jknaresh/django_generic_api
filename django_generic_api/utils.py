@@ -66,6 +66,7 @@ def is_fields_exist(model, fields):
         if not field.__contains__("__"):
             valid_fields.append(field)
         else:
+            # Validate if the fk field exists
             fk_field, related_field = field.split("__", 1)
             try:
                 model_meta = getattr(model, "_meta")  # data of model
@@ -75,13 +76,15 @@ def is_fields_exist(model, fields):
                 related_model_meta.get_field(related_field)
             except FieldDoesNotExist:
                 raise ValueError(
-                    {"error": f"Invalid field {field}", "code": "DGA-U001"}
+                    {
+                        "error": f"Invalid foreign field {field}",
+                        "code": "DGA-U001",
+                    }
                 )
 
     model_fields = get_model_fields_with_properties(model)
     result = set(valid_fields) - set(model_fields.keys())
     if len(result) > 0:
-        # todo: if any foreign key validate field.
         raise ValueError(
             {"error": f"Extra field {result}", "code": "DGA-U002"}
         )
