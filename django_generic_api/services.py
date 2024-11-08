@@ -187,9 +187,18 @@ def get_model_config_schema(model):
 
 
 def check_field_value(model, field1, value):
+    """
+    Check if the user given field exists in the model.
+    Retrieve the field's properties (such as null, blank, max_length, default).
+    Verify if the field accepts null as a valid input.
+    Confirm that the value is suitable for insertion into the field.
+
+    param : model, fields, value
+    return : True/False
+    """
     is_fields_exist(model, [field1])
 
-    model_fields = get_model_fields_with_properties(model)
+    model_fields = get_model_fields_with_properties(model, field1)
     field_properties = model_fields[field1]
     if field_properties.get("null") and value[0] is None:
         return True
@@ -227,7 +236,7 @@ def fetch_data(
     :param filters: Dictionary of filters for the query
     :param fields1: List of fields to return
     """
-    # info: validate field names from payload against config
+    # info: validate field names from payload against model fields
     is_fields_exist(model, fields1)
 
     # sort field validation

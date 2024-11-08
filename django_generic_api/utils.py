@@ -32,7 +32,7 @@ def make_permission_str(model, action):
     return permission
 
 
-def get_model_fields_with_properties(model):
+def get_model_fields_with_properties(model, field_list=None):
     """
     Returns a dictionary where the keys are field names and the values are a
     dictionary
@@ -42,23 +42,20 @@ def get_model_fields_with_properties(model):
     :return: dict
     """
     model_meta = getattr(model, "_meta")
-    field_obj = model_meta.fields
-    # todo: as per input read only those fields
-    required_attributes = ["null", "blank", "max_length", "default"]
+
+    fields = []
+    if field_list:
+        # info: read only user given fields in filters.name
+        fields.append(model_meta.get_field(field_list))
+    else:
+        fields = model_meta.fields
+
     field_dict = {}
-    field_properties = {}
 
-    # todo: separate function to get field properties
-    for field1 in field_obj:
-        # collect properties of fields.
-        field_properties["type"] = field1.get_internal_type()
-
-        for attr in required_attributes:
-            if hasattr(field1, attr):
-                field_properties[attr] = getattr(field1, attr)
-
-        field_dict[field1.attname] = field_properties
-        field_properties = {}
+    # info: Retrieve field properties of each field
+    for field1 in fields:
+        field_properties = get_field_properties(field1)
+        field_dict[field1.name] = field_properties
 
     return field_dict
 
@@ -66,7 +63,7 @@ def get_model_fields_with_properties(model):
 def is_fields_exist(model, fields):
     valid_fields = []
     for field in fields:
-        if "__" not in field:
+        if not field.__contains__("__"):
             valid_fields.append(field)
         else:
             fk_field, related_field = field.split("__", 1)
@@ -136,3 +133,22 @@ def is_valid_domain(domain):
             return True
 
     return False
+
+
+def get_field_properties(field1):
+    """
+    Retrieve field properties like 'type','null','blank',
+    'max_length', 'default'
+
+    param : Django field instance
+    return : dict with field properties
+    """
+    field_properties = {
+        "type": field1.get_internal_type(),
+        "null": field1.null,
+        "blank": field1.blank,
+        "max_length": getattr(field1, "max_length", None),
+        "default": getattr(field1, "default", None),
+    }
+
+    return field_properties
