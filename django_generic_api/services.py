@@ -198,7 +198,7 @@ def check_field_value(model, field1, value):
     """
     is_fields_exist(model, [field1])
 
-    model_fields = get_model_fields_with_properties(model, field1)
+    model_fields = get_model_fields_with_properties(model, [field1])
     field_properties = model_fields[field1]
     if field_properties.get("null") and value[0] is None:
         return True
@@ -206,14 +206,12 @@ def check_field_value(model, field1, value):
     model_meta = getattr(model, "_meta")
     field_instance = model_meta.get_field(field1)
 
-    is_valid_value = True
     for value_i in value:
         try:
             field_instance.get_prep_value(value_i)
-            is_valid_value *= True
         except (ValueError, ValidationError):
-            is_valid_value *= False
-    return is_valid_value
+            return False
+    return True
 
 
 def fetch_data(
@@ -289,6 +287,20 @@ def apply_filters(model, filters):
         field_name = filter_item.name
         value = filter_item.value
         operation = filter_item.operation
+
+        UNCOUNTABLE_FIELDS = [
+            "id",
+            "inserted_timestamp",
+            "update_timestamp",
+            "end_timestamp",
+        ]
+        if field_name in UNCOUNTABLE_FIELDS:
+            raise ValueError(
+                {
+                    "error": f"Filtering by the field '{field_name}' is not permitted.",
+                    "code": "DGA-S010",
+                }
+            )
 
         if not check_field_value(model, field_name, value):
             raise ValueError(
