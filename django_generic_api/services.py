@@ -3,20 +3,14 @@ from typing import Dict, Optional
 
 from django.apps import apps
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from django.core.exceptions import ValidationError
-from django.db.models import (
-    Q,
-    IntegerField,
-    CharField,
-    EmailField,
-    BooleanField,
-    FloatField,
-    TextField,
-    ForeignKey,
-    DateField,
-)
 from django.http import JsonResponse
-from pydantic import BaseModel, create_model, EmailStr, Field
+from pydantic import (
+    BaseModel,
+    create_model,
+    Field,
+)
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
@@ -25,6 +19,8 @@ from .utils import (
     get_model_fields_with_properties,
     is_fields_exist,
     PydanticConfigV1,
+    FIELD_VALIDATION_MAP,
+    DJANGO_TO_PYDANTIC_TYPE_MAP,
 )
 
 DEFAULT_APPS = {
@@ -34,18 +30,6 @@ DEFAULT_APPS = {
     "django.contrib.sessions": True,
     "django.contrib.messages": True,
     "django.contrib.staticfiles": True,
-}
-
-# Define a dictionary to map Django fields to Pydantic types
-DJANGO_TO_PYDANTIC_TYPE_MAP = {
-    CharField: str,
-    IntegerField: int,
-    EmailField: EmailStr,
-    BooleanField: bool,
-    FloatField: float,
-    TextField: str,
-    ForeignKey: int,
-    DateField: str,
 }
 
 
@@ -118,8 +102,8 @@ def get_model_config_schema(model):
     Converts a Django ORM model into a Pydantic model object.
 
     The resulting Pydantic model includes fields with their corresponding
-    types, `max_length` constraints (if applicable), and an indication of
-    whether fields are required.
+    types, `max_length`, `default` constraints (if applicable), and an
+    indication of whether fields are required.
 
     :param model: Django model class to convert into a Pydantic model.
     """
@@ -132,49 +116,42 @@ def get_model_config_schema(model):
         if field1.name == "id":
             continue
 
-        field_type = None
-        is_optional = field1.null or field1.blank
         field_constraints = {}
 
-        # Check if the field type exists in the mapping dictionary
-        for django_field, pydantic_type in DJANGO_TO_PYDANTIC_TYPE_MAP.items():
-            if isinstance(field1, django_field):
-                if isinstance(field1, ForeignKey):
-                    related_model_pk_type = int
-                    field_type = (
-                        (
-                            Optional[related_model_pk_type]
-                            if is_optional
-                            else related_model_pk_type
-                        ),
-                    )
-                else:
-                    field_type = (
-                        (
-                            Optional[pydantic_type]
-                            if is_optional
-                            else pydantic_type
-                        ),
-                    )
+        is_optional = field1.null or field1.blank or field1.has_default()
+        default_value = field1.get_default() if field1.has_default() else None
 
-                if (
-                    hasattr(field1, "max_length")
-                    and field1.max_length is not None
-                ):
-                    field_constraints["max_length"] = field1.max_length
-                break
+        django_field_type = field1.get_internal_type()
 
-        if field_type:
-            if is_optional:
-                model_fields[field1.column] = (
-                    field_type[0],  # Optional type
-                    Field(None, **field_constraints),
-                )
-            else:
-                model_fields[field1.column] = (
-                    field_type[0],  # Required type
-                    Field(..., **field_constraints),
-                )
+        # Retrieve the Pydantic type from the mapping
+        if not DJANGO_TO_PYDANTIC_TYPE_MAP.get(django_field_type):
+            raise ValueError(
+                {
+                    "error": f"Field type mapping not found for: {field1.name}",
+                    "code": "DGA-S011",
+                }
+            )
+
+        mapped_type = DJANGO_TO_PYDANTIC_TYPE_MAP.get(django_field_type)
+
+        if django_field_type == "ForeignKey":
+            related_model_pk_type = int  # Assuming int PK for related fields
+            field_type = (
+                Optional[related_model_pk_type]
+                if is_optional
+                else related_model_pk_type
+            )
+        else:
+            field_type = Optional[mapped_type] if is_optional else mapped_type
+
+        # Assigning attribute `max_length` if they exist for the field
+        if hasattr(field1, "max_length"):
+            field_constraints["max_length"] = field1.max_length
+
+        model_fields[field1.column] = (
+            field_type,
+            Field(default=default_value, **field_constraints),
+        )
 
     # Dynamically create a Pydantic model
     pydantic_model = create_model(
@@ -354,6 +331,22 @@ def handle_save_input(model, record_id, save_input):
                 {"error": f"Extra field {results}", "code": "DGA-S009"}
             )
 
+        for field_name, value in list(saveInput.items()):
+            model_meta = getattr(model, "_meta", None)
+            model_field = model_meta.get_field(field_name)
+
+            if (
+                model_field.has_default()
+                and not value
+                and not model_field.null
+            ):
+                saveInput.pop(field_name)
+
+            try:
+                model_field.get_prep_value(value)
+            except Exception as e:
+                raise ValueError({"error": e, "code": "DGA-S010"})
+
         # Validate against schema
         try:
             model_schema_pydantic_model(**saveInput)
@@ -389,8 +382,8 @@ def handle_save_input(model, record_id, save_input):
                     "code": "DGA-S007",
                 }
             )
-        except Exception:
-            raise ValueError({"error": "Invalid ID", "code": "DGA-S008"})
+        except Exception as e:
+            raise ValueError({"error": e.args[0], "code": "DGA-S008"})
 
     message = list(set(messages))
     return instances, message
