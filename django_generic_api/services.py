@@ -4,6 +4,7 @@ from typing import Dict, Optional
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from pydantic import (
     BaseModel,
@@ -18,10 +19,8 @@ from .utils import (
     get_model_fields_with_properties,
     is_fields_exist,
     PydanticConfigV1,
-    FIELD_VALIDATION_MAP,
     DJANGO_TO_PYDANTIC_TYPE_MAP,
 )
-
 
 DEFAULT_APPS = {
     "django.contrib.admin": True,
@@ -164,6 +163,15 @@ def get_model_config_schema(model):
 
 
 def check_field_value(model, field1, value):
+    """
+    Check if the user given field exists in the model.
+    Retrieve the field's properties (such as null, blank, max_length, default).
+    Verify if the field accepts null as a valid input.
+    Confirm that the value is suitable for insertion into the field.
+
+    param : model, fields, value
+    return : True/False
+    """
     is_fields_exist(model, [field1])
 
     model_fields = get_model_fields_with_properties(model, [field1])
@@ -171,18 +179,15 @@ def check_field_value(model, field1, value):
     if field_properties.get("null") and value[0] is None:
         return True
 
-    field_type = field_properties["type"]
-    validation_func = FIELD_VALIDATION_MAP.get(field_type)
-    if not validation_func:
-        return True
+    model_meta = getattr(model, "_meta")
+    field_instance = model_meta.get_field(field1)
 
-    is_valid_value = None
     for value_i in value:
-        if not is_valid_value:
-            is_valid_value = validation_func(value_i)
-        else:
-            is_valid_value *= validation_func(value_i)
-    return is_valid_value
+        try:
+            field_instance.get_prep_value(value_i)
+        except (ValueError, ValidationError):
+            return False
+    return True
 
 
 def fetch_data(
@@ -205,7 +210,7 @@ def fetch_data(
     :param filters: Dictionary of filters for the query
     :param fields1: List of fields to return
     """
-    # info: validate field names from payload against config
+    # info: validate field names from payload against model fields
     is_fields_exist(model, fields1)
 
     # sort field validation
@@ -261,7 +266,10 @@ def apply_filters(model, filters):
 
         if not check_field_value(model, field_name, value):
             raise ValueError(
-                {"error": f"Invalid data: {value}", "code": "DGA-S004"}
+                {
+                    "error": f"Invalid data: {value} for {field_name}",
+                    "code": "DGA-S004",
+                }
             )
 
         condition1 = None

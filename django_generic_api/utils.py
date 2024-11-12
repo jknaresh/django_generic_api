@@ -75,7 +75,7 @@ def make_permission_str(model, action):
     return permission
 
 
-def get_model_fields_with_properties(model, input_fields):
+def get_model_fields_with_properties(model, field_list=None):
     """
     Returns a dictionary where the keys are field names and the values are a
     dictionary
@@ -85,23 +85,19 @@ def get_model_fields_with_properties(model, input_fields):
     :return: dict
     """
     model_meta = getattr(model, "_meta")
-    field_obj = model_meta.fields
-    # todo: as per input read only those fields
-    required_attributes = ["null", "blank", "max_length", "default"]
+
+    if field_list:
+        # info: read only user given fields in filters.name
+        fields = [model_meta.get_field(fld) for fld in field_list]
+    else:
+        fields = model_meta.fields
+
     field_dict = {}
-    field_properties = {}
 
-    # todo: separate function to get field properties
-    for field1 in field_obj:
-        # collect properties of fields.
-        field_properties["type"] = field1.get_internal_type()
-
-        for attr in required_attributes:
-            if hasattr(field1, attr):
-                field_properties[attr] = getattr(field1, attr)
-
-        field_dict[field1.attname] = field_properties
-        field_properties = {}
+    # info: Retrieve field properties of each field
+    for field1 in fields:
+        field_properties = get_field_properties(field1)
+        field_dict[field1.name] = field_properties
 
     return field_dict
 
@@ -109,9 +105,10 @@ def get_model_fields_with_properties(model, input_fields):
 def is_fields_exist(model, fields):
     valid_fields = []
     for field in fields:
-        if "__" not in field:
+        if not field.__contains__("__"):
             valid_fields.append(field)
         else:
+            # Validate if the fk field exists
             fk_field, related_field = field.split("__", 1)
             try:
                 model_meta = getattr(model, "_meta")  # data of model
@@ -121,13 +118,15 @@ def is_fields_exist(model, fields):
                 related_model_meta.get_field(related_field)
             except FieldDoesNotExist:
                 raise ValueError(
-                    {"error": f"Invalid field {field}", "code": "DGA-U001"}
+                    {
+                        "error": f"Invalid foreign field {field}",
+                        "code": "DGA-U001",
+                    }
                 )
 
-    model_fields = get_model_fields_with_properties(model, valid_fields)
+    model_fields = get_model_fields_with_properties(model)
     result = set(valid_fields) - set(model_fields.keys())
     if len(result) > 0:
-        # todo: if any foreign key validate field.
         raise ValueError(
             {"error": f"Extra field {result}", "code": "DGA-U002"}
         )
@@ -152,43 +151,6 @@ def store_user_ip(user_id, user_ip):
             writer.writerow(["user_id", "user_ip"])
 
         writer.writerow([user_id, user_ip])
-
-
-def validate_integer_field(value):
-    return int(value) if value.isdigit() else False
-
-
-def validate_bool_field(value):
-    return value in [
-        "True",
-        "False",
-        "true",
-        "false",
-        "0",
-        "1",
-        True,
-        False,
-        0,
-        1,
-    ]
-
-
-def validate_char_field(value):
-    try:
-        if isinstance(value, str):
-            value.encode("utf-8")
-            return True
-        else:
-            return False
-    except UnicodeEncodeError:
-        return False
-
-
-FIELD_VALIDATION_MAP = {
-    "IntegerField": validate_integer_field,
-    "BooleanField": validate_bool_field,
-    "CharField": validate_char_field,
-}
 
 
 def custom_exception_handler(exc, context):
@@ -216,3 +178,24 @@ def is_valid_domain(domain):
             return True
 
     return False
+
+
+def get_field_properties(field1):
+    """
+    Retrieve field properties like 'type','null','blank',
+    'max_length', 'default'
+
+    param : Django field instance
+    return : dict with field properties
+    """
+    field_properties = {
+        "type": field1.get_internal_type(),
+        "null": field1.null,
+        "blank": field1.blank,
+    }
+    if getattr(field1, "max_length", None):
+        field_properties["max_length"] = getattr(field1, "max_length", None)
+    if getattr(field1, "default", None):
+        field_properties["default"] = field1.get_default()
+
+    return field_properties
