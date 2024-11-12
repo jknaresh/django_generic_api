@@ -3,17 +3,60 @@ import os
 import time
 
 from django.core.exceptions import FieldDoesNotExist
-from pydantic import ConfigDict
+from pydantic import ConfigDict, EmailStr, AnyUrl, IPvAnyAddress
+import datetime
 from rest_framework.exceptions import Throttled
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 import mmap
+from uuid import UUID
+from decimal import Decimal
+from typing import Any, List
 
 actions = {
     "fetch": "view",
     "save": "add",
     "edit": "change",
     "remove": "delete",
+}
+
+# Define a dictionary to map Django fields to Pydantic types
+DJANGO_TO_PYDANTIC_TYPE_MAP = {
+    "CharField": str,
+    "IntegerField": int,
+    "EmailField": EmailStr,
+    "BooleanField": bool,
+    "FloatField": float,
+    "TextField": str,
+    "ForeignKey": int,
+    "DateField": datetime.date,
+    "PositiveBigIntegerField": int,
+    "CommaSeparatedIntegerField": str,
+    "ImageField": str,
+    "BigAutoField": int,
+    "SlugField": str,
+    "FileField": str,
+    "FilePathField": str,
+    "URLField": AnyUrl,
+    "AutoField": int,
+    "UUIDField": UUID,
+    "PositiveIntegerField": int,
+    "PositiveSmallIntegerField": int,
+    "SmallIntegerField": int,
+    "BigIntegerField": int,
+    "BinaryField": bytes,
+    "IPAddressField": IPvAnyAddress,
+    "GenericIPAddressField": IPvAnyAddress,
+    "DecimalField": Decimal,
+    "NullBooleanField": bool,
+    "DurationField": datetime.timedelta,
+    "DateTimeField": datetime.datetime,
+    "TimeField": datetime.time,
+    "SmallAutoField": int,
+    "JSONField": dict,
+    "Field": Any,
+    "ManyToManyField": List[int],
+    "OneToOneField": int,
 }
 
 
