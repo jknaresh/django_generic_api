@@ -88,7 +88,7 @@ def get_model_fields_with_properties(model, field_list=None):
 
     if field_list:
         # info: read only user given fields in filters.name
-        fields = [model_meta.get_field(field_list[0])]
+        fields = [model_meta.get_field(fld) for fld in field_list]
     else:
         fields = model_meta.fields
 
@@ -192,12 +192,9 @@ def get_field_properties(field1):
         "type": field1.get_internal_type(),
         "null": field1.null,
         "blank": field1.blank,
-        "max_length": (
-            getattr(field1, "max_length")
-            if hasattr(field1, "max_length")
-            else None
-        ),
-        "default": getattr(field1, "default", None),
+        "default": field1.get_default() if field1.has_default() else None,
     }
+    if getattr(field1, "max_length", None):
+        field_properties["max_length"] = getattr(field1, "max_length", None)
 
     return field_properties

@@ -19,7 +19,6 @@ from .utils import (
     get_model_fields_with_properties,
     is_fields_exist,
     PydanticConfigV1,
-    FIELD_VALIDATION_MAP,
     DJANGO_TO_PYDANTIC_TYPE_MAP,
 )
 
@@ -264,20 +263,6 @@ def apply_filters(model, filters):
         field_name = filter_item.name
         value = filter_item.value
         operation = filter_item.operation
-
-        UNCOUNTABLE_FIELDS = [
-            "id",
-            "inserted_timestamp",
-            "update_timestamp",
-            "end_timestamp",
-        ]
-        if field_name in UNCOUNTABLE_FIELDS:
-            raise ValueError(
-                {
-                    "error": f"Filtering by the field '{field_name}' is not permitted.",
-                    "code": "DGA-S010",
-                }
-            )
 
         if not check_field_value(model, field_name, value):
             raise ValueError(
