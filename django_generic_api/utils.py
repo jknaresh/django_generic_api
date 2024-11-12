@@ -192,9 +192,10 @@ def get_field_properties(field1):
         "type": field1.get_internal_type(),
         "null": field1.null,
         "blank": field1.blank,
-        "default": field1.get_default() if field1.has_default() else None,
     }
     if getattr(field1, "max_length", None):
         field_properties["max_length"] = getattr(field1, "max_length", None)
+    if getattr(field1, "default", None):
+        field_properties["default"] = field1.get_default()
 
     return field_properties
