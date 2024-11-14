@@ -1,14 +1,9 @@
 from django_generic_api.django_generic_api.services import generate_token
-from django_generic_api.django_generic_api.utils import registration_token
 from django.contrib.auth.models import Permission, User
 import pytest
 from model_bakery import baker
 from rest_framework.test import APIClient
 from api_app.models import Customer
-import pdb
-from pydantic import SecretStr
-from django.contrib.auth.hashers import make_password
-from urllib.parse import quote, unquote
 
 
 @pytest.fixture
@@ -16,12 +11,13 @@ def all_perm_user():
     """
     User with add and view perm.
     """
-    user = baker.make(
-        User, username="allpermuser@gmail.com", password="123456"
-    )
+    user = baker.make(User, username="allpermuser@gmail.com")
+    user.set_password("123456")
+    user.save()
+
     perm1 = Permission.objects.get(codename="add_customer")
     perm2 = Permission.objects.get(codename="view_customer")
-    user.groups.add(perm1, perm2)
+    user.user_permissions.add(perm1, perm2)
     return user
 
 
@@ -30,13 +26,13 @@ def save_perm_user():
     """
     User with add perm.
     """
-    user = baker.make(
-        User, username="addpermuser@gmail.com", password="123456"
-    )
+    user = baker.make(User, username="addpermuser@gmail.com")
+    user.set_password("123456")
+    user.save()
+
     perm1 = Permission.objects.get(codename="add_customer")
     perm2 = Permission.objects.get(codename="change_customer")
-    user.user_permissions.add(perm1,perm2)
-    user.save()
+    user.user_permissions.add(perm1, perm2)
     return user
 
 
@@ -45,12 +41,12 @@ def view_perm_user():
     """
     User with view perm.
     """
-    user = baker.make(
-        User, username="viewpermuser@gmail.com", password="123456"
-    )
+    user = baker.make(User, username="viewpermuser@gmail.com")
+    user.set_password("123456")
+    user.save()
+
     perm = Permission.objects.get(codename="view_customer")
     user.user_permissions.add(perm)
-    user.save()
     return user
 
 
@@ -59,7 +55,10 @@ def no_perm_user():
     """
     User with no perm.
     """
-    user = baker.make(User, username="nopermuser@gmail.com", password="123456")
+    user = baker.make(User, username="nopermuser@gmail.com")
+    user.set_password("123456")
+    user.save()
+
     return user
 
 
@@ -134,17 +133,20 @@ def login_user(db):
     login_user = baker.make(
         User,
         username="user@gmail.com",
-        password="123456",
     )
+    login_user.set_password("123456")
+    login_user.is_active = True
+    login_user.save()
+
     return login_user
 
 
 @pytest.fixture
-def inactive_user_wrong_token(db):
-    user = baker.make(User, username="inactive@gmail.com", password="123456")
+def email_activate_inactive_user_id(db):
+    user = baker.make(User, username="inactive@gmail.com")
+    user.set_password("123456")
     user.is_active = False
-    token = registration_token(user.id)
-    encoded_token = quote(token)
-    wrong_token = encoded_token + "abc"
+    user.save()
+    user_id = user.id
 
-    return wrong_token
+    return user_id

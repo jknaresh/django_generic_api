@@ -12,6 +12,7 @@ import mmap
 from uuid import UUID
 from decimal import Decimal
 from typing import Any, List
+from pathlib import Path
 
 actions = {
     "fetch": "view",
@@ -168,8 +169,8 @@ def custom_exception_handler(exc, context):
 
 
 def is_valid_domain(domain):
-
-    domain_file = "valid_domains.txt"
+    base_path = Path(__file__).resolve().parent
+    domain_file = base_path / "valid_domains.txt"
     domain_bytes = domain.lower().encode("utf-8")
 
     with open(domain_file, "rb", 0) as file:
