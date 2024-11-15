@@ -4,9 +4,11 @@
 
 import pytest
 
+
 @pytest.fixture
 def sample_string():
     return "Hello World!"
+
 
 @pytest.fixture
 def sample_dict():
