@@ -155,3 +155,55 @@ class TestLoginAPI:
         assert response.status_code == 400
         assert response_data["error"] == "Input should be a valid string"
         assert response_data["code"] == "DGA-V010"
+
+
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "login_payload, expected_status, expected_keys, expected_error, expected_code",
+    [
+        # Test case: Successful login
+        (
+            {
+                "payload": {
+                    "variables": {
+                        "email": "user@gmail.com",
+                        "password": "123456",
+                    }
+                }
+            },
+            200,
+            ["refresh", "access"],
+            None,
+            None,
+        ),
+        # Test case: Missing field in payload
+        (
+            {
+                "payload": {
+                    "variables": {
+                        "password": "123456",
+                    }
+                }
+            },
+            400,
+            [],
+            "Field required",
+            "DGA-V010",
+        ),
+    ],
+)
+def test_login(api_client, login_user, login_payload, expected_status, expected_keys, expected_error, expected_code):
+    response = api_client.post("/api/login/", login_payload, format="json")
+    response_data = json.loads(response.content.decode("utf-8"))
+
+    assert response.status_code == expected_status
+
+    if expected_keys:
+        for key in expected_keys:
+            assert key in response_data["data"][0]
+
+    if expected_error:
+        assert response_data["error"] == expected_error
+        assert response_data["code"] == expected_code

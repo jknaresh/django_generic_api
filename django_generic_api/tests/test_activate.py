@@ -99,3 +99,53 @@ class TestAccountActivateAPI:
             response_data["message"]
             == "Your account has been activated successfully."
         )
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "setup_user, token_modifier, expected_status, expected_message, expected_error, expected_code",
+    [
+        # Test case: User account is activated successfully
+        (
+                "email_activate_inactive_user_id",
+                lambda user_id: f"{user_id}:{int(time.time())}",
+                201,
+                "Your account has been activated successfully.",
+                None,
+                None,
+        ),
+        # Test case: User does not exist
+        (
+                "email_activate_inactive_user_id",
+                lambda user_id: f"{user_id}:{int(time.time())}",
+                400,
+                None,
+                "User not found.",
+                "DGA-V019",
+        ),
+    ],
+)
+def test_activate_user(
+        request, api_client, setup_user, token_modifier, expected_status,
+        expected_message, expected_error, expected_code
+):
+    # Retrieve or prepare user ID based on the setup fixture
+    user_id = request.getfixturevalue(setup_user)
+
+    if expected_error == "User not found.":
+        User.objects.filter(id=user_id).delete()  # Simulate user deletion
+
+    token = token_modifier(user_id)
+
+    response = api_client.get(f"/api/activate/{token}/", format="json")
+    response_data = json.loads(response.content.decode("utf-8"))
+
+    assert response.status_code == expected_status
+
+    if expected_message:
+        assert response_data["message"] == expected_message
+    if expected_error:
+        assert response_data["error"] == expected_error
+        assert response_data["code"] == expected_code
+
+

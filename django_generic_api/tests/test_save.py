@@ -760,3 +760,86 @@ class TestGenericSaveAPI:
 
         updated_data = Customer.objects.get(id=data_id)
         assert updated_data.name == "ABCD"
+
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "payload, expected_status, expected_error, expected_code, expected_message, expected_data",
+    [
+        # Test missing required fields (modelName is missing)
+        (
+            {
+                "payload": {
+                    "variables": {
+                        "id": None,
+                        "saveInput": [
+                            {
+                                "name": "test_user1",
+                                "dob": "2024-11-04",
+                                "email": "ltest1@mail.com",
+                                "phone_no": "012345",
+                                "address": "HYD",
+                                "pin_code": "100",
+                                "inserted_timestamp": "2024-11-10 11:11:11",
+                                "status": "123",
+                            }
+                        ],
+                    }
+                }
+            },
+            400,
+            "Field required",
+            "DGA-V002",
+            None,
+            None,
+        ),
+        # Test creating a record successfully
+        (
+            {
+                "payload": {
+                    "variables": {
+                        "modelName": "Customer",
+                        "id": None,
+                        "saveInput": [
+                            {
+                                "name": "test_user1",
+                                "dob": "2020-01-21",
+                                "email": "ltest1@mail.com",
+                                "phone_no": "012345",
+                                "address": "HYD",
+                                "pin_code": "100",
+                                "status": "123",
+                            }
+                        ],
+                    }
+                }
+            },
+            201,
+            None,
+            None,
+            ["Record created successfully."],
+            [{"id": [1]}],
+        ),
+    ],
+)
+def test_save_api(api_client, add_perm_token, payload, expected_status, expected_error, expected_code, expected_message, expected_data):
+    headers = {"Authorization": f"Bearer {add_perm_token}"}
+
+    response = api_client.post(
+        "/api/save/",
+        payload,
+        format="json",
+        headers=headers,
+    )
+    response_data = json.loads(response.content.decode("utf-8"))
+
+    assert response.status_code == expected_status
+
+    if expected_error:
+        assert response_data["error"] == expected_error
+        assert response_data["code"] == expected_code
+    if expected_message:
+        assert response_data["message"] == expected_message
+    if expected_data:
+        assert response_data["data"] == expected_data

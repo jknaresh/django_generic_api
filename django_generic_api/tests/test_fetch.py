@@ -1129,3 +1129,79 @@ class TestGenericFetchAPI:
             == "Authentication failed: Token is invalid or expired"
         )
         assert response_data["code"] == "DGA-S003"
+
+
+@pytest.mark.parametrize(
+    "fetch_payload, expected_status, expected_response",
+    [
+        # Positive Scenario
+        (
+            {
+                "payload": {
+                    "variables": {
+                        "modelName": "customer",
+                        "fields": ["name", "email"],
+                        "filters": [
+                            {
+                                "operator": "eq",
+                                "name": "phone_no",
+                                "value": ["123456"],
+                            }
+                        ],
+                        "pageNumber": 1,
+                        "pageSize": 10,
+                        "sort": {"field": "name", "order_by": "desc"},
+                        "distinct": True,
+                    }
+                }
+            },
+            200,
+            {
+                "total": 1,
+                "data": [{"name": "test_user1", "email": "user1@gmail.com"}],
+            },
+        ),
+        # Missing Required Field Scenario
+        (
+            {
+                "payload": {
+                    "variables": {
+                        "modelName": "customer",
+                        "filters": [
+                            {
+                                "operator": "eq",
+                                "name": "phone_no",
+                                "value": ["123456"],
+                            }
+                        ],
+                        "pageNumber": 1,
+                        "pageSize": 10,
+                        "sort": {"field": "name", "order_by": "desc"},
+                    }
+                }
+            },
+            400,
+            {
+                "error": "Field required('fields',)",
+                "code": "DGA-V006",
+            },
+        ),
+    ],
+)
+
+@pytest.mark.django_db
+class TestFetchScenarios:
+    def test_fetch(self, fetch_data_1, fetch_payload, expected_status,
+                   expected_response, api_client, view_perm_token):
+        headers = {"Authorization": f"Bearer {view_perm_token}"}
+
+        response = api_client.post(
+            "/api/fetch/",
+            fetch_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+
+        assert response.status_code == expected_status
+        assert response_data == expected_response
