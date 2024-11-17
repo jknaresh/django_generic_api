@@ -1188,11 +1188,17 @@ class TestGenericFetchAPI:
         ),
     ],
 )
-
 @pytest.mark.django_db
 class TestFetchScenarios:
-    def test_fetch(self, fetch_data_1, fetch_payload, expected_status,
-                   expected_response, api_client, view_perm_token):
+    def test_fetch(
+        self,
+        fetch_data_1,
+        fetch_payload,
+        expected_status,
+        expected_response,
+        api_client,
+        view_perm_token,
+    ):
         headers = {"Authorization": f"Bearer {view_perm_token}"}
 
         response = api_client.post(

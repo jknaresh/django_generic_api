@@ -762,7 +762,6 @@ class TestGenericSaveAPI:
         assert updated_data.name == "ABCD"
 
 
-
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "payload, expected_status, expected_error, expected_code, expected_message, expected_data",
@@ -823,7 +822,16 @@ class TestGenericSaveAPI:
         ),
     ],
 )
-def test_save_api(api_client, add_perm_token, payload, expected_status, expected_error, expected_code, expected_message, expected_data):
+def test_save_api(
+    api_client,
+    add_perm_token,
+    payload,
+    expected_status,
+    expected_error,
+    expected_code,
+    expected_message,
+    expected_data,
+):
     headers = {"Authorization": f"Bearer {add_perm_token}"}
 
     response = api_client.post(

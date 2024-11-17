@@ -157,8 +157,6 @@ class TestLoginAPI:
         assert response_data["code"] == "DGA-V010"
 
 
-
-
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "login_payload, expected_status, expected_keys, expected_error, expected_code",
@@ -194,7 +192,15 @@ class TestLoginAPI:
         ),
     ],
 )
-def test_login(api_client, login_user, login_payload, expected_status, expected_keys, expected_error, expected_code):
+def test_login(
+    api_client,
+    login_user,
+    login_payload,
+    expected_status,
+    expected_keys,
+    expected_error,
+    expected_code,
+):
     response = api_client.post("/api/login/", login_payload, format="json")
     response_data = json.loads(response.content.decode("utf-8"))
 

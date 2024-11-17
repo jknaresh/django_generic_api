@@ -107,27 +107,33 @@ class TestAccountActivateAPI:
     [
         # Test case: User account is activated successfully
         (
-                "email_activate_inactive_user_id",
-                lambda user_id: f"{user_id}:{int(time.time())}",
-                201,
-                "Your account has been activated successfully.",
-                None,
-                None,
+            "email_activate_inactive_user_id",
+            lambda user_id: f"{user_id}:{int(time.time())}",
+            201,
+            "Your account has been activated successfully.",
+            None,
+            None,
         ),
         # Test case: User does not exist
         (
-                "email_activate_inactive_user_id",
-                lambda user_id: f"{user_id}:{int(time.time())}",
-                400,
-                None,
-                "User not found.",
-                "DGA-V019",
+            "email_activate_inactive_user_id",
+            lambda user_id: f"{user_id}:{int(time.time())}",
+            400,
+            None,
+            "User not found.",
+            "DGA-V019",
         ),
     ],
 )
 def test_activate_user(
-        request, api_client, setup_user, token_modifier, expected_status,
-        expected_message, expected_error, expected_code
+    request,
+    api_client,
+    setup_user,
+    token_modifier,
+    expected_status,
+    expected_message,
+    expected_error,
+    expected_code,
 ):
     # Retrieve or prepare user ID based on the setup fixture
     user_id = request.getfixturevalue(setup_user)
@@ -147,5 +153,3 @@ def test_activate_user(
     if expected_error:
         assert response_data["error"] == expected_error
         assert response_data["code"] == expected_code
-
-
