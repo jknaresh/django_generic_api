@@ -1,4 +1,4 @@
-from django_generic_api.django_generic_api.services import generate_token
+from django_generic_api.services import generate_token
 from django.contrib.auth.models import Permission, User
 import pytest
 from model_bakery import baker

@@ -3,7 +3,7 @@ import pytest
 from rest_framework.test import APIClient
 from api_app.models import Customer
 import json
-from test_support import (
+from fixtures import (
     api_client,
     fetch_data_1,
     view_perm_token,
