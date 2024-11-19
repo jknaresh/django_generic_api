@@ -13,6 +13,7 @@ from uuid import UUID
 from decimal import Decimal
 from typing import Any, List
 from pathlib import Path
+import base64
 
 actions = {
     "fetch": "view",
@@ -137,7 +138,9 @@ def is_fields_exist(model, fields):
 def registration_token(user_id):
     timestamp = int(time.time())
     token = f"{user_id}:{timestamp}"
-    return token
+    encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
+
+    return encoded_token
 
 
 def store_user_ip(user_id, user_ip):

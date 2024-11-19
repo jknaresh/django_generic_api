@@ -1,30 +1,27 @@
 import pytest
 from rest_framework.test import APIClient
 import json
-from test_support import (
-    api_client,
-    email_activate_inactive_user_id,
-)
+from test_support import api_client, inactive_user_id, non_existing_user
 import time
 from django.contrib.auth.models import User
 from unittest import mock
 from rest_framework_simplejwt.tokens import AccessToken
+import base64
 
 
 @pytest.mark.django_db
 class TestAccountActivateAPI:
 
-    def test_expired_activation_link(
-        self, api_client, email_activate_inactive_user_id
-    ):
+    def test_expired_activation_link(self, api_client, inactive_user_id):
         """
         User's activation link is expired.
         """
         timestamp = int(time.time()) - (25 * 60 * 60)  # 25 hours old timestamp
-        token = f"{email_activate_inactive_user_id}:{timestamp}"
+        token = f"{inactive_user_id}:{timestamp}"
+        encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
 
         response = api_client.get(
-            f"/api/activate/{token}/",
+            f"/api/activate/{encoded_token}/",
             format="json",
         )
 
@@ -34,22 +31,21 @@ class TestAccountActivateAPI:
         assert response_data["error"] == "The activation link has expired."
         assert response_data["code"] == "DGA-V018"
 
-    def test_email_is_already_active(
-        self, api_client, email_activate_inactive_user_id
-    ):
+    def test_email_is_already_active(self, api_client, inactive_user_id):
         """
         User is already active.
         """
 
-        user = User.objects.get(id=email_activate_inactive_user_id)
+        user = User.objects.get(id=inactive_user_id)
         user.is_active = True
         user.save()
 
         timestamp = int(time.time())
         token = f"{user.id}:{timestamp}"
+        encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
 
         response = api_client.get(
-            f"/api/activate/{token}/",
+            f"/api/activate/{encoded_token}/",
             format="json",
         )
 
@@ -57,20 +53,19 @@ class TestAccountActivateAPI:
         assert response.status_code == 200
         assert response_data["message"] == "Account is already active."
 
-    def test_user_does_not_exist(
-        self, api_client, email_activate_inactive_user_id
-    ):
+    def test_user_does_not_exist(self, api_client, inactive_user_id):
         """
         User id does not exist
         """
-        user = User.objects.get(id=email_activate_inactive_user_id)
+        user = User.objects.get(id=inactive_user_id)
 
         timestamp = int(time.time())
         token = f"{user.id}:{timestamp}"
+        encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
         user.delete()
 
         response = api_client.get(
-            f"/api/activate/{token}/",
+            f"/api/activate/{encoded_token}/",
             format="json",
         )
 
@@ -79,17 +74,16 @@ class TestAccountActivateAPI:
         assert response_data["error"] == "User not found."
         assert response_data["code"] == "DGA-V019"
 
-    def test_user_activated_success(
-        self, api_client, email_activate_inactive_user_id
-    ):
+    def test_user_activated_success(self, api_client, inactive_user_id):
         """
         User account is activated successfully.
         """
         timestamp = int(time.time())
-        token = f"{email_activate_inactive_user_id}:{timestamp}"
+        token = f"{inactive_user_id}:{timestamp}"
+        encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
 
         response = api_client.get(
-            f"/api/activate/{token}/",
+            f"/api/activate/{encoded_token}/",
             format="json",
         )
 
@@ -107,7 +101,7 @@ class TestAccountActivateAPI:
     [
         # Test case: User account is activated successfully
         (
-            "email_activate_inactive_user_id",
+            "inactive_user_id",
             201,
             "Your account has been activated successfully.",
             None,
@@ -115,7 +109,7 @@ class TestAccountActivateAPI:
         ),
         # Test case: User does not exist
         (
-            "email_activate_inactive_user_id",
+            "non_existing_user",
             400,
             None,
             "User not found.",
@@ -135,12 +129,10 @@ def test_activate_user(
     # Retrieve or prepare user ID based on the setup fixture
     user_id = request.getfixturevalue(setup_user)
 
-    if expected_error == "User not found.":
-        User.objects.filter(id=user_id).delete()  # Simulate user deletion
-
     token = f"{user_id}:{int(time.time())}"
+    encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
 
-    response = api_client.get(f"/api/activate/{token}/", format="json")
+    response = api_client.get(f"/api/activate/{encoded_token}/", format="json")
     response_data = json.loads(response.content.decode("utf-8"))
 
     assert response.status_code == expected_status

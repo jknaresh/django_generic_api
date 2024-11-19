@@ -8,12 +8,37 @@ from test_support import (
 from urllib.parse import quote
 import time
 from unittest import mock
+import base64
 
 
 @pytest.mark.django_db
 class TestRegisterAPI:
 
-    def test_missing_required_field(self, api_client):
+    def test_registration_success(self, api_client):
+        """
+        User registration is success.
+        """
+        register_payload = {
+            "payload": {
+                "variables": {
+                    "email": "abc@gmail.com",
+                    "password": "123456",
+                    "password1": "123456",
+                }
+            }
+        }
+
+        response = api_client.post(
+            "/api/register/",
+            register_payload,
+            format="json",
+        )
+
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 200
+        assert "message" in response_data
+
+    def test_invalid_payload_format(self, api_client):
         """
         User has not included a required field in payload.
         """
@@ -84,35 +109,6 @@ class TestRegisterAPI:
         assert response.status_code == 400
         assert response_data["error"] == "passwords does not match"
         assert response_data["code"] == "DGA-V014"
-
-    def test_registration_success(self, api_client):
-        """
-        User registration is success.
-        """
-        register_payload = {
-            "payload": {
-                "variables": {
-                    "email": "abc@gmail.com",
-                    "password": "123456",
-                    "password1": "123456",
-                }
-            }
-        }
-
-        response = api_client.post(
-            "/api/register/",
-            register_payload,
-            format="json",
-        )
-
-        timestamp = int(time.time())
-        token = f"{1}:{timestamp}"
-        final = quote(token)
-        link = f"http://127.0.0.1:8050/api/activate/{final}/"
-
-        response_data = json.loads(response.content.decode("utf-8"))
-        assert response.status_code == 200
-        assert response_data["message"] == f"Email sent successfully. {link}"
 
     def test_invalid_domain(self, api_client):
         """

@@ -31,13 +31,14 @@ class TestLoginAPI:
         assert "refresh" in response_data["data"][0]
         assert "access" in response_data["data"][0]
 
-    def test_missing_field_in_payload(self, api_client):
+    def test_missing_email_property(self, api_client):
         """
         User has not passed a required field in payload.
         """
         login_payload = {
             "payload": {
                 "variables": {
+                    # missing email
                     "password": "123456",
                 }
             }
@@ -53,7 +54,7 @@ class TestLoginAPI:
         assert response_data["error"] == "Field required"
         assert response_data["code"] == "DGA-V010"
 
-    def test_extra_field_in_payload_format(self, api_client):
+    def test_invalid_payload_format(self, api_client):
         """
         User has given an extra field in payload format.
         """
@@ -99,7 +100,7 @@ class TestLoginAPI:
         assert response_data["error"] == "Username not found"
         assert response_data["code"] == "DGA-V011"
 
-    def test_wrong_password(self, api_client, login_user):
+    def test_invalid_password(self, api_client, login_user):
         """
         user has given wrong password
         """
@@ -139,7 +140,7 @@ class TestLoginAPI:
         assert response_data["error"] == "Token generation not allowed."
         assert response_data["code"] == "DGA-V021"
 
-    def test_login_credentials_invalid_datatype(self, api_client):
+    def test_email_invalid_datatype(self, api_client):
         """
         User sends credentials with wrong data type.
         """

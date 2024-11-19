@@ -125,6 +125,16 @@ def fetch_data_1(db):
         pin_code="100",
         status="alive",
     )
+    customer = baker.make(
+        Customer,
+        name="test_user2",
+        dob="2003-04-08",
+        email="user2@gmail.com",
+        phone_no="456789",
+        address="DEL",
+        pin_code="200",
+        status="alive",
+    )
     return customer
 
 
@@ -142,11 +152,23 @@ def login_user(db):
 
 
 @pytest.fixture
-def email_activate_inactive_user_id(db):
+def inactive_user_id(db):
     user = baker.make(User, username="inactive@gmail.com")
     user.set_password("123456")
     user.is_active = False
     user.save()
     user_id = user.id
+
+    return user_id
+
+
+@pytest.fixture
+def non_existing_user(db):
+    user = baker.make(User, username="non_existing_user@gmail.com")
+    user.set_password("123456")
+    user.is_active = False
+    user.save()
+    user_id = user.id
+    user.delete()
 
     return user_id

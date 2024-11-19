@@ -17,7 +17,83 @@ from rest_framework_simplejwt.tokens import AccessToken
 @pytest.mark.django_db
 class TestGenericSaveAPI:
 
-    def test_missing_required_fields(self, api_client, add_perm_token):
+    def test_create_record(self, api_client, add_perm_token):
+        """
+        User has sent correct payload format.
+        """
+        save_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "Customer",
+                    "id": None,
+                    "saveInput": [
+                        {
+                            "name": "test_user1",
+                            "dob": "2020-01-21",
+                            "email": "ltest1@mail.com",
+                            "phone_no": "012345",
+                            "address": "HYD",
+                            "pin_code": "100",
+                            "status": "123",
+                        }
+                    ],
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
+        response = api_client.post(
+            "/api/save/",
+            save_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 201
+        assert response_data["data"] == [{"id": [1]}]
+        assert response_data["message"] == ["Record created successfully."]
+
+    def test_update_record(self, api_client, add_perm_token, fetch_data_1):
+        """
+        This is a success update scenario.
+        """
+        data_id = fetch_data_1.id
+
+        save_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "Customer",
+                    "id": data_id,
+                    "saveInput": [
+                        {
+                            "name": "ABCD",
+                            "dob": "2020-01-21",
+                            "email": "ltest1@mail.com",
+                            "phone_no": "012345",
+                            "address": "HYD",
+                            "pin_code": "100",
+                            "status": "123",
+                        }
+                    ],
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
+        response = api_client.post(
+            "/api/save/",
+            save_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+
+        assert response.status_code == 201
+        assert response_data["data"] == [{"id": [data_id]}]
+        assert response_data["message"] == ["Record updated successfully."]
+
+        updated_data = Customer.objects.get(id=data_id)
+        assert updated_data.name == "ABCD"
+
+    def test_invalid_payload_format(self, api_client, add_perm_token):
         """
         Test the fetch endpoint with a payload that omits any of (modelName, saveInput).
         """
@@ -53,7 +129,7 @@ class TestGenericSaveAPI:
         assert response_data["error"] == "Field required"
         assert response_data["code"] == "DGA-V002"
 
-    def test_model_name_not_string(self, api_client, add_perm_token):
+    def test_invalid_model_name_non_string(self, api_client, add_perm_token):
         """
         Test the fetch endpoint with modelName not as a string.
         """
@@ -90,7 +166,7 @@ class TestGenericSaveAPI:
         assert response_data["error"] == "Input should be a valid string"
         assert response_data["code"] == "DGA-V002"
 
-    def test_model_name_not_exist(self, api_client, add_perm_token):
+    def test_invalid_model_name(self, api_client, add_perm_token):
         """
         Test the fetch endpoint with modelName which does not exist.
         """
@@ -127,7 +203,7 @@ class TestGenericSaveAPI:
         assert response_data["error"] == "Model not found"
         assert response_data["code"] == "DGA-V003"
 
-    def test_save_input_length_greater_than_10(
+    def test_saveInput_length_greater_than_10(
         self, api_client, add_perm_token
     ):
         """
@@ -266,7 +342,7 @@ class TestGenericSaveAPI:
         assert response_data["error"] == "Only 10 records at once."
         assert response_data["code"] == "DGA-V001"
 
-    def test_save_input_multiple_records(self, api_client, add_perm_token):
+    def test_update_multiple_records(self, api_client, add_perm_token):
         """
         Test the save endpoint with multiple records in the saveInput array, where only one record should be updated at a time.
         """
@@ -316,9 +392,7 @@ class TestGenericSaveAPI:
         )
         assert response_data["code"] == "DGA-V005"
 
-    def test_user_passes_non_existent_field_in_save_input(
-        self, api_client, add_perm_token
-    ):
+    def test_unknown_saveInput_field(self, api_client, add_perm_token):
         """
         User passes a non-existent field in saveInput.
         """
@@ -359,7 +433,7 @@ class TestGenericSaveAPI:
         )
         assert response_data["code"] == "DGA-V005"
 
-    def test_user_passes_invalid_datatype_value(
+    def test_invalid_savInput_element_datatype(
         self, api_client, add_perm_token
     ):
         """
@@ -401,7 +475,7 @@ class TestGenericSaveAPI:
         )
         assert response_data["code"] == "DGA-V005"
 
-    def test_user_does_not_pass_required_field(
+    def test_missing_required_field_saveInput(
         self, api_client, add_perm_token
     ):
         """
@@ -443,9 +517,7 @@ class TestGenericSaveAPI:
         )
         assert response_data["code"] == "DGA-V005"
 
-    def test_user_tries_to_update_non_existent_record(
-        self, api_client, add_perm_token
-    ):
+    def test_update_unknown_record(self, api_client, add_perm_token):
         """
         User tries to update a record which does not exist.
         """
@@ -485,9 +557,7 @@ class TestGenericSaveAPI:
         )
         assert response_data["code"] == "DGA-V005"
 
-    def test_user_tries_to_update_with_string_id(
-        self, api_client, add_perm_token
-    ):
+    def test_invalid_id_element_datatype(self, api_client, add_perm_token):
         """
         User tries to update a record with string as ID.
         """
@@ -527,9 +597,7 @@ class TestGenericSaveAPI:
         )
         assert response_data["code"] == "DGA-V005"
 
-    def test_authentication_header_not_passed(
-        self, api_client, add_perm_token
-    ):
+    def test_save_access_denied(self, api_client, add_perm_token):
         """
         User is not passing the authentication header.
         """
@@ -600,42 +668,7 @@ class TestGenericSaveAPI:
         assert response_data["error"] == "Invalid Token"
         assert response_data["code"] == "DGA-S002"
 
-    def test_create_record_success(self, api_client, add_perm_token):
-        """
-        User has sent correct payload format.
-        """
-        save_payload = {
-            "payload": {
-                "variables": {
-                    "modelName": "Customer",
-                    "id": None,
-                    "saveInput": [
-                        {
-                            "name": "test_user1",
-                            "dob": "2020-01-21",
-                            "email": "ltest1@mail.com",
-                            "phone_no": "012345",
-                            "address": "HYD",
-                            "pin_code": "100",
-                            "status": "123",
-                        }
-                    ],
-                }
-            }
-        }
-        headers = {"Authorization": f"Bearer {add_perm_token}"}
-        response = api_client.post(
-            "/api/save/",
-            save_payload,
-            format="json",
-            headers=headers,
-        )
-        response_data = json.loads(response.content.decode("utf-8"))
-        assert response.status_code == 201
-        assert response_data["data"] == [{"id": [1]}]
-        assert response_data["message"] == ["Record created successfully."]
-
-    def test_save_without_permission(self, api_client, view_perm_token):
+    def test_save_unauthorized(self, api_client, view_perm_token):
         save_payload = {
             "payload": {
                 "variables": {
@@ -718,48 +751,6 @@ class TestGenericSaveAPI:
             == "Authentication failed: Token is invalid or expired"
         )
         assert response_data["code"] == "DGA-S003"
-
-    def test_update_success_scenario(
-        self, api_client, add_perm_token, fetch_data_1
-    ):
-        """
-        This is a success update scenario.
-        """
-        data_id = fetch_data_1.id
-        save_payload = {
-            "payload": {
-                "variables": {
-                    "modelName": "Customer",
-                    "id": data_id,
-                    "saveInput": [
-                        {
-                            "name": "ABCD",
-                            "dob": "2020-01-21",
-                            "email": "ltest1@mail.com",
-                            "phone_no": "012345",
-                            "address": "HYD",
-                            "pin_code": "100",
-                            "status": "123",
-                        }
-                    ],
-                }
-            }
-        }
-        headers = {"Authorization": f"Bearer {add_perm_token}"}
-        response = api_client.post(
-            "/api/save/",
-            save_payload,
-            format="json",
-            headers=headers,
-        )
-        response_data = json.loads(response.content.decode("utf-8"))
-
-        assert response.status_code == 201
-        assert response_data["data"] == [{"id": [data_id]}]
-        assert response_data["message"] == ["Record updated successfully."]
-
-        updated_data = Customer.objects.get(id=data_id)
-        assert updated_data.name == "ABCD"
 
 
 @pytest.mark.django_db

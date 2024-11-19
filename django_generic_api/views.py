@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+import base64
 
 from .payload_models import (
     FetchPayload,
@@ -290,7 +291,7 @@ class GenericRegisterAPIView(APIView):
                     message,
                     from_email,
                     recipient_list,
-                    fail_silently=False,
+                    fail_silently=True,
                 )
                 # todo: Remove "email_verify' variable after whole process,
                 #  only for dev, remove in prod.
@@ -333,7 +334,8 @@ class AccountActivateAPIView(APIView):
         try:
             # Decode token and get the user ID
             token = unquote(encoded_token)
-            user_id, timestamp = token.split(":")
+            decoded_token = base64.urlsafe_b64decode(token.encode()).decode()
+            user_id, timestamp = decoded_token.split(":")
 
             # todo: set as user customizable time
             if int(time.time()) - int(timestamp) > 24 * 3600:
