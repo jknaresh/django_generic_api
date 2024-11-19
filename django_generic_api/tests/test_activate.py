@@ -103,12 +103,11 @@ class TestAccountActivateAPI:
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "setup_user, token_modifier, expected_status, expected_message, expected_error, expected_code",
+    "setup_user, expected_status, expected_message, expected_error, expected_code",
     [
         # Test case: User account is activated successfully
         (
             "email_activate_inactive_user_id",
-            lambda user_id: f"{user_id}:{int(time.time())}",
             201,
             "Your account has been activated successfully.",
             None,
@@ -117,7 +116,6 @@ class TestAccountActivateAPI:
         # Test case: User does not exist
         (
             "email_activate_inactive_user_id",
-            lambda user_id: f"{user_id}:{int(time.time())}",
             400,
             None,
             "User not found.",
@@ -129,7 +127,6 @@ def test_activate_user(
     request,
     api_client,
     setup_user,
-    token_modifier,
     expected_status,
     expected_message,
     expected_error,
@@ -141,7 +138,7 @@ def test_activate_user(
     if expected_error == "User not found.":
         User.objects.filter(id=user_id).delete()  # Simulate user deletion
 
-    token = token_modifier(user_id)
+    token = f"{user_id}:{int(time.time())}"
 
     response = api_client.get(f"/api/activate/{token}/", format="json")
     response_data = json.loads(response.content.decode("utf-8"))
