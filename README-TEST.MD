@@ -4,27 +4,30 @@
 pip install pytest==8.3.3
 ```
 
+## To run all test cases:
+
+- Edit the DJANGO_SETTINGS_MODULE in the pytest.ini file to point to your_project.settings.
+- From the root folder where the pytest.ini file is located, run the following command in the command line:
+```bash
+pytest
+```
+
 - Ensure you have set up the path to the test file correctly, including any necessary parameters.
 
-
-- Set up your path for the file with necessary parameters
-- For pytest 
-1.  Add new configuration as pytest
-2. Select your python environment.
-3. Select your path to the test file.
-4. Add necessary arguments.
-5. Run the Debug element.
-
-
-## Configuring Pytest
+## Configuring Pytest for individual file.
 - To configure pytest, follow these steps:
 
-- Add a new configuration for pytest in your IDE or environment.
+### In PyCharm:
+- Add a new configuration for pytest.
 - Select your Python environment.
-- Set the path to the test file or directory containing test files.
+- Set the path to the test file.
 - Add any necessary arguments for pytest.
-- Run the configuration, or use the debug option in your IDE to run tests interactively.
+- Apply and save the configuration.
 
 ## Running Tests
 
-- Run the configured tests by executing the test script or triggering it through your IDE.
+- To run a Test case file, follow these steps:
+
+### In PyCharm:
+- Create a pytest configuration for the file if it does not already exist.
+- Use the debugger to run the test case file.
