@@ -1,9 +1,19 @@
-from django_generic_api.services import generate_token
 from django.contrib.auth.models import Permission, User
 import pytest
 from model_bakery import baker
 from rest_framework.test import APIClient
-from api_app.models import Customer
+from django_generic_api.tests.demo_app.models import Customer
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+
+
+def generate_token(user):
+    refresh = RefreshToken.for_user(user)
+    return [
+        {
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        }
+    ]
 
 
 @pytest.fixture

@@ -1,9 +1,9 @@
 # Test cases for fetch API
 import pytest
 from rest_framework.test import APIClient
-from api_app.models import Customer
+from django_generic_api.tests.demo_app.models import Customer
 import json
-from API_fixtures import (
+from django_generic_api.tests.API_fixtures import (
     api_client,
     fetch_data_1,
     view_perm_token,
@@ -45,9 +45,8 @@ class TestGenericFetchAPI:
             }
         }
         headers = {"Authorization": f"Bearer {view_perm_token}"}
-
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -83,9 +82,8 @@ class TestGenericFetchAPI:
             }
         }
         headers = {"Authorization": f"Bearer {view_perm_token}"}
-
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -123,7 +121,7 @@ class TestGenericFetchAPI:
         headers = {"Authorization": f"Bearer {view_perm_token}"}
 
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -163,7 +161,7 @@ class TestGenericFetchAPI:
 
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -197,7 +195,7 @@ class TestGenericFetchAPI:
         }
 
         # Send a POST request to the fetch endpoint without authentication
-        response = api_client.post("/api/fetch/", fetch_payload, format="json")
+        response = api_client.post("/fetch/", fetch_payload, format="json")
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 401
         assert response_data["error"] == "Unauthorized access"
@@ -229,7 +227,7 @@ class TestGenericFetchAPI:
 
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -268,7 +266,7 @@ class TestGenericFetchAPI:
 
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -309,7 +307,7 @@ class TestGenericFetchAPI:
 
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -346,7 +344,7 @@ class TestGenericFetchAPI:
         headers = {"Authorization": f"Bearer {add_perm_token}"}
 
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -387,7 +385,7 @@ class TestGenericFetchAPI:
 
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -428,7 +426,7 @@ class TestGenericFetchAPI:
 
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -469,7 +467,7 @@ class TestGenericFetchAPI:
 
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -504,7 +502,7 @@ class TestGenericFetchAPI:
 
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -545,7 +543,7 @@ class TestGenericFetchAPI:
 
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -586,7 +584,7 @@ class TestGenericFetchAPI:
 
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -623,7 +621,7 @@ class TestGenericFetchAPI:
 
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -664,7 +662,7 @@ class TestGenericFetchAPI:
 
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -706,7 +704,7 @@ class TestGenericFetchAPI:
         headers = {"Authorization": f"Bearer {view_perm_token}"}
 
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -748,7 +746,7 @@ class TestGenericFetchAPI:
         headers = {"Authorization": f"Bearer {view_perm_token}"}
 
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -790,7 +788,7 @@ class TestGenericFetchAPI:
         headers = {"Authorization": f"Bearer {view_perm_token}"}
 
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -825,7 +823,7 @@ class TestGenericFetchAPI:
         }
         headers = {"Authorization": f"Bearer {view_perm_token}"}
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -861,7 +859,7 @@ class TestGenericFetchAPI:
         }
         headers = {"Authorization": f"Bearer {view_perm_token}"}
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -897,7 +895,7 @@ class TestGenericFetchAPI:
         }
         headers = {"Authorization": f"Bearer {view_perm_token}"}
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -933,7 +931,7 @@ class TestGenericFetchAPI:
         }
         headers = {"Authorization": f"Bearer {view_perm_token}"}
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -970,7 +968,7 @@ class TestGenericFetchAPI:
         }
         headers = {"Authorization": f"Bearer {view_perm_token}"}
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -1018,7 +1016,7 @@ class TestGenericFetchAPI:
         headers = {"Authorization": f"Bearer {expired_access_token}"}
 
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,
@@ -1104,7 +1102,7 @@ class TestFetchScenarios:
         headers = {"Authorization": f"Bearer {view_perm_token}"}
 
         response = api_client.post(
-            "/api/fetch/",
+            "/fetch/",
             fetch_payload,
             format="json",
             headers=headers,

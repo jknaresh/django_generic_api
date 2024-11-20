@@ -1,7 +1,11 @@
 import pytest
 from rest_framework.test import APIClient
 import json
-from API_fixtures import api_client, inactive_user_id, non_existing_user
+from django_generic_api.tests.API_fixtures import (
+    api_client,
+    inactive_user_id,
+    non_existing_user,
+)
 import time
 from django.contrib.auth.models import User
 from unittest import mock
@@ -21,7 +25,7 @@ class TestAccountActivateAPI:
         encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
 
         response = api_client.get(
-            f"/api/activate/{encoded_token}/",
+            f"/activate/{encoded_token}/",
             format="json",
         )
 
@@ -45,7 +49,7 @@ class TestAccountActivateAPI:
         encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
 
         response = api_client.get(
-            f"/api/activate/{encoded_token}/",
+            f"/activate/{encoded_token}/",
             format="json",
         )
 
@@ -65,7 +69,7 @@ class TestAccountActivateAPI:
         user.delete()
 
         response = api_client.get(
-            f"/api/activate/{encoded_token}/",
+            f"/activate/{encoded_token}/",
             format="json",
         )
 
@@ -83,7 +87,7 @@ class TestAccountActivateAPI:
         encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
 
         response = api_client.get(
-            f"/api/activate/{encoded_token}/",
+            f"/activate/{encoded_token}/",
             format="json",
         )
 
@@ -132,7 +136,7 @@ def test_activate_user(
     token = f"{user_id}:{int(time.time())}"
     encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
 
-    response = api_client.get(f"/api/activate/{encoded_token}/", format="json")
+    response = api_client.get(f"/activate/{encoded_token}/", format="json")
     response_data = json.loads(response.content.decode("utf-8"))
 
     assert response.status_code == expected_status

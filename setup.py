@@ -33,6 +33,8 @@ setup(
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     ],
     install_requires=install_requires,
-    setup_requires=['pytest-runner',],
-    tests_require=['pytest'],
+    setup_requires=[
+        "pytest-runner",
+    ],
+    tests_require=["pytest"],
 )

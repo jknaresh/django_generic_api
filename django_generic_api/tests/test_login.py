@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 import json
-from API_fixtures import (
+from django_generic_api.tests.API_fixtures import (
     api_client,
     login_user,
 )
@@ -23,7 +23,7 @@ class TestLoginAPI:
         }
 
         # Sending POST request to login endpoint
-        response = api_client.post("/api/login/", login_payload, format="json")
+        response = api_client.post("/login/", login_payload, format="json")
         response_data = json.loads(response.content.decode("utf-8"))
 
         # Assertions
@@ -45,7 +45,7 @@ class TestLoginAPI:
         }
 
         response = api_client.post(
-            "/api/login/",
+            "/login/",
             login_payload,
             format="json",
         )
@@ -70,7 +70,7 @@ class TestLoginAPI:
         }
 
         response = api_client.post(
-            "/api/login/",
+            "/login/",
             login_payload,
             format="json",
         )
@@ -91,7 +91,7 @@ class TestLoginAPI:
         }
 
         response = api_client.post(
-            "/api/login/",
+            "/login/",
             login_payload,
             format="json",
         )
@@ -112,7 +112,7 @@ class TestLoginAPI:
         }
 
         response = api_client.post(
-            "/api/login/",
+            "/login/",
             login_payload,
             format="json",
         )
@@ -133,7 +133,7 @@ class TestLoginAPI:
 
         headers = {"X-Requested-With": "XMLHttpRequest"}
         response = api_client.post(
-            "/api/login/", login_payload, format="json", headers=headers
+            "/login/", login_payload, format="json", headers=headers
         )
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
@@ -148,7 +148,7 @@ class TestLoginAPI:
             "payload": {"variables": {"email": 123465, "password": "123456"}}
         }
         response = api_client.post(
-            "/api/login/",
+            "/login/",
             login_payload,
             format="json",
         )
@@ -202,7 +202,7 @@ def test_login(
     expected_error,
     expected_code,
 ):
-    response = api_client.post("/api/login/", login_payload, format="json")
+    response = api_client.post("/login/", login_payload, format="json")
     response_data = json.loads(response.content.decode("utf-8"))
 
     assert response.status_code == expected_status

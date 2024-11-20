@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 import json
-from API_fixtures import (
+from django_generic_api.tests.API_fixtures import (
     api_client,
     login_user,
 )
@@ -29,7 +29,7 @@ class TestRegisterAPI:
         }
 
         response = api_client.post(
-            "/api/register/",
+            "/register/",
             register_payload,
             format="json",
         )
@@ -52,7 +52,7 @@ class TestRegisterAPI:
         }
 
         response = api_client.post(
-            "/api/register/",
+            "/register/",
             register_payload,
             format="json",
         )
@@ -77,7 +77,7 @@ class TestRegisterAPI:
         }
 
         response = api_client.post(
-            "/api/register/",
+            "/register/",
             register_payload,
             format="json",
         )
@@ -101,7 +101,7 @@ class TestRegisterAPI:
         }
 
         response = api_client.post(
-            "/api/register/",
+            "/register/",
             register_payload,
             format="json",
         )
@@ -126,7 +126,7 @@ class TestRegisterAPI:
         }
 
         response = api_client.post(
-            "/api/register/",
+            "/register/",
             register_payload,
             format="json",
         )
@@ -152,7 +152,7 @@ class TestRegisterAPI:
         }
 
         response = api_client.post(
-            "/api/register/",
+            "/register/",
             register_payload,
             format="json",
         )
