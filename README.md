@@ -125,7 +125,7 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "user@example.com"  # Your Gmail address
-EMAIL_HOST_PASSWORD = "srcp yqyu xteg nzfe"  # Your Gmail password
+EMAIL_HOST_PASSWORD = "**** **** **** ****"  # Your Gmail password
 ```
 
 - Set you BASE_URL which includes http protocol and domain name
