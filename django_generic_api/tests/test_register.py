@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 import json
-from fixtures import (
+from API_fixtures import (
     api_client,
     login_user,
 )

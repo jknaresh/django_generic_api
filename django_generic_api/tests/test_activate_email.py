@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 import json
-from fixtures import api_client, inactive_user_id, non_existing_user
+from API_fixtures import api_client, inactive_user_id, non_existing_user
 import time
 from django.contrib.auth.models import User
 from unittest import mock

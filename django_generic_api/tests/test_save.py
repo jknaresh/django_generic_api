@@ -2,7 +2,7 @@ import pytest
 from rest_framework.test import APIClient
 from api_app.models import Customer
 import json
-from fixtures import (
+from API_fixtures import (
     save_perm_user,
     add_perm_token,
     view_perm_token,
