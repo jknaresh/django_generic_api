@@ -1,28 +1,29 @@
-## Setting Up Your Environment.
+## To run test cases:
 
-```bash
-pip install pytest==8.3.3
+- Navigate to the directory containing the setup.py file for this package.
+### To run all test cases:
+```bash 
+python setup.py pytest
 ```
 
-## To run all test cases:
+### To run individual file:
+```bash 
+python setup.py pytest --addopts "<path_to_your_test_file>"
 
-- Edit the DJANGO_SETTINGS_MODULE in the pytest.ini file to point to your_project.settings.
-- From the root folder where the pytest.ini file is located, run the following command in the command line:
-```bash
-pytest
+# example : python setup.py pytest --addopts "django_generic_api/tests/test_basic.py"
 ```
-
-- Ensure you have set up the path to the test file correctly, including any necessary parameters.
 
 ## Configuring Pytest for individual file.
 - To configure pytest, follow these steps:
 
 ### In PyCharm:
-- Add a new configuration for pytest.
-- Select your Python environment.
-- Set the path to the test file.
-- Add any necessary arguments for pytest.
-- Apply and save the configuration.
+- Run > Edit Configurations.
+- Click on Add new configuration and select pytest.
+- Select the path for your python virtual_environment/Scripts/python.exe.
+- Select your test_case file below.
+- Add additional arguments as required (-v, -s, ...).
+- Now click on apply and OK.
+![pytest_config.png](pytest_config.png)
 
 ## Running Tests
 
