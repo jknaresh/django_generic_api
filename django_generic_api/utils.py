@@ -12,6 +12,8 @@ import mmap
 from uuid import UUID
 from decimal import Decimal
 from typing import Any, List
+from pathlib import Path
+import base64
 
 actions = {
     "fetch": "view",
@@ -136,7 +138,9 @@ def is_fields_exist(model, fields):
 def registration_token(user_id):
     timestamp = int(time.time())
     token = f"{user_id}:{timestamp}"
-    return token
+    encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
+
+    return encoded_token
 
 
 def store_user_ip(user_id, user_ip):
@@ -168,8 +172,8 @@ def custom_exception_handler(exc, context):
 
 
 def is_valid_domain(domain):
-
-    domain_file = "valid_domains.txt"
+    base_path = Path(__file__).resolve().parent
+    domain_file = base_path / "valid_domains.txt"
     domain_bytes = domain.lower().encode("utf-8")
 
     with open(domain_file, "rb", 0) as file:

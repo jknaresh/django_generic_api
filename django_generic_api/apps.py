@@ -19,7 +19,7 @@ class DjangoGenericApiConfig(AppConfig):
             ],
             "DEFAULT_THROTTLE_RATES": {
                 "user": "2000/hour",  # Rate limit for authenticated users
-                "anon": "20/hour",  # Rate limit for unauthenticated users,
+                "anon": "25/hour",  # Rate limit for unauthenticated users,
                 # 20 request per 1 hour
             },
             "EXCEPTION_HANDLER": "django_generic_api.utils.custom_exception_handler",
