@@ -3,23 +3,25 @@ import pytest
 from rest_framework.test import APIClient
 from django_generic_api.tests.demo_app.models import Customer
 import json
-from django_generic_api.tests.API_fixtures import (
+from fixtures.API import (
     api_client,
-    fetch_data_1,
     view_perm_token,
     add_perm_token,
     view_perm_user,
     save_perm_user,
+    customer1,
+    customer2,
 )
 from unittest import mock
 from rest_framework_simplejwt.tokens import AccessToken
+from model_bakery import baker
 
 
 @pytest.mark.django_db
 class TestGenericFetchAPI:
 
     def test_fetch_check_user_permission(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         """
         User has view permissions.
@@ -55,11 +57,11 @@ class TestGenericFetchAPI:
         assert response.status_code == 200
         assert response_data["total"] == 1
         assert response_data["data"] == [
-            {"name": "test_user1", "email": "user1@gmail.com"}
+            {"name": customer1.name, "email": customer1.email}
         ]
 
     def test_fetch_filter_operator_eq(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         fetch_payload = {
             "payload": {
@@ -92,11 +94,11 @@ class TestGenericFetchAPI:
         assert response.status_code == 200
         assert response_data["total"] == 1
         assert response_data["data"] == [
-            {"name": "test_user1", "email": "user1@gmail.com"}
+            {"name": customer1.name, "email": customer1.email}
         ]
 
     def test_fetch_filter_operator_in(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, customer2, api_client, view_perm_token
     ):
         fetch_payload = {
             "payload": {
@@ -130,12 +132,12 @@ class TestGenericFetchAPI:
         assert response.status_code == 200
         assert response_data["total"] == 2
         assert response_data["data"] == [
-            {"name": "test_user2", "email": "user2@gmail.com"},
-            {"name": "test_user1", "email": "user1@gmail.com"},
+            {"name": customer2.name, "email": customer2.email},
+            {"name": customer1.name, "email": customer1.email},
         ]
 
     def test_payload_missing_field_property(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         """
         User has missed a required field in payload format
@@ -238,7 +240,7 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-S002"
 
     def test_invalid_payload_format(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         """
         User has given wrong format in payload
@@ -279,9 +281,7 @@ class TestGenericFetchAPI:
         )
         assert response_data["code"] == "DGA-V006"
 
-    def test_invalid_model_name(
-        self, fetch_data_1, api_client, view_perm_token
-    ):
+    def test_invalid_model_name(self, customer1, api_client, view_perm_token):
         """
         User has given invalid model name.
         """
@@ -317,9 +317,7 @@ class TestGenericFetchAPI:
         assert response_data["error"] == ""
         assert response_data["code"] == "DGA-V007"
 
-    def test_fetch_unauthorized(
-        self, fetch_data_1, api_client, add_perm_token
-    ):
+    def test_fetch_unauthorized(self, customer1, api_client, add_perm_token):
         """
         User does not have view permissions.
         """
@@ -358,7 +356,7 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V008"
 
     def test_invalid_model_name_non_string(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         """
         User has given modelName not as string.
@@ -399,7 +397,7 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V006"
 
     def test_invalid_payload_fields_data_type(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         """
         User has not given fields as list of strings
@@ -439,7 +437,7 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V006"
 
     def test_unknown_fetch_filter_name(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         """
         User has given invalid fetch data.
@@ -481,7 +479,7 @@ class TestGenericFetchAPI:
         )
 
     def test_invalid_fetch_filter_format(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         """
         User has given wrong format for fetch filters.
@@ -516,7 +514,7 @@ class TestGenericFetchAPI:
         )
 
     def test_invalid_fetch_filter_operator(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         """
         User has given invalid filter operator.
@@ -557,7 +555,7 @@ class TestGenericFetchAPI:
         )
 
     def test_invalid_fetch_filter_name_datatype(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         """
         User has given invalid datatype for filter name
@@ -598,7 +596,7 @@ class TestGenericFetchAPI:
         )
 
     def test_invalid_fetch_filter_value_element_datatype(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         """
         User has given invalid filter operator.
@@ -635,7 +633,7 @@ class TestGenericFetchAPI:
         )
 
     def test_invalid_filter_value_length_for_eq_operator(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         """
         User has given invalid filter operator.
@@ -676,7 +674,7 @@ class TestGenericFetchAPI:
         )
 
     def test_invalid_filters_operation(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         """
         Test the fetch endpoint with filters operation set to a value other
@@ -719,9 +717,7 @@ class TestGenericFetchAPI:
             == "Input should be 'or' or 'and'('filters', 0, 'operation')"
         )
 
-    def test_unknown_page_number(
-        self, fetch_data_1, api_client, view_perm_token
-    ):
+    def test_unknown_page_number(self, customer1, api_client, view_perm_token):
         """
         User does not send pagesize as int.
         """
@@ -761,9 +757,7 @@ class TestGenericFetchAPI:
             == "Input should be a valid integer, unable to parse string as an integer('pageNumber',)"
         )
 
-    def test_negative_page_size(
-        self, fetch_data_1, api_client, view_perm_token
-    ):
+    def test_negative_page_size(self, customer1, api_client, view_perm_token):
         """
         Test the fetch endpoint with pageNumber or pageSize set to a negative integer.
         """
@@ -801,7 +795,7 @@ class TestGenericFetchAPI:
         assert response_data["error"] == "Negative indexing is not supported."
 
     def test_unknown_format_sort_property(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         fetch_payload = {
             "payload": {
@@ -836,9 +830,7 @@ class TestGenericFetchAPI:
             == "Input should be a valid dictionary or instance of FetchSort('sort',)"
         )
 
-    def test_extra_keys_in_sort(
-        self, fetch_data_1, api_client, view_perm_token
-    ):
+    def test_extra_keys_in_sort(self, customer1, api_client, view_perm_token):
         fetch_payload = {
             "payload": {
                 "variables": {
@@ -872,9 +864,7 @@ class TestGenericFetchAPI:
             == "Extra inputs are not permitted('sort', 'abc')"
         )
 
-    def test_invalid_sort_field(
-        self, fetch_data_1, api_client, view_perm_token
-    ):
+    def test_invalid_sort_field(self, customer1, api_client, view_perm_token):
         fetch_payload = {
             "payload": {
                 "variables": {
@@ -909,7 +899,7 @@ class TestGenericFetchAPI:
         )
 
     def test_invalid_sort_order_by(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         fetch_payload = {
             "payload": {
@@ -945,7 +935,7 @@ class TestGenericFetchAPI:
         )
 
     def test_invalid_distinct_value(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         fetch_payload = {
             "payload": {
@@ -1092,7 +1082,7 @@ class TestGenericFetchAPI:
 class TestFetchScenarios:
     def test_fetch(
         self,
-        fetch_data_1,
+        customer1,
         fetch_payload,
         expected_status,
         expected_response,

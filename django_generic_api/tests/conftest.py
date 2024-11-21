@@ -1,6 +1,11 @@
 import django
 from django.conf import settings
 from django.core.management import call_command
+import os
+import sys
+
+# Add the base directory to sys.path for clean imports
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 
 def pytest_configure():

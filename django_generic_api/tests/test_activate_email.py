@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 import json
-from django_generic_api.tests.API_fixtures import (
+from fixtures.API import (
     api_client,
     inactive_user_id,
     non_existing_user,

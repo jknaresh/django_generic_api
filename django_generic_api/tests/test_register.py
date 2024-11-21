@@ -1,10 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 import json
-from django_generic_api.tests.API_fixtures import (
-    api_client,
-    login_user,
-)
+from fixtures.API import api_client, login_user
 from urllib.parse import quote
 import time
 from unittest import mock
