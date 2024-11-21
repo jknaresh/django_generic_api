@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 from django_generic_api.tests.demo_app.models import Customer
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
+
 # customer instance 1
 @pytest.fixture
 def customer1():
@@ -41,6 +42,7 @@ def all_perm_user_fixture():
     user.user_permissions.add(perm1, perm2)
 
     return user
+
 
 @pytest.fixture
 def save_perm_user():

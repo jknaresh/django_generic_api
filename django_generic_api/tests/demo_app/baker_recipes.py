@@ -17,35 +17,21 @@ customer_2 = Recipe(
     phone_no="456789",
 )
 
-test_instance = Recipe(
-    Customer,
-    name = "instance_1",
-    address = "GOA"
-)
+test_instance = Recipe(Customer, name="instance_1", address="GOA")
 
 all_perm_user = Recipe(
-    User,
-    username="allpermuser@gmail.com",
-    password="123456"
+    User, username="allpermuser@gmail.com", password="123456"
 )
 
 save_perm_user = Recipe(
-    User,
-    username="addpermuser@gmail.com",
-    password="123456"
+    User, username="addpermuser@gmail.com", password="123456"
 )
 
 view_perm_user = Recipe(
-    User,
-    username="viewpermuser@gmail.com",
-    password="123456"
+    User, username="viewpermuser@gmail.com", password="123456"
 )
 
-no_perm_user = Recipe(
-    User,
-    username="nopermuser@gmail.com",
-    password="123456"
-)
+no_perm_user = Recipe(User, username="nopermuser@gmail.com", password="123456")
 
 login_user = Recipe(
     User,
