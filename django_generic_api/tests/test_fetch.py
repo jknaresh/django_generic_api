@@ -222,8 +222,47 @@ class TestGenericFetchAPI:
         assert response_data["total"] == 2
         assert response_data["data"] == [
             {"name": customer2.name, "email": customer2.email},
-            {"name": customer1.name, "email": customer1.email}
+            {"name": customer1.name, "email": customer1.email},
         ]
+
+    def test_fetch_filter_operator_gt_2(
+        self, customer1, customer2, api_client, view_perm_token
+    ):
+        """
+        Fetch operator is gt
+        """
+        fetch_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "customer",
+                    "fields": ["name", "email"],
+                    "filters": [
+                        {
+                            "operator": "gt",
+                            "name": "phone_no",
+                            "value": ["999999"],
+                            "operation": "or",
+                        }
+                    ],
+                    "pageNumber": 1,
+                    "pageSize": 10,
+                    "sort": {"field": "name", "order_by": "desc"},
+                    "distinct": True,
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {view_perm_token}"}
+
+        response = api_client.post(
+            "/fetch/",
+            fetch_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 200
+        assert response_data["total"] == 0
+        assert response_data["data"] == []
 
     def test_payload_missing_field_property(
         self, customer1, api_client, view_perm_token
