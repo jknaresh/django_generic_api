@@ -22,8 +22,8 @@ class TestRegisterAPI:
             "payload": {
                 "variables": {
                     "email": "abc@gmail.com",
-                    "password": "Shrijan@123",
-                    "password1": "Shrijan@123",
+                    "password": "test_user@123",
+                    "password1": "test_user@123",
                 }
             }
         }
@@ -148,8 +148,8 @@ class TestRegisterAPI:
             "payload": {
                 "variables": {
                     "email": "abc@abcdef.com",
-                    "password": "Shrijan@123",
-                    "password1": "Shrijan@123",
+                    "password": "test_user@123",
+                    "password1": "test_user@123",
                 }
             }
         }
@@ -174,8 +174,8 @@ class TestRegisterAPI:
             "payload": {
                 "variables": {
                     "email": "user@gmail.com",
-                    "password": "Shrijan@123",
-                    "password1": "Shrijan@123",
+                    "password": "test_user@123",
+                    "password1": "test_user@123",
                 }
             }
         }
