@@ -252,9 +252,12 @@ class GenericRegisterAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if not getattr(settings, 'BASE_URL', None):
+        if not getattr(settings, "BASE_URL", None):
             return Response(
-                {"error": "Configure BASE_URL before registration.", "code": "DGA-V023"},
+                {
+                    "error": "Configure BASE_URL before registration.",
+                    "code": "DGA-V023",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
