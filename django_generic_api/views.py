@@ -240,6 +240,12 @@ class GenericRegisterAPIView(APIView):
         password = validate_register_data.password.get_secret_value()
         password1 = validate_register_data.password1.get_secret_value()
 
+        if not password == password1:
+            return Response(
+                {"error": "passwords does not match", "code": "DGA-V014"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         # info: Checks password strength if password validators are configured in settings.
         if getattr(settings, "AUTH_PASSWORD_VALIDATORS"):
             try:
@@ -256,12 +262,6 @@ class GenericRegisterAPIView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
-        if not password == password1:
-            return Response(
-                {"error": "passwords does not match", "code": "DGA-V014"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
         email_domain = email.split("@")[-1]
         if not is_valid_domain(email_domain):

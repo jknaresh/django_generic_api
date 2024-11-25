@@ -42,6 +42,20 @@ def pytest_configure():
         },
         CORS_ALLOWED_ORIGINS=["http://192.168.2.218", "http://localhost:8599"],
         CORS_ALLOW_ALL_ORIGINS=True,
+        AUTH_PASSWORD_VALIDATORS=[
+            {
+                "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+            },
+            {
+                "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+            },
+            {
+                "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+            },
+            {
+                "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+            },
+        ],
     )
 
     django.setup()
