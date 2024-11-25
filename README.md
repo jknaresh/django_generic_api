@@ -115,7 +115,7 @@ SIMPLE_JWT = {
 
 - When a user registers themselves, a user activation link is sent to them.
 - To integrate the email activation, add these seetings.
-- [Get your EMAIL_HOST_PASSWORD](https://letscodemore.medium.com/solved-smtplib-smtpauthenticationerror-535-b5-7-8-username-and-password-not-accepted-2b26110f9f3b)
+- [Get your EMAIL_HOST_PASSWORD](https://saurabh-nakoti.medium.com/how-to-set-up-smtp-in-gmail-using-an-app-password-96adffa164b3)
 
 ```bash
 # These settings configure Django to send emails using Gmail's SMTP server with TLS encryption.

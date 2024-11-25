@@ -291,7 +291,7 @@ class GenericRegisterAPIView(APIView):
                     message,
                     from_email,
                     recipient_list,
-                    fail_silently=True,
+                    fail_silently=False,
                 )
                 # todo: Remove "email_verify' variable after whole process,
                 #  only for dev, remove in prod.
