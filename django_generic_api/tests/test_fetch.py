@@ -5,7 +5,6 @@ from django_generic_api.tests.demo_app.models import Customer
 import json
 from fixtures.API import (
     api_client,
-    fetch_data_1,
     view_perm_token,
     add_perm_token,
     view_perm_user,
@@ -15,7 +14,6 @@ from fixtures.API import (
 )
 from unittest import mock
 from rest_framework_simplejwt.tokens import AccessToken
-from model_bakery import baker
 
 
 @pytest.mark.django_db
@@ -266,7 +264,7 @@ class TestGenericFetchAPI:
         assert response_data["data"] == []
 
     def test_fetch_filter_operator_like(
-        self, fetch_data_1, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         fetch_payload = {
             "payload": {
@@ -406,7 +404,7 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-S002"
 
     def test_invalid_payload_format(
-        self, fetch_data_1, api_client, view_perm_token
+        self, api_client, view_perm_token
     ):
         """
         User has given wrong format in payload

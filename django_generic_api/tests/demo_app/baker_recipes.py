@@ -8,6 +8,7 @@ customer_1 = Recipe(
     name="test_user1",
     email="user1@gmail.com",
     phone_no="123456",
+    address = "hyderabad"
 )
 
 customer_2 = Recipe(

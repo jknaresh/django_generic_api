@@ -1,9 +1,9 @@
-from django.contrib.auth.models import Permission, User
+from django.contrib.auth.models import Permission
 import pytest
 from model_bakery import baker
 from rest_framework.test import APIClient
 from django_generic_api.tests.demo_app.models import Customer
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 # customer instance 1
