@@ -1,19 +1,18 @@
 # Test cases for fetch API
-import pytest
-from rest_framework.test import APIClient
-from django_generic_api.tests.demo_app.models import Customer
 import json
+from unittest import mock
+
+import pytest
+from rest_framework_simplejwt.tokens import AccessToken
+
 from fixtures.API import (
     api_client,
     view_perm_token,
     add_perm_token,
     view_perm_user,
-    save_perm_user,
     customer1,
     customer2,
 )
-from unittest import mock
-from rest_framework_simplejwt.tokens import AccessToken
 
 
 @pytest.mark.django_db
@@ -404,7 +403,7 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-S002"
 
     def test_invalid_payload_format(
-        self, api_client, view_perm_token
+        self, customer1, api_client, view_perm_token
     ):
         """
         User has given wrong format in payload
@@ -715,7 +714,8 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V006"
         assert (
             response_data["error"]
-            == "Input should be 'eq', 'in', 'not', 'gt' or 'like'('filters', 0, 'operator')"
+            == "Input should be 'eq', 'in', 'not' or 'gt'('filters', 0, "
+            "'operator')"
         )
 
     def test_invalid_fetch_filter_name_datatype(

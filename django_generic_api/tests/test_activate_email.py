@@ -1,16 +1,14 @@
-import pytest
-from rest_framework.test import APIClient
+import base64
 import json
+import time
+
+import pytest
+from django.contrib.auth.models import User
+
 from fixtures.API import (
     api_client,
     inactive_user_id,
-    non_existing_user,
 )
-import time
-from django.contrib.auth.models import User
-from unittest import mock
-from rest_framework_simplejwt.tokens import AccessToken
-import base64
 
 
 @pytest.mark.django_db
@@ -101,7 +99,8 @@ class TestAccountActivateAPI:
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "setup_user, expected_status, expected_message, expected_error, expected_code",
+    "setup_user, expected_status, expected_message, expected_error, "
+    "expected_code",
     [
         # Test case: User account is activated successfully
         (

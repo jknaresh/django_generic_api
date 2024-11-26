@@ -1,9 +1,8 @@
-import pytest
-from rest_framework.test import APIClient
 import json
+
+import pytest
+
 from fixtures.API import api_client, login_user
-from django.contrib.auth.models import User
-from unittest import mock
 
 
 @pytest.mark.django_db
@@ -157,7 +156,8 @@ class TestLoginAPI:
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "login_payload, expected_status, expected_keys, expected_error, expected_code",
+    "login_payload, expected_status, expected_keys, expected_error, "
+    "expected_code",
     [
         # Test case: Successful login
         (

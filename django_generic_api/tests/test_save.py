@@ -1,17 +1,17 @@
-import pytest
-from rest_framework.test import APIClient
-from django_generic_api.tests.demo_app.models import Customer
 import json
+from unittest import mock
+
+import pytest
+from rest_framework_simplejwt.tokens import AccessToken
+
+from django_generic_api.tests.demo_app.models import Customer
 from fixtures.API import (
     save_perm_user,
     add_perm_token,
     view_perm_token,
     api_client,
-    view_perm_user,
     customer1,
 )
-from unittest import mock
-from rest_framework_simplejwt.tokens import AccessToken
 
 
 @pytest.mark.django_db
@@ -95,7 +95,8 @@ class TestGenericSaveAPI:
 
     def test_invalid_payload_format(self, api_client, add_perm_token):
         """
-        Test the fetch endpoint with a payload that omits any of (modelName, saveInput).
+        Test the fetch endpoint with a payload that omits any of (modelName,
+        saveInput).
         """
         save_payload = {
             "payload": {
@@ -344,7 +345,8 @@ class TestGenericSaveAPI:
 
     def test_update_multiple_records(self, api_client, add_perm_token):
         """
-        Test the save endpoint with multiple records in the saveInput array, where only one record should be updated at a time.
+        Test the save endpoint with multiple records in the saveInput array,
+        where only one record should be updated at a time.
         """
         save_payload = {
             "payload": {
@@ -388,7 +390,8 @@ class TestGenericSaveAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': 'Only 1 record to update at once', 'code': 'DGA-S005'}"
+            == "{'error': 'Only 1 record to update at once', 'code': "
+            "'DGA-S005'}"
         )
         assert response_data["code"] == "DGA-V005"
 
@@ -471,7 +474,9 @@ class TestGenericSaveAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': ValidationError(['“01Jan2003” value has an invalid date format. It must be in YYYY-MM-DD format.']), 'code': 'DGA-S010'}"
+            == "{'error': ValidationError(['“01Jan2003” value has an "
+            "invalid date format. It must be in YYYY-MM-DD "
+            "format.']), 'code': 'DGA-S010'}"
         )
         assert response_data["code"] == "DGA-V005"
 
@@ -512,8 +517,8 @@ class TestGenericSaveAPI:
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
         assert (
-            response_data["error"]
-            == "{'error': 'NOT NULL constraint failed: demo_app_customer.dob', 'code': 'DGA-S008'}"
+            response_data["error"] == "{'error': 'NOT NULL constraint failed: "
+            "demo_app_customer.dob', 'code': 'DGA-S008'}"
         )
         assert response_data["code"] == "DGA-V005"
 
@@ -553,7 +558,8 @@ class TestGenericSaveAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': 'Record with (ID) 9000 does not exist', 'code': 'DGA-S007'}"
+            == "{'error': 'Record with (ID) 9000 does not exist', "
+            "'code': 'DGA-S007'}"
         )
         assert response_data["code"] == "DGA-V005"
 
@@ -593,7 +599,8 @@ class TestGenericSaveAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': \"Field 'id' expected a number but got 'abc'.\", 'code': 'DGA-S008'}"
+            == "{'error': \"Field 'id' expected a number but got "
+            "'abc'.\", 'code': 'DGA-S008'}"
         )
         assert response_data["code"] == "DGA-V005"
 
@@ -755,7 +762,8 @@ class TestGenericSaveAPI:
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "payload, expected_status, expected_error, expected_code, expected_message, expected_data",
+    "payload, expected_status, expected_error, expected_code, "
+    "expected_message, expected_data",
     [
         # Test missing required fields (modelName is missing)
         (
@@ -771,7 +779,7 @@ class TestGenericSaveAPI:
                                 "phone_no": "012345",
                                 "address": "HYD",
                                 "pin_code": "100",
-                                "inserted_timestamp": "2024-11-10 11:11:11",
+                                "inserted_timestamp": "2024-11-10 " "11:11:11",
                                 "status": "123",
                             }
                         ],

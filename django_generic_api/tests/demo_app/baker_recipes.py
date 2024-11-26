@@ -1,6 +1,7 @@
+from django.contrib.auth.models import User
 from model_bakery.recipe import Recipe
+
 from django_generic_api.tests.demo_app.models import Customer
-from django.contrib.auth.models import User, Permission
 
 # Create instances of a model with predefined field values.
 customer_1 = Recipe(

@@ -1,15 +1,15 @@
+import os
+import sys
+
 import django
 from django.conf import settings
 from django.core.management import call_command
-import os
-import sys
 
 # Add the base directory to sys.path for clean imports
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 
 def pytest_configure():
-
     settings.configure(
         INSTALLED_APPS=[
             "django.contrib.auth",
@@ -49,16 +49,20 @@ def pytest_configure():
         CORS_ALLOW_ALL_ORIGINS=True,
         AUTH_PASSWORD_VALIDATORS=[
             {
-                "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+                "NAME": "django.contrib.auth.password_validation"
+                ".UserAttributeSimilarityValidator",
             },
             {
-                "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+                "NAME": "django.contrib.auth.password_validation"
+                ".MinimumLengthValidator",
             },
             {
-                "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+                "NAME": "django.contrib.auth.password_validation"
+                ".CommonPasswordValidator",
             },
             {
-                "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+                "NAME": "django.contrib.auth.password_validation"
+                ".NumericPasswordValidator",
             },
         ],
     )
