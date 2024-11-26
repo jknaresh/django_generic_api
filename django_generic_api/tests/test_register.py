@@ -19,8 +19,8 @@ class TestRegisterAPI:
             "payload": {
                 "variables": {
                     "email": "abc@gmail.com",
-                    "password": "123456",
-                    "password1": "123456",
+                    "password": "test_user@123",
+                    "password1": "test_user@123",
                 }
             }
         }
@@ -34,6 +34,35 @@ class TestRegisterAPI:
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 200
         assert "message" in response_data
+
+    def test_registration_weak_password(self, api_client):
+        """
+        User registration is success.
+        """
+        register_payload = {
+            "payload": {
+                "variables": {
+                    "email": "abc@gmail.com",
+                    "password": "123456",
+                    "password1": "123456",
+                }
+            }
+        }
+
+        response = api_client.post(
+            "/register/",
+            register_payload,
+            format="json",
+        )
+
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 400
+        assert response_data["error"] == [
+            "1. Password must contain at least 8 characters.",
+            "2. Password must not be too common.",
+            "3. Password must not be entirely numeric.",
+        ]
+        assert response_data["code"] == "DGA-V024"
 
     def test_invalid_payload_format(self, api_client):
         """
@@ -116,8 +145,8 @@ class TestRegisterAPI:
             "payload": {
                 "variables": {
                     "email": "abc@abcdef.com",
-                    "password": "123456",
-                    "password1": "123456",
+                    "password": "test_user@123",
+                    "password1": "test_user@123",
                 }
             }
         }
@@ -142,8 +171,8 @@ class TestRegisterAPI:
             "payload": {
                 "variables": {
                     "email": "user@gmail.com",
-                    "password": "123456",
-                    "password1": "123456",
+                    "password": "test_user@123",
+                    "password1": "test_user@123",
                 }
             }
         }
