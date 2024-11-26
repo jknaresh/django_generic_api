@@ -1,5 +1,5 @@
 import pytest
-from django_generic_api.tests.fixtures import sample_string, sample_dict
+from fixtures.basic import sample_string, sample_dict
 from django_generic_api.tests.demo_app.models import Customer
 from model_bakery import baker
 
@@ -33,17 +33,11 @@ def test_string_concatenation(str1, str2, expected):
     assert str1 + str2 == expected
 
 
+# to test the model created in custom app "demo_app"
 @pytest.mark.django_db
 def test_model_creation():
-    test_instance = baker.make(
-        Customer,
-        name="test_user1",
-        dob="2003-04-27",
-        email="user1@gmail.com",
-        phone_no="123456",
-        address="HYD",
-        pin_code="100",
-        status="alive",
-    )
+    test_instance = baker.make_recipe("demo_app.test_instance")
+
     assert Customer.objects.count() == 1
-    assert test_instance.name == "test_user1"
+    assert test_instance.name == "instance_1"
+    assert test_instance.address == "GOA"
