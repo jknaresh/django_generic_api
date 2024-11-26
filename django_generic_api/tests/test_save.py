@@ -2,16 +2,20 @@ import json
 from unittest import mock
 
 import pytest
+from django_generic_api.tests.demo_app.models import Customer
 from rest_framework_simplejwt.tokens import AccessToken
 
-from django_generic_api.tests.demo_app.models import Customer
 from fixtures.API import (
     save_perm_user,
+    view_perm_user,
     add_perm_token,
     view_perm_token,
     api_client,
     customer1,
 )
+
+# To ensure the import is retained
+_ = view_perm_user
 
 
 @pytest.mark.django_db
@@ -204,7 +208,7 @@ class TestGenericSaveAPI:
         assert response_data["error"] == "Model not found"
         assert response_data["code"] == "DGA-V003"
 
-    def test_saveInput_length_greater_than_10(
+    def test_save_input_length_greater_than_10(
         self, api_client, add_perm_token
     ):
         """
@@ -395,7 +399,7 @@ class TestGenericSaveAPI:
         )
         assert response_data["code"] == "DGA-V005"
 
-    def test_unknown_saveInput_field(self, api_client, add_perm_token):
+    def test_unknown_save_input_field(self, api_client, add_perm_token):
         """
         User passes a non-existent field in saveInput.
         """
@@ -436,7 +440,7 @@ class TestGenericSaveAPI:
         )
         assert response_data["code"] == "DGA-V005"
 
-    def test_invalid_savInput_element_datatype(
+    def test_invalid_save_input_element_datatype(
         self, api_client, add_perm_token
     ):
         """
@@ -480,7 +484,7 @@ class TestGenericSaveAPI:
         )
         assert response_data["code"] == "DGA-V005"
 
-    def test_missing_required_field_saveInput(
+    def test_missing_required_field_save_input(
         self, api_client, add_perm_token
     ):
         """

@@ -9,10 +9,14 @@ from fixtures.API import (
     api_client,
     view_perm_token,
     add_perm_token,
+    save_perm_user,
     view_perm_user,
     customer1,
     customer2,
 )
+
+# To ensure the import is retained
+_ = save_perm_user
 
 
 @pytest.mark.django_db
@@ -714,7 +718,7 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V006"
         assert (
             response_data["error"]
-            == "Input should be 'eq', 'in', 'not' or 'gt'('filters', 0, "
+            == "Input should be 'eq', 'in', 'not', 'gt' or 'like'('filters', 0, "
             "'operator')"
         )
 
