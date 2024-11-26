@@ -12,6 +12,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 import base64
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.contrib.auth import password_validation
 
 from .payload_models import (
     FetchPayload,
@@ -235,7 +237,6 @@ class GenericRegisterAPIView(APIView):
             )
 
         email = validate_register_data.email
-        # todo: password strength
         password = validate_register_data.password.get_secret_value()
         password1 = validate_register_data.password1.get_secret_value()
 
@@ -245,10 +246,36 @@ class GenericRegisterAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # info: Checks password strength if password validators are configured in settings.
+        if getattr(settings, "AUTH_PASSWORD_VALIDATORS"):
+            try:
+                password_validation.validate_password(password)
+            except DjangoValidationError:
+                return Response(
+                    {
+                        "error": [
+                            "1. Password must contain at least 8 characters.",
+                            "2. Password must not be too common.",
+                            "3. Password must not be entirely numeric.",
+                        ],
+                        "code": "DGA-V024",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         email_domain = email.split("@")[-1]
         if not is_valid_domain(email_domain):
             return Response(
                 {"error": "Invalid email domain", "code": "DGA-V022"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not getattr(settings, "BASE_URL", None):
+            return Response(
+                {
+                    "error": "Configure BASE_URL before registration.",
+                    "code": "DGA-V023",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -291,7 +318,7 @@ class GenericRegisterAPIView(APIView):
                     message,
                     from_email,
                     recipient_list,
-                    fail_silently=True,
+                    fail_silently=False,
                 )
                 # todo: Remove "email_verify' variable after whole process,
                 #  only for dev, remove in prod.

@@ -2,13 +2,13 @@ import pytest
 from rest_framework.test import APIClient
 from django_generic_api.tests.demo_app.models import Customer
 import json
-from django_generic_api.tests.API_fixtures import (
+from fixtures.API import (
     save_perm_user,
     add_perm_token,
     view_perm_token,
-    fetch_data_1,
     api_client,
     view_perm_user,
+    customer1,
 )
 from unittest import mock
 from rest_framework_simplejwt.tokens import AccessToken
@@ -52,11 +52,11 @@ class TestGenericSaveAPI:
         assert response_data["data"] == [{"id": [1]}]
         assert response_data["message"] == ["Record created successfully."]
 
-    def test_update_record(self, api_client, add_perm_token, fetch_data_1):
+    def test_update_record(self, api_client, add_perm_token, customer1):
         """
         This is a success update scenario.
         """
-        data_id = fetch_data_1.id
+        data_id = customer1.id
 
         save_payload = {
             "payload": {

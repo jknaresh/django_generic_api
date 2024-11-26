@@ -6,6 +6,20 @@ from django_generic_api.tests.demo_app.models import Customer
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
 
+# customer instance 1
+@pytest.fixture
+def customer1():
+    customer1 = baker.make_recipe("demo_app.customer_1")
+    return customer1
+
+
+# customer instance 2
+@pytest.fixture
+def customer2():
+    customer2 = baker.make_recipe("demo_app.customer_2")
+    return customer2
+
+
 def generate_token(user):
     refresh = RefreshToken.for_user(user)
     return [
@@ -17,17 +31,16 @@ def generate_token(user):
 
 
 @pytest.fixture
-def all_perm_user():
+def all_perm_user_fixture():
     """
     User with add and view perm.
     """
-    user = baker.make(User, username="allpermuser@gmail.com")
-    user.set_password("123456")
-    user.save()
+    user = baker.make_recipe("demo_app.all_perm_user")
 
     perm1 = Permission.objects.get(codename="add_customer")
     perm2 = Permission.objects.get(codename="view_customer")
     user.user_permissions.add(perm1, perm2)
+
     return user
 
 
@@ -36,9 +49,7 @@ def save_perm_user():
     """
     User with add perm.
     """
-    user = baker.make(User, username="addpermuser@gmail.com")
-    user.set_password("123456")
-    user.save()
+    user = baker.make_recipe("demo_app.save_perm_user")
 
     perm1 = Permission.objects.get(codename="add_customer")
     perm2 = Permission.objects.get(codename="change_customer")
@@ -51,9 +62,7 @@ def view_perm_user():
     """
     User with view perm.
     """
-    user = baker.make(User, username="viewpermuser@gmail.com")
-    user.set_password("123456")
-    user.save()
+    user = baker.make_recipe("demo_app.view_perm_user")
 
     perm = Permission.objects.get(codename="view_customer")
     user.user_permissions.add(perm)
@@ -65,10 +74,7 @@ def no_perm_user():
     """
     User with no perm.
     """
-    user = baker.make(User, username="nopermuser@gmail.com")
-    user.set_password("123456")
-    user.save()
-
+    user = baker.make_recipe("demo_app.no_perm_user")
     return user
 
 
@@ -123,37 +129,8 @@ def api_client():
 
 
 @pytest.fixture
-def fetch_data_1(db):
-    """Fixture for baked Customer model."""
-    customer = baker.make(
-        Customer,
-        name="test_user1",
-        dob="2003-04-27",
-        email="user1@gmail.com",
-        phone_no="123456",
-        address="HYD",
-        pin_code="100",
-        status="alive",
-    )
-    customer = baker.make(
-        Customer,
-        name="test_user2",
-        dob="2003-04-08",
-        email="user2@gmail.com",
-        phone_no="456789",
-        address="DEL",
-        pin_code="200",
-        status="alive",
-    )
-    return customer
-
-
-@pytest.fixture
 def login_user(db):
-    login_user = baker.make(
-        User,
-        username="user@gmail.com",
-    )
+    login_user = baker.make_recipe("demo_app.login_user")
     login_user.set_password("123456")
     login_user.is_active = True
     login_user.save()
@@ -163,7 +140,7 @@ def login_user(db):
 
 @pytest.fixture
 def inactive_user_id(db):
-    user = baker.make(User, username="inactive@gmail.com")
+    user = baker.make_recipe("demo_app.inactive_user_id")
     user.set_password("123456")
     user.is_active = False
     user.save()
@@ -174,7 +151,7 @@ def inactive_user_id(db):
 
 @pytest.fixture
 def non_existing_user(db):
-    user = baker.make(User, username="non_existing_user@gmail.com")
+    user = baker.make_recipe("demo_app.non_existing_user")
     user.set_password("123456")
     user.is_active = False
     user.save()
