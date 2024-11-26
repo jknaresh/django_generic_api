@@ -1,19 +1,19 @@
+import base64
 import time
 from urllib.parse import quote, unquote
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth import logout
+from django.contrib.auth import password_validation
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
 from django.utils.decorators import method_decorator
 from pydantic import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-import base64
-from django.core.exceptions import ValidationError as DjangoValidationError
-from django.contrib.auth import password_validation
 
 from .payload_models import (
     FetchPayload,
@@ -246,7 +246,8 @@ class GenericRegisterAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # info: Checks password strength if password validators are configured in settings.
+        # info: Checks password strength if password validators are
+        # configured in settings.
         if getattr(settings, "AUTH_PASSWORD_VALIDATORS"):
             try:
                 password_validation.validate_password(password)

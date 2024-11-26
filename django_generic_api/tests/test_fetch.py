@@ -1,20 +1,18 @@
 # Test cases for fetch API
-import pytest
-from rest_framework.test import APIClient
-from django_generic_api.tests.demo_app.models import Customer
 import json
+from unittest import mock
+
+import pytest
+from rest_framework_simplejwt.tokens import AccessToken
+
 from fixtures.API import (
     api_client,
     view_perm_token,
     add_perm_token,
     view_perm_user,
-    save_perm_user,
     customer1,
     customer2,
 )
-from unittest import mock
-from rest_framework_simplejwt.tokens import AccessToken
-from model_bakery import baker
 
 
 @pytest.mark.django_db
@@ -638,7 +636,8 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V006"
         assert (
             response_data["error"]
-            == "Input should be a valid dictionary or instance of FetchFilter('filters', 0)"
+            == "Input should be a valid dictionary or instance of "
+            "FetchFilter('filters', 0)"
         )
 
     def test_invalid_fetch_filter_operator(
@@ -679,7 +678,8 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V006"
         assert (
             response_data["error"]
-            == "Input should be 'eq', 'in', 'not' or 'gt'('filters', 0, 'operator')"
+            == "Input should be 'eq', 'in', 'not' or 'gt'('filters', 0, "
+            "'operator')"
         )
 
     def test_invalid_fetch_filter_name_datatype(
@@ -757,7 +757,8 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V009"
         assert (
             response_data["error"]
-            == "{'error': \"Invalid data: ['456789'] for dob\", 'code': 'DGA-S004'}"
+            == "{'error': \"Invalid data: ['456789'] for dob\", 'code': "
+            "'DGA-S004'}"
         )
 
     def test_invalid_filter_value_length_for_eq_operator(
@@ -882,12 +883,14 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V006"
         assert (
             response_data["error"]
-            == "Input should be a valid integer, unable to parse string as an integer('pageNumber',)"
+            == "Input should be a valid integer, unable to parse string "
+            "as an integer('pageNumber',)"
         )
 
     def test_negative_page_size(self, customer1, api_client, view_perm_token):
         """
-        Test the fetch endpoint with pageNumber or pageSize set to a negative integer.
+        Test the fetch endpoint with pageNumber or pageSize set to a
+        negative integer.
         """
         fetch_payload = {
             "payload": {
@@ -955,7 +958,8 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V006"
         assert (
             response_data["error"]
-            == "Input should be a valid dictionary or instance of FetchSort('sort',)"
+            == "Input should be a valid dictionary or instance of "
+            "FetchSort('sort',)"
         )
 
     def test_extra_keys_in_sort(self, customer1, api_client, view_perm_token):
@@ -1096,7 +1100,8 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V006"
         assert (
             response_data["error"]
-            == "Input should be a valid boolean, unable to interpret input('distinct',)"
+            == "Input should be a valid boolean, unable to interpret "
+            "input('distinct',)"
         )
 
     @mock.patch("rest_framework_simplejwt.tokens.AccessToken.verify")

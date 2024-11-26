@@ -3,8 +3,8 @@ from typing import Dict, Optional
 
 from django.apps import apps
 from django.contrib.auth import get_user_model
-from django.db.models import Q
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.http import JsonResponse
 from pydantic import (
     BaseModel,
@@ -126,7 +126,8 @@ def get_model_config_schema(model):
         if not DJANGO_TO_PYDANTIC_TYPE_MAP.get(django_field_type):
             raise ValueError(
                 {
-                    "error": f"Field type mapping not found for: {field1.name}",
+                    "error": f"Field type mapping not found for: "
+                    f"{field1.name}",
                     "code": "DGA-S011",
                 }
             )

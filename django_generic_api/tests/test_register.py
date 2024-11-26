@@ -1,11 +1,8 @@
-import pytest
-from rest_framework.test import APIClient
 import json
+
+import pytest
+
 from fixtures.API import api_client, login_user
-from urllib.parse import quote
-import time
-from unittest import mock
-import base64
 
 
 @pytest.mark.django_db

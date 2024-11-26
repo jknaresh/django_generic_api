@@ -1,7 +1,8 @@
 import pytest
-from fixtures.basic import sample_string, sample_dict
-from django_generic_api.tests.demo_app.models import Customer
 from model_bakery import baker
+
+from django_generic_api.tests.demo_app.models import Customer
+from fixtures.basic import sample_string, sample_dict
 
 
 def test_sample_string(sample_string):
