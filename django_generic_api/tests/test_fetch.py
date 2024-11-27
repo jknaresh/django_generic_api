@@ -9,10 +9,16 @@ from fixtures.API import (
     api_client,
     view_perm_token,
     add_perm_token,
+    save_perm_user,
     view_perm_user,
     customer1,
     customer2,
 )
+
+# To ensure the import is retained
+usage = save_perm_user
+
+# As pytest uses an SQLite3 database by default, the LIKE and ILIKE operators are tested using a MySQL database, but this is not mentioned here.
 
 
 @pytest.mark.django_db
@@ -262,6 +268,52 @@ class TestGenericFetchAPI:
         assert response_data["total"] == 0
         assert response_data["data"] == []
 
+    def test_fetch_filter_operator_like(
+        self, customer1, customer2, api_client, view_perm_token
+    ):
+        fetch_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "customer",
+                    "fields": ["name", "email", "address"],
+                    "filters": [
+                        {
+                            "operator": "like",
+                            "name": "address",
+                            "value": ["hyd"],
+                        }
+                    ],
+                    "pageNumber": 1,
+                    "pageSize": 10,
+                    "sort": {"field": "name", "order_by": "asc"},
+                    "distinct": True,
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {view_perm_token}"}
+
+        response = api_client.post(
+            "/fetch/",
+            fetch_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 200
+        assert response_data["total"] == 2
+        assert response_data["data"] == [
+            {
+                "name": "test_user1",
+                "email": "user1@gmail.com",
+                "address": "hyderabad",
+            },
+            {
+                "name": "test_user2",
+                "email": "user2@gmail.com",
+                "address": "HYDERABAD",
+            },
+        ]
+
     def test_payload_missing_field_property(
         self, customer1, api_client, view_perm_token
     ):
@@ -440,7 +492,7 @@ class TestGenericFetchAPI:
         )
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 404
-        assert response_data["error"] == ""
+        assert response_data["error"] == "Model not found"
         assert response_data["code"] == "DGA-V007"
 
     def test_fetch_unauthorized(self, customer1, api_client, add_perm_token):
@@ -636,8 +688,7 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V006"
         assert (
             response_data["error"]
-            == "Input should be a valid dictionary or instance of "
-            "FetchFilter('filters', 0)"
+            == "Input should be a valid dictionary or instance of FetchFilter('filters', 0)"
         )
 
     def test_invalid_fetch_filter_operator(
@@ -676,9 +727,11 @@ class TestGenericFetchAPI:
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V006"
+
+        # Add the newly added operator to the error message while testing
         assert (
             response_data["error"]
-            == "Input should be 'eq', 'in', 'not' or 'gt'('filters', 0, "
+            == "Input should be 'eq', 'in', 'not', 'gt', 'like' or 'ilike'('filters', 0, "
             "'operator')"
         )
 
@@ -757,8 +810,7 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V009"
         assert (
             response_data["error"]
-            == "{'error': \"Invalid data: ['456789'] for dob\", 'code': "
-            "'DGA-S004'}"
+            == "{'error': \"Invalid data: ['456789'] for dob\", 'code': 'DGA-S004'}"
         )
 
     def test_invalid_filter_value_length_for_eq_operator(
@@ -883,14 +935,12 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V006"
         assert (
             response_data["error"]
-            == "Input should be a valid integer, unable to parse string "
-            "as an integer('pageNumber',)"
+            == "Input should be a valid integer, unable to parse string as an integer('pageNumber',)"
         )
 
     def test_negative_page_size(self, customer1, api_client, view_perm_token):
         """
-        Test the fetch endpoint with pageNumber or pageSize set to a
-        negative integer.
+        Test the fetch endpoint with pageNumber or pageSize set to a negative integer.
         """
         fetch_payload = {
             "payload": {
@@ -958,8 +1008,7 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V006"
         assert (
             response_data["error"]
-            == "Input should be a valid dictionary or instance of "
-            "FetchSort('sort',)"
+            == "Input should be a valid dictionary or instance of FetchSort('sort',)"
         )
 
     def test_extra_keys_in_sort(self, customer1, api_client, view_perm_token):
@@ -1100,8 +1149,7 @@ class TestGenericFetchAPI:
         assert response_data["code"] == "DGA-V006"
         assert (
             response_data["error"]
-            == "Input should be a valid boolean, unable to interpret "
-            "input('distinct',)"
+            == "Input should be a valid boolean, unable to interpret input('distinct',)"
         )
 
     @mock.patch("rest_framework_simplejwt.tokens.AccessToken.verify")

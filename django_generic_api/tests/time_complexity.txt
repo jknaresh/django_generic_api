@@ -1,0 +1,4 @@
+This file is used to record the time taken to execute all test cases on cache.
+
+1. Time taken using the bakery model (baker.make method): 74 cases completed in 25 seconds.
+2. Time taken using the bakery model (baker.make_recipe method): 81 cases completed in 15 seconds.

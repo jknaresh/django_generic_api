@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
-from model_bakery.recipe import Recipe
-
 from django_generic_api.tests.demo_app.models import Customer
+from model_bakery.recipe import Recipe
 
 # Create instances of a model with predefined field values.
 customer_1 = Recipe(
@@ -9,6 +8,7 @@ customer_1 = Recipe(
     name="test_user1",
     email="user1@gmail.com",
     phone_no="123456",
+    address="hyderabad",
 )
 
 customer_2 = Recipe(
@@ -16,6 +16,7 @@ customer_2 = Recipe(
     name="test_user2",
     email="user2@gmail.com",
     phone_no="456789",
+    address="HYDERABAD",
 )
 
 test_instance = Recipe(Customer, name="instance_1", address="GOA")

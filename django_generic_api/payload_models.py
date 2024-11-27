@@ -23,6 +23,8 @@ class OperatorByEnum(str, Enum):
     IN = "in"
     NOT = "not"
     GT = "gt"
+    LIKE = "like"
+    ILIKE = "ilike"
 
 
 class OperationByEnum(str, Enum):

@@ -283,6 +283,10 @@ def apply_filters(model, filters):
             condition1 = ~Q(**{f"{field_name}": value[0]})
         elif operator == "gt":
             condition1 = Q(**{f"{field_name}__gt": value[0]})
+        elif operator == "like":
+            condition1 = Q(**{f"{field_name}__contains": value[0]})
+        elif operator == "ilike":
+            condition1 = Q(**{f"{field_name}__icontains": value[0]})
 
         if last_logical_operation == "or":
             query1 |= condition1
