@@ -15,7 +15,7 @@ from fixtures.API import (
 )
 
 # To ensure the import is retained
-_ = view_perm_user
+usage = view_perm_user
 
 
 @pytest.mark.django_db

@@ -16,7 +16,9 @@ from fixtures.API import (
 )
 
 # To ensure the import is retained
-_ = save_perm_user
+usage = save_perm_user
+
+# As pytest uses an SQLite3 database by default, the LIKE and ILIKE operators are tested using a MySQL database, but this is not mentioned here.
 
 
 @pytest.mark.django_db
@@ -265,43 +267,6 @@ class TestGenericFetchAPI:
         assert response.status_code == 200
         assert response_data["total"] == 0
         assert response_data["data"] == []
-
-    def test_fetch_filter_operator_like(
-        self, customer1, api_client, view_perm_token
-    ):
-        fetch_payload = {
-            "payload": {
-                "variables": {
-                    "modelName": "customer",
-                    "fields": ["name", "email"],
-                    "filters": [
-                        {
-                            "operator": "like",
-                            "name": "address",
-                            "value": ["hyd"],
-                        }
-                    ],
-                    "pageNumber": 1,
-                    "pageSize": 10,
-                    "sort": {"field": "name", "order_by": "desc"},
-                    "distinct": True,
-                }
-            }
-        }
-        headers = {"Authorization": f"Bearer {view_perm_token}"}
-
-        response = api_client.post(
-            "/fetch/",
-            fetch_payload,
-            format="json",
-            headers=headers,
-        )
-        response_data = json.loads(response.content.decode("utf-8"))
-        assert response.status_code == 200
-        assert response_data["total"] == 1
-        assert response_data["data"] == [
-            {"name": "test_user1", "email": "user1@gmail.com"},
-        ]
 
     def test_payload_missing_field_property(
         self, customer1, api_client, view_perm_token
@@ -716,9 +681,11 @@ class TestGenericFetchAPI:
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V006"
+
+        # Add the newly added operator to the error message while testing
         assert (
             response_data["error"]
-            == "Input should be 'eq', 'in', 'not', 'gt' or 'like'('filters', 0, "
+            == "Input should be 'eq', 'in', 'not', 'gt', 'like' or 'ilike'('filters', 0, "
             "'operator')"
         )
 

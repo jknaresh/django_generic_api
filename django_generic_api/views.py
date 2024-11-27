@@ -141,9 +141,9 @@ class GenericFetchAPIView(APIView):
         # check if user has permission to view the data.
         try:
             model = get_model_by_name(model_name)
-        except Exception as e:
+        except ValueError:
             return Response(
-                {"error": str(e), "code": "DGA-V007"},
+                {"error": "Model not found", "code": "DGA-V007"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         if not self.request.user.has_perm(make_permission_str(model, "fetch")):

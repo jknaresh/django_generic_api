@@ -12,7 +12,7 @@ from fixtures.API import (
 )
 
 # To ensure the import is retained
-_ = non_existing_user
+usage = non_existing_user
 
 
 @pytest.mark.django_db

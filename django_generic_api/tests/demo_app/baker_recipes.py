@@ -16,6 +16,7 @@ customer_2 = Recipe(
     name="test_user2",
     email="user2@gmail.com",
     phone_no="456789",
+    address="HYDERABAD",
 )
 
 test_instance = Recipe(Customer, name="instance_1", address="GOA")
