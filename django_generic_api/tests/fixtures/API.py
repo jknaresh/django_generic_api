@@ -3,6 +3,8 @@ from django.contrib.auth.models import Permission
 from model_bakery import baker
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
+import time
+import base64
 
 
 # customer instance 1
@@ -158,3 +160,14 @@ def non_existing_user(db):
     user.delete()
 
     return user_id
+
+
+@pytest.fixture
+def registration_token():
+    def token(user_id):
+        timestamp = int(time.time())
+        token1 = f"{user_id}:{timestamp}"
+        encoded_token = base64.urlsafe_b64encode(token1.encode()).decode()
+        return encoded_token
+
+    return token

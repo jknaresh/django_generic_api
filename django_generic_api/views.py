@@ -14,12 +14,15 @@ from pydantic import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
 
 from .payload_models import (
     FetchPayload,
     SavePayload,
     GenericLoginPayload,
     GenericRegisterPayload,
+    GenericForgotPasswordPayload,
+    GenericNewPasswordPayload,
 )
 from .services import (
     get_model_by_name,
@@ -34,6 +37,12 @@ from .utils import (
     store_user_ip,
     is_valid_domain,
 )
+from captcha.image import ImageCaptcha
+from io import BytesIO
+from django.http import FileResponse
+import random
+import uuid
+from django.core.cache import cache
 
 
 class GenericSaveAPIView(APIView):
@@ -236,7 +245,35 @@ class GenericRegisterAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        captcha_id = validate_register_data.captcha_id
+        captcha_number = validate_register_data.captcha_number
+
+        cached_captcha = cache.get(captcha_id)
+
+        if cached_captcha is None:
+            return Response(
+                {"error": "CAPTCHA expired or invalid.", "code": "DGA-V029"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if captcha_number != cached_captcha:
+            return Response(
+                {"error": "Invalid CAPTCHA.", "code": "DGA-V030"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         email = validate_register_data.email
+
+        user = User.objects.filter(username=email).exists()
+        if user:
+            return Response(
+                {
+                    "error": "Account already exists with this email.",
+                    "code": "DGA-V015",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         password = validate_register_data.password.get_secret_value()
         password1 = validate_register_data.password1.get_secret_value()
 
@@ -280,69 +317,118 @@ class GenericRegisterAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        user = User.objects.filter(username=email).exists()
-        if user:
+        new_user = User(
+            username=email,
+            email=email,
+            is_active=False,
+        )
+        new_user.set_password(password)
+        new_user.save()
+
+        token = registration_token(new_user.id)
+        encoded_token = quote(token)
+        email_verify = f"{settings.BASE_URL}/api/activate/" f"{encoded_token}/"
+
+        try:
+            subject = "Verify your email address for SignUp"
+            message = (
+                "Please click the link below to verify your "
+                f"account:\n\n{email_verify}"
+            )
+            from_email = settings.EMAIL_HOST_USER
+            recipient_list = [email]
+
+            send_mail(
+                subject,
+                message,
+                from_email,
+                recipient_list,
+                fail_silently=False,
+            )
+            # todo: Remove "email_verify' variable after whole process,
+            #  only for dev, remove in prod.
             return Response(
-                {
-                    "error": "Account already exists with this email.",
-                    "code": "DGA-V015",
-                },
+                {"message": f"Email sent successfully. {email_verify}"},
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e), "code": "DGA-V016"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        else:
-            new_user = User(
-                username=email,
-                email=email,
-                is_active=False,
-            )
-            new_user.set_password(password)
-            new_user.save()
-
-            token = registration_token(new_user.id)
-            encoded_token = quote(token)
-            email_verify = (
-                f"{settings.BASE_URL}/api/activate/" f"{encoded_token}/"
-            )  # todo: throw error if no
-            # base url
-
-            try:
-                subject = "Verify your email address for SignUp"
-                message = (
-                    "Please click the link below to verify your "
-                    f"account:\n\n{email_verify}"
-                )
-                from_email = settings.EMAIL_HOST_USER
-                recipient_list = [email]
-
-                send_mail(
-                    subject,
-                    message,
-                    from_email,
-                    recipient_list,
-                    fail_silently=False,
-                )
-                # todo: Remove "email_verify' variable after whole process,
-                #  only for dev, remove in prod.
-                return Response(
-                    {"message": f"Email sent successfully. {email_verify}"},
-                    status=status.HTTP_200_OK,
-                )
-            except Exception as e:
-                return Response(
-                    {"error": str(e), "code": "DGA-V016"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
 
 
 class GenericForgotPasswordAPIView(APIView):
-    # WIP: continue process
+
     def post(self, *args, **kwargs):
         payload = self.request.data.get("payload", {}).get("variables", {})
         try:
-            validated_email = ForgotPasswordPayload(**payload)
+            validated_userdata = GenericForgotPasswordPayload(**payload)
         except ValidationError as e:
             return Response(
                 {"error": e.errors()[0].get("msg"), "code": "DGA-V017"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        captcha_id = validated_userdata.captcha_id
+        captcha_number = validated_userdata.captcha_number
+
+        cached_captcha = cache.get(captcha_id)
+
+        if cached_captcha is None:
+            return Response(
+                {"error": "CAPTCHA expired or invalid.", "code": "DGA-V025"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if captcha_number != cached_captcha:
+            return Response(
+                {"error": "Invalid CAPTCHA.", "code": "DGA-V026"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        username = validated_userdata.email
+        user_model = get_user_model()
+
+        try:
+            user = user_model.objects.get(username=username)
+        except user_model.DoesNotExist:
+            return Response(
+                {"error": "User not found", "code": "DGA-V027"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        token = registration_token(user.id)
+        encoded_token = quote(token)
+        new_password_link = (
+            f"{settings.BASE_URL}/api/newpassword/" f"{encoded_token}/"
+        )
+
+        try:
+            subject = "Change your password"
+            message = (
+                f"This link is to generate a new password: \n\n{new_password_link}, "
+                "\n\nSend a POST request to this link with defined payload to generate a new password."
+            )
+            from_email = settings.EMAIL_HOST_USER
+            recipient_list = [username]
+
+            send_mail(
+                subject,
+                message,
+                from_email,
+                recipient_list,
+                fail_silently=False,
+            )
+            # todo: Remove "new_password_link' variable after whole process,
+            #  only for dev, remove in prod.
+            return Response(
+                {"message": f"Email sent successfully. {new_password_link}"},
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e), "code": "DGA-V028"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -405,3 +491,96 @@ class AccountActivateAPIView(APIView):
                 {"error": str(e), "code": "DGA-V020"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class CaptchaServiceAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+
+        image_captcha = ImageCaptcha()
+        captcha_number = random.randint(1000, 9999)
+        captcha_id = str(uuid.uuid1())
+
+        cache.set(captcha_id, captcha_number, timeout=300)
+
+        image_data = BytesIO()
+        image_captcha.write(str(captcha_number), image_data)
+        image_data.seek(0)
+
+        return FileResponse(
+            image_data,
+            content_type="image/png",
+            as_attachment=False,
+            filename="captcha.png",
+            headers={"X-Captcha-ID": captcha_id},
+        )
+
+
+class NewPasswordAPIView(APIView):
+
+    def post(self, request, encoded_token, *args, **kwargs):
+
+        # Decode token and get the user ID
+        try:
+            token = unquote(encoded_token)
+            decoded_token = base64.urlsafe_b64decode(token.encode()).decode()
+            user_id, timestamp = decoded_token.split(":")
+        except (ValueError, base64.binascii.Error):
+            return Response(
+                {"error": "Invalid token format.", "code": "DGA-V035"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # todo: set as user customizable time
+        if int(time.time()) - int(timestamp) > 24 * 3600:
+            return Response(
+                {
+                    "error": "The password reset link has expired.",
+                    "code": "DGA-V031",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        payload = self.request.data.get("payload", {}).get("variables", {})
+        try:
+            validated_userdata = GenericNewPasswordPayload(**payload)
+        except ValidationError as e:
+            return Response(
+                {"error": e.errors()[0].get("msg"), "code": "DGA-V032"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = get_object_or_404(User, id=user_id)
+
+        password = validated_userdata.password.get_secret_value()
+        password1 = validated_userdata.password1.get_secret_value()
+
+        if not password == password1:
+            return Response(
+                {"error": "passwords does not match", "code": "DGA-V033"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if getattr(settings, "AUTH_PASSWORD_VALIDATORS"):
+            try:
+                password_validation.validate_password(password)
+            except DjangoValidationError:
+                return Response(
+                    {
+                        "error": [
+                            "1. Password must contain at least 8 characters.",
+                            "2. Password must not be too common.",
+                            "3. Password must not be entirely numeric.",
+                        ],
+                        "code": "DGA-V034",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        user.set_password(password)
+        user.is_active = True
+        user.save()
+
+        return Response(
+            {"message": "Your password has been reset."},
+            status=status.HTTP_200_OK,
+        )

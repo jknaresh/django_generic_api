@@ -7,6 +7,7 @@ from pydantic import (
     JsonValue,
     SecretStr,
     EmailStr,
+    UUID1,
 )
 
 from .utils import PydanticConfigV1
@@ -74,11 +75,24 @@ class FetchPayload(BaseModel, PydanticConfigV1):
 
 
 class GenericLoginPayload(BaseModel, PydanticConfigV1):
-    email: str
+    email: EmailStr
     password: SecretStr
 
 
 class GenericRegisterPayload(BaseModel, PydanticConfigV1):
     email: EmailStr
+    password: SecretStr
+    password1: SecretStr
+    captcha_id: UUID1
+    captcha_number: int
+
+
+class GenericForgotPasswordPayload(BaseModel, PydanticConfigV1):
+    email: EmailStr
+    captcha_id: UUID1
+    captcha_number: int
+
+
+class GenericNewPasswordPayload(BaseModel, PydanticConfigV1):
     password: SecretStr
     password1: SecretStr
