@@ -288,11 +288,40 @@ header["Content-Type"]="application/json"
     "access": "..."
 }
 ```
+---
+## Captcha API
 
+- This API allows users to obtain a CAPTCHA image and its id for verification purposes.
+- To get a captcha, perform the request as
+
+### Method:
+
+```bash
+HTTP Method: "GET"
+```
+### URL construction:
+
+```bash
+url: "http://domain-name/api/captcha/",
+```
+
+### <span style="color: green;">Response for Captcha:</span>
+
+```bash
+{
+    <Captcha_Image>
+}
+```
+
+### Usage: 
+- Extract the "captcha_number" from the CAPTCHA image.
+- Retrieve the "captcha_id" from the X-Captcha-ID response header.
+- Use both attributes in subsequent requests requiring CAPTCHA validation.
 ---
 
 ## Register API
 
+- Send a GET request to Captcha API to get "captcha_id" and "captcha_number".
 - To register a user, post the data on url '/< prefix >/register/'.
 - As user sends registration request, a user activation link is sent to their
   email, as user clicks on
@@ -318,7 +347,9 @@ url: "http://domain-name/api/register/",
         "variables":{
             "email":"user@example.com",
             "password":"123456",
-            "password1":"123456"
+            "password1":"123456",
+            "captcha_id": "<captcha_id>",
+            "captcha_number": <captcha_number>
         }
     }
 }
@@ -662,3 +693,86 @@ header["Authorization"]="Bearer <access token>"
 | SaveInput.value | Any              | Value of corresponding column in table , ex: value1 | True     | "value1"                                    | 963                                      |
 
 ---
+
+
+## Forgot Password API
+
+- Send a GET request to Captcha API to get "captcha_id" and "captcha_number".
+- This API enables users to initiate the password recovery process.
+- When a user forgets their password, they can submit a request to receive a password reset link via email.
+
+### Method:
+
+```bash
+HTTP Method: "POST"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/forgotPassword/",
+```
+
+### <span style="color: red;">Payload for Forgot Password:</span>
+
+```json
+{
+    "payload":{
+        "variables":{
+            "email":"user@example.com",
+            "captcha_id": "<captcha_id>",
+            "captcha_number": <captcha_number>
+        }
+    }
+}
+```
+
+### <span style="color: green;">Response for Forgot Password:</span>
+
+```json
+{
+    "message": "Email sent successfully."
+}
+```
+
+---
+
+## New Password API
+
+- This API enables users to reset their password securely.
+- Users must first initiate the password reset process by sending a POST request to the Forgot Password API.
+- A password reset link will be sent to their registered email address. 
+- Once the link is received, users can use it to update their password by making a POST request as outlined below.
+
+### Method:
+
+```bash
+HTTP Method: "POST"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/newpassword/<encoded_token>",
+```
+
+### <span style="color: red;">Payload for New Password:</span>
+
+```json
+{
+    "payload":{
+        "variables":{
+            "password": "123456",
+            "password1" : "123456"
+        }
+    }
+}
+```
+
+### <span style="color: green;">Response for New Password:</span>
+
+```json
+{
+    "message": "Your password has been reset."
+}
+```
