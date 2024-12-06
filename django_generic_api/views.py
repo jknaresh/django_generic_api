@@ -494,7 +494,30 @@ class AccountActivateAPIView(APIView):
 
 
 class CaptchaServiceAPIView(APIView):
+
+    # post method
     def post(self, request, *args, **kwargs):
+
+        image_captcha = ImageCaptcha()
+        captcha_number = random.randint(1000, 9999)
+        captcha_id = str(uuid.uuid1())
+
+        cache.set(captcha_id, captcha_number, timeout=300)
+
+        image_data = BytesIO()
+        image_captcha.write(str(captcha_number), image_data)
+        image_data.seek(0)
+
+        return FileResponse(
+            image_data,
+            content_type="image/png",
+            as_attachment=False,
+            filename="captcha.png",
+            headers={"X-Captcha-ID": captcha_id},
+        )
+
+    # get method
+    def get(self, request, *args, **kwargs):
 
         image_captcha = ImageCaptcha()
         captcha_number = random.randint(1000, 9999)

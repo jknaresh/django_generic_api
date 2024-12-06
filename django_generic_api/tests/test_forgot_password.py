@@ -6,6 +6,9 @@ from fixtures.API import api_client, login_user
 from django.core.cache import cache as cache1
 
 
+# Forgot password test cases use post method for captcha implementation
+
+
 @pytest.mark.django_db
 class TestForgotPasswordAPI:
 
