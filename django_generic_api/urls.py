@@ -10,6 +10,9 @@ from .views import (
     GenericLoginAPIView,
     GenericRegisterAPIView,
     AccountActivateAPIView,
+    GenericForgotPasswordAPIView,
+    CaptchaServiceAPIView,
+    NewPasswordAPIView,
 )
 
 urlpatterns = [
@@ -23,5 +26,16 @@ urlpatterns = [
         "activate/<str:encoded_token>/",
         AccountActivateAPIView.as_view(),
         name="activate",
+    ),
+    path(
+        "forgotPassword/",
+        GenericForgotPasswordAPIView.as_view(),
+        name="forgotPassword",
+    ),
+    path("captcha/", CaptchaServiceAPIView.as_view(), name="captcha"),
+    path(
+        "newpassword/<str:encoded_token>/",
+        NewPasswordAPIView.as_view(),
+        name="newpassword",
     ),
 ]

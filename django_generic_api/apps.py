@@ -19,8 +19,8 @@ class DjangoGenericApiConfig(AppConfig):
             ],
             "DEFAULT_THROTTLE_RATES": {
                 "user": "2000/hour",  # Rate limit for authenticated users
-                "anon": "25/hour",  # Rate limit for unauthenticated users,
-                # 20 request per 1 hour
+                "anon": "60/hour",  # Rate limit for unauthenticated users,
+                # 60 request per 1 hour
             },
             "EXCEPTION_HANDLER": "django_generic_api.utils.custom_exception_handler",
         }
@@ -33,3 +33,17 @@ class DjangoGenericApiConfig(AppConfig):
         for key, value in DEFAULT_DRF_THROTTLE_SETTINGS.items():
             if key not in settings.REST_FRAMEWORK:
                 settings.REST_FRAMEWORK[key] = value
+
+        # Predefining cache settings
+        DEFAULT_CACHE_SETTINGS = {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-cache-name",
+        }
+
+        # Check if `CACHES` is defined; if not, define it
+        if not hasattr(settings, "CACHES"):
+            settings.CACHES = {"default": DEFAULT_CACHE_SETTINGS}
+        else:
+            # Ensure the default cache backend is set if not already defined
+            if "default" not in settings.CACHES:
+                settings.CACHES["default"] = DEFAULT_CACHE_SETTINGS

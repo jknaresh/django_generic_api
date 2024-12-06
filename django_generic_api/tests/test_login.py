@@ -50,7 +50,7 @@ class TestLoginAPI:
         assert response_data["error"] == "Field required"
         assert response_data["code"] == "DGA-V010"
 
-    def test_invalid_payload_format(self, api_client):
+    def test_invalid_payload_format(self, api_client, login_user):
         """
         User has given an extra field in payload format.
         """
@@ -58,7 +58,7 @@ class TestLoginAPI:
         login_payload = {
             "payload": {
                 "variables": {
-                    "email": "admin",
+                    "email": "user@gmail.com",
                     "extra_field": "abc",
                     "password": "123456",
                 }
