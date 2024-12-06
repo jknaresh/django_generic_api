@@ -292,12 +292,13 @@ header["Content-Type"]="application/json"
 ## Captcha API
 
 - This API allows users to obtain a CAPTCHA image and its id for verification purposes.
+- This API supports both GET and POST methods.
 - To get a captcha, perform the request as
 
 ### Method:
 
 ```bash
-HTTP Method: "GET"
+HTTP Method: "GET" / "POST"
 ```
 ### URL construction:
 
