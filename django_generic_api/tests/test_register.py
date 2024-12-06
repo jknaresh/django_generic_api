@@ -13,7 +13,9 @@ class TestRegisterAPI:
         """
         User registration is success.
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
@@ -48,7 +50,9 @@ class TestRegisterAPI:
         """
         User registration is success.
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
@@ -88,7 +92,9 @@ class TestRegisterAPI:
         """
         User has not included a required field in payload.
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
@@ -122,7 +128,9 @@ class TestRegisterAPI:
         """
         User's Register payload consists an extra field.
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
@@ -150,12 +158,17 @@ class TestRegisterAPI:
             format="json",
         )
         response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 400
+        assert response_data["code"] == "DGA-V013"
+        assert response_data["error"] == "Extra inputs are not permitted"
 
     def test_passwords_dont_match(self, api_client):
         """
         User's Register payload does not match predefined payload
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
@@ -190,7 +203,9 @@ class TestRegisterAPI:
         """
         User has registered with an invalid domain
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
@@ -226,7 +241,9 @@ class TestRegisterAPI:
         """
         User registers with an existing email.
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
@@ -264,7 +281,9 @@ class TestRegisterAPI:
         """
         User registration is success.
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
@@ -300,7 +319,9 @@ class TestRegisterAPI:
         """
         User registration is success.
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")

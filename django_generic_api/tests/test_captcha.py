@@ -11,7 +11,8 @@ class TestCaptchaAPI:
         Captcha success scenario.
         """
 
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         captcha_number = cache1.get(captcha_id)

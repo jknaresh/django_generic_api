@@ -13,7 +13,9 @@ class TestForgotPasswordAPI:
         """
         Success scenario.
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
@@ -46,7 +48,9 @@ class TestForgotPasswordAPI:
         """
         Invalid captcha id
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
@@ -80,7 +84,9 @@ class TestForgotPasswordAPI:
         """
         Invalid captcha number
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
@@ -114,7 +120,9 @@ class TestForgotPasswordAPI:
         """
         Mandatory field is missing in payload
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
@@ -147,7 +155,9 @@ class TestForgotPasswordAPI:
         """
         Mandatory field is missing in payload
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
@@ -181,7 +191,9 @@ class TestForgotPasswordAPI:
         """
         User has passed an extra field in payload
         """
-        captcha_response = api_client.get("/captcha/")
+        captcha_response = api_client.post("/captcha/")
+        assert captcha_response.headers["Content-Type"] == "image/png"
+
         assert captcha_response.status_code == 200
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")

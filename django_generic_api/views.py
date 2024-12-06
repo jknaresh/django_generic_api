@@ -494,7 +494,7 @@ class AccountActivateAPIView(APIView):
 
 
 class CaptchaServiceAPIView(APIView):
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
 
         image_captcha = ImageCaptcha()
         captcha_number = random.randint(1000, 9999)
