@@ -1,2 +1,3 @@
 include README.md
 include LICENSE
+include django_generic_api/valid_domains.txt

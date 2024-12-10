@@ -329,6 +329,7 @@ class GenericRegisterAPIView(APIView):
         encoded_token = quote(token)
         email_verify = f"{settings.BASE_URL}/api/activate/" f"{encoded_token}/"
 
+        # todo : throw error if email settings arent setup
         try:
             subject = "Verify your email address for SignUp"
             message = (

@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 from rest_framework_simplejwt.tokens import AccessToken
 
-from fixtures.API import (
+from fixtures.api import (
     api_client,
     view_perm_token,
     add_perm_token,

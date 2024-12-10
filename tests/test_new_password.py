@@ -1,5 +1,5 @@
 import pytest
-from fixtures.API import api_client, inactive_user_id, registration_token
+from fixtures.api import api_client, inactive_user_id, registration_token
 import json
 from urllib.parse import quote
 

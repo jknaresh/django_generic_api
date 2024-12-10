@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from fixtures.API import api_client, login_user
+from fixtures.api import api_client, login_user
 
 
 @pytest.mark.django_db
