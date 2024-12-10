@@ -162,4 +162,4 @@ cython_debug/
 .idea/
 *~
 user_ips.csv
-django_generic_api/tests/demo_app/migrations/0001_initial.py
+tests/demo_app/migrations/0001_initial.py

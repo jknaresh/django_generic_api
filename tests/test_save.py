@@ -5,7 +5,7 @@ import pytest
 from django_generic_api.tests.demo_app.models import Customer
 from rest_framework_simplejwt.tokens import AccessToken
 
-from fixtures.API import (
+from fixtures.api import (
     save_perm_user,
     view_perm_user,
     add_perm_token,
