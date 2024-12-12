@@ -108,6 +108,30 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
 }
 ```
+---
+
+### Configuation settings
+
+- Users can customize the configurations.
+- To customize as per your needs, create a config file named as "django_generic_api.ini".
+- Place this file in same directory as your manage.py file within your Django project.
+
+```bash
+[REST_FRAMEWORK]
+
+# Allowed request rate for authenticated users.
+USER_RATE = int   # default value = 1000 
+# Allowed request rate for anonymous user.
+ANON_RATE = int   # default value = 30
+
+[SAVE_SETTINGS]
+# Number of records allowed to save at once.
+CREATE_BATCH_SIZE = int   # default value = 10
+
+[EMAIL_SETTINGS]
+# Expiry time for email activation link (in hours).
+EMAIL_ACTIVATION_LINK_EXPIRY_HOURS = int    # default value = 24
+``` 
 
 ---
 
