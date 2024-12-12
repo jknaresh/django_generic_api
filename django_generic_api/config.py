@@ -1,6 +1,7 @@
 import os
 import configparser
 
+
 def get_project_root():
     # Get the project root directory (where manage.py is located)
     current_dir = os.getcwd()  # Start from the current working directory
