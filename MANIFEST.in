@@ -1,2 +1,4 @@
 include README.md
 include LICENSE
+include django_generic_api/config.py
+include django_generic_api/default.ini

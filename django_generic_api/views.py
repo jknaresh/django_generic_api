@@ -34,6 +34,7 @@ from .utils import (
     store_user_ip,
     is_valid_domain,
 )
+from .config import create_batch_size, expiry_hours
 
 
 class GenericSaveAPIView(APIView):
@@ -48,10 +49,13 @@ class GenericSaveAPIView(APIView):
 
         saveInput = payload.get("saveInput", {})
 
-        # Does not allow to save more than 10 records at once
-        if len(saveInput) > 10:
+        # Does not allow saving more than the customized number of records at once.
+        if len(saveInput) > create_batch_size:
             return Response(
-                {"error": "Only 10 records at once.", "code": "DGA-V001"},
+                {
+                    "error": f"Only {create_batch_size} records at once.",
+                    "code": "DGA-V001",
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -302,8 +306,7 @@ class GenericRegisterAPIView(APIView):
             encoded_token = quote(token)
             email_verify = (
                 f"{settings.BASE_URL}/api/activate/" f"{encoded_token}/"
-            )  # todo: throw error if no
-            # base url
+            )
 
             try:
                 subject = "Verify your email address for SignUp"
@@ -365,8 +368,8 @@ class AccountActivateAPIView(APIView):
             decoded_token = base64.urlsafe_b64decode(token.encode()).decode()
             user_id, timestamp = decoded_token.split(":")
 
-            # todo: set as user customizable time
-            if int(time.time()) - int(timestamp) > 24 * 3600:
+            # info: set as user customizable time
+            if int(time.time()) - int(timestamp) > expiry_hours * 3600:
                 return Response(
                     {
                         "error": "The activation link has expired.",
