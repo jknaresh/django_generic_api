@@ -7,7 +7,6 @@ from pydantic import (
     JsonValue,
     SecretStr,
     EmailStr,
-    UUID1,
 )
 
 from .utils import PydanticConfigV1
