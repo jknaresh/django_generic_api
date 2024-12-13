@@ -350,7 +350,7 @@ url: "http://domain-name/api/register/",
             "password":"123456",
             "password1":"123456",
             "captcha_id": "<captcha_id>",
-            "captcha_number": <captcha_number>
+            "captcha_value": "<captcha_value>"
         }
     }
 }

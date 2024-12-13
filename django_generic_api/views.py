@@ -44,6 +44,10 @@ import random
 import uuid
 from django.core.cache import cache
 
+from captcha.models import CaptchaStore
+from captcha.helpers import captcha_image_url
+from PIL import Image
+
 
 class GenericSaveAPIView(APIView):
 
@@ -245,23 +249,6 @@ class GenericRegisterAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        captcha_id = validate_register_data.captcha_id
-        captcha_number = validate_register_data.captcha_number
-
-        cached_captcha = cache.get(captcha_id)
-
-        if cached_captcha is None:
-            return Response(
-                {"error": "CAPTCHA expired or invalid.", "code": "DGA-V029"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if captcha_number != cached_captcha:
-            return Response(
-                {"error": "Invalid CAPTCHA.", "code": "DGA-V030"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         email = validate_register_data.email
 
         user = User.objects.filter(username=email).exists()
@@ -368,23 +355,6 @@ class GenericForgotPasswordAPIView(APIView):
         except ValidationError as e:
             return Response(
                 {"error": e.errors()[0].get("msg"), "code": "DGA-V017"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        captcha_id = validated_userdata.captcha_id
-        captcha_number = validated_userdata.captcha_number
-
-        cached_captcha = cache.get(captcha_id)
-
-        if cached_captcha is None:
-            return Response(
-                {"error": "CAPTCHA expired or invalid.", "code": "DGA-V025"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if captcha_number != cached_captcha:
-            return Response(
-                {"error": "Invalid CAPTCHA.", "code": "DGA-V026"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -498,45 +468,78 @@ class CaptchaServiceAPIView(APIView):
 
     # post method
     def post(self, request, *args, **kwargs):
+        # Generate a new captcha key
+        captcha_key = CaptchaStore.generate_key()
+        # Generate the image URL (served from your Django app)
+        image_url = captcha_image_url(captcha_key)
 
-        image_captcha = ImageCaptcha()
-        captcha_number = random.randint(1000, 9999)
-        captcha_id = str(uuid.uuid1())
-
-        cache.set(captcha_id, captcha_number, timeout=300)
-
-        image_data = BytesIO()
-        image_captcha.write(str(captcha_number), image_data)
-        image_data.seek(0)
-
-        return FileResponse(
-            image_data,
-            content_type="image/png",
-            as_attachment=False,
-            filename="captcha.png",
-            headers={"X-Captcha-ID": captcha_id},
+        # Return the image URL and captcha key to the client
+        return Response(
+            {
+                "captcha_key": captcha_key,
+                "image_url": request.build_absolute_uri(image_url),
+            }
         )
 
     # get method
     def get(self, request, *args, **kwargs):
+        # Generate a new captcha key
+        captcha_key = CaptchaStore.generate_key()
+        # Generate the image URL (served from your Django app)
+        image_url = captcha_image_url(captcha_key)
 
-        image_captcha = ImageCaptcha()
-        captcha_number = random.randint(1000, 9999)
-        captcha_id = str(uuid.uuid1())
-
-        cache.set(captcha_id, captcha_number, timeout=300)
-
-        image_data = BytesIO()
-        image_captcha.write(str(captcha_number), image_data)
-        image_data.seek(0)
-
-        return FileResponse(
-            image_data,
-            content_type="image/png",
-            as_attachment=False,
-            filename="captcha.png",
-            headers={"X-Captcha-ID": captcha_id},
+        # Return the image URL and captcha key to the client
+        return Response(
+            {
+                "captcha_key": captcha_key,
+                "image_url": request.build_absolute_uri(image_url),
+            }
         )
+
+
+class CaptchaVerifyAPIView(APIView):
+    """
+    API View to verify the captcha.
+    """
+
+    def post(self, request, *args, **kwargs):
+        captcha_key = request.data.get("captcha_key")
+        captcha_response = request.data.get("captcha_response")
+
+        if not captcha_key or not captcha_response:
+            return Response(
+                {
+                    "error": "Captcha key and response are required.",
+                    "code": "DGA-V025",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Validate the captcha response
+            captcha = CaptchaStore.objects.get(hashkey=captcha_key)
+            if captcha.response == captcha_response.lower():
+                captcha.delete()  # Clean up after successful validation
+                return Response(
+                    {"message": "Captcha verified successfully."},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {
+                        "error": "Invalid captcha response.",
+                        "code": "DGA-V026",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except CaptchaStore.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid or expired captcha key.",
+                    "code": "DGA-V027",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class NewPasswordAPIView(APIView):

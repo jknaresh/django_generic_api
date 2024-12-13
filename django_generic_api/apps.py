@@ -29,7 +29,7 @@ class DjangoGenericApiConfig(AppConfig):
 
         # Apply these defaults directly to `api_settings`
         for key, value in DEFAULT_DRF_THROTTLE_SETTINGS.items():
-            if key not in settings.REST_FRAMEWORK:
+            if not settings.REST_FRAMEWORK.get(key):
                 settings.REST_FRAMEWORK[key] = value
 
         # Predefining cache settings
@@ -49,5 +49,5 @@ class DjangoGenericApiConfig(AppConfig):
                 {"default": GENERIC_API_PACKAGE_CACHE_SETTINGS},
             )
         else:
-            if "default" not in settings.CACHES:
+            if not settings.CACHES.get("default"):
                 settings.CACHES["default"] = GENERIC_API_PACKAGE_CACHE_SETTINGS

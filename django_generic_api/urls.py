@@ -1,7 +1,8 @@
-from django.urls import path
+from django.urls import path, include
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
+from captcha import urls as captcha_urls
 
 from .views import (
     GenericFetchAPIView,
@@ -13,6 +14,7 @@ from .views import (
     GenericForgotPasswordAPIView,
     CaptchaServiceAPIView,
     NewPasswordAPIView,
+    CaptchaVerifyAPIView,
 )
 
 urlpatterns = [
@@ -34,8 +36,14 @@ urlpatterns = [
     ),
     path("captcha/", CaptchaServiceAPIView.as_view(), name="captcha"),
     path(
+        "verify_captcha/",
+        CaptchaVerifyAPIView.as_view(),
+        name="verify_captcha",
+    ),
+    path(
         "newpassword/<str:encoded_token>/",
         NewPasswordAPIView.as_view(),
         name="newpassword",
     ),
+    path("captcha/", include(captcha_urls)),
 ]

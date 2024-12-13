@@ -16,13 +16,13 @@ class TestCaptchaAPI:
         assert captcha_response.headers["Content-Type"] == "image/png"
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
-        captcha_number = cache1.get(captcha_id)
+        captcha_value = cache1.get(captcha_id)
 
         # captcha is an image
         assert captcha_response["Content-Type"] == "image/png"
         assert captcha_response.status_code == 200
         assert captcha_id is not None
-        assert captcha_number is not None
+        assert captcha_value is not None
 
     def test_captcha_get_success(self, api_client):
         """
@@ -33,13 +33,13 @@ class TestCaptchaAPI:
         assert captcha_response.headers["Content-Type"] == "image/png"
 
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
-        captcha_number = cache1.get(captcha_id)
+        captcha_value = cache1.get(captcha_id)
 
         # captcha is an image
         assert captcha_response["Content-Type"] == "image/png"
         assert captcha_response.status_code == 200
         assert captcha_id is not None
-        assert captcha_number is not None
+        assert captcha_value is not None
 
     def test_captcha_get_cache_timeout(self, api_client):
         """
@@ -53,6 +53,6 @@ class TestCaptchaAPI:
 
         # after timeout, cache returns None
         with patch("django.core.cache.cache.get", return_value=None):
-            captcha_number = cache1.get(captcha_id)
+            captcha_value = cache1.get(captcha_id)
 
-        assert captcha_number is None
+        assert captcha_value is None

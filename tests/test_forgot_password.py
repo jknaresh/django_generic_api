@@ -24,15 +24,15 @@ class TestForgotPasswordAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         forgot_password_payload = {
             "payload": {
                 "variables": {
                     "email": "user@gmail.com",
                     "captcha_id": captcha_id,
-                    "captcha_number": captcha_number,
+                    "captcha_value": captcha_value,
                 }
             }
         }
@@ -59,15 +59,15 @@ class TestForgotPasswordAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         forgot_password_payload = {
             "payload": {
                 "variables": {
                     "email": "user@gmail.com",
                     "captcha_id": "81978239-ae63-11ef-8027-e45e375cd493",  # custom UUID 1
-                    "captcha_number": captcha_number,
+                    "captcha_value": captcha_value,
                 }
             }
         }
@@ -83,7 +83,7 @@ class TestForgotPasswordAPI:
         assert response_data["error"] == "CAPTCHA expired or invalid."
         assert response_data["code"] == "DGA-V025"
 
-    def test_invalid_captcha_number(self, api_client, login_user):
+    def test_invalid_captcha_value(self, api_client, login_user):
         """
         Invalid captcha number
         """
@@ -95,15 +95,15 @@ class TestForgotPasswordAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         forgot_password_payload = {
             "payload": {
                 "variables": {
                     "email": "user@gmail.com",
                     "captcha_id": captcha_id,
-                    "captcha_number": 1234,
+                    "captcha_value": 1234,
                 }
             }
         }
@@ -131,14 +131,14 @@ class TestForgotPasswordAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         forgot_password_payload = {
             "payload": {
                 "variables": {
                     "email": "user@gmail.com",
-                    "captcha_number": captcha_number,
+                    "captcha_value": captcha_value,
                 }
             }
         }
@@ -166,15 +166,15 @@ class TestForgotPasswordAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         forgot_password_payload = {
             "payload": {
                 "variables": {
                     "email": "nouser@gmail.com",
                     "captcha_id": captcha_id,
-                    "captcha_number": captcha_number,
+                    "captcha_value": captcha_value,
                 }
             }
         }
@@ -202,15 +202,15 @@ class TestForgotPasswordAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         forgot_password_payload = {
             "payload": {
                 "variables": {
                     "email": "user@gmail.com",
                     "captcha_id": captcha_id,
-                    "captcha_number": captcha_number,
+                    "captcha_value": captcha_value,
                     "extra_field": "ABCD",
                 }
             }

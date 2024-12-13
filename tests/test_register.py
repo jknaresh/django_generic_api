@@ -23,8 +23,8 @@ class TestRegisterAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         register_payload = {
             "payload": {
@@ -33,7 +33,7 @@ class TestRegisterAPI:
                     "password": "test_user@123",
                     "password1": "test_user@123",
                     "captcha_id": captcha_id,
-                    "captcha_number": captcha_number,
+                    "captcha_value": captcha_value,
                 }
             }
         }
@@ -60,8 +60,8 @@ class TestRegisterAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         register_payload = {
             "payload": {
@@ -70,7 +70,7 @@ class TestRegisterAPI:
                     "password": "123456",
                     "password1": "123456",
                     "captcha_id": captcha_id,
-                    "captcha_number": captcha_number,
+                    "captcha_value": captcha_value,
                 }
             }
         }
@@ -102,8 +102,8 @@ class TestRegisterAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         register_payload = {
             "payload": {
@@ -111,7 +111,7 @@ class TestRegisterAPI:
                     "email": "ab@gmail.com",
                     "password": "123456",
                     "captcha_id": captcha_id,
-                    "captcha_number": captcha_number,
+                    "captcha_value": captcha_value,
                 }
             }
         }
@@ -138,8 +138,8 @@ class TestRegisterAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         register_payload = {
             "payload": {
@@ -149,7 +149,7 @@ class TestRegisterAPI:
                     "password": "123456",
                     "password1": "123456",
                     "captcha_id": captcha_id,
-                    "captcha_number": captcha_number,
+                    "captcha_value": captcha_value,
                 }
             }
         }
@@ -176,8 +176,8 @@ class TestRegisterAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         register_payload = {
             "payload": {
@@ -186,7 +186,7 @@ class TestRegisterAPI:
                     "password": "123456789",
                     "password1": "123456",
                     "captcha_id": captcha_id,
-                    "captcha_number": captcha_number,
+                    "captcha_value": captcha_value,
                 }
             }
         }
@@ -213,8 +213,8 @@ class TestRegisterAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         register_payload = {
             "payload": {
@@ -223,7 +223,7 @@ class TestRegisterAPI:
                     "password": "test_user@123",
                     "password1": "test_user@123",
                     "captcha_id": captcha_id,
-                    "captcha_number": captcha_number,
+                    "captcha_value": captcha_value,
                 }
             }
         }
@@ -251,8 +251,8 @@ class TestRegisterAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         register_payload = {
             "payload": {
@@ -261,7 +261,7 @@ class TestRegisterAPI:
                     "password": "test_user@123",
                     "password1": "test_user@123",
                     "captcha_id": captcha_id,
-                    "captcha_number": captcha_number,
+                    "captcha_value": captcha_value,
                 }
             }
         }
@@ -279,7 +279,7 @@ class TestRegisterAPI:
         )
         assert response_data["code"] == "DGA-V015"
 
-    def test_invalid_captcha_number(self, api_client):
+    def test_invalid_captcha_value(self, api_client):
         """
         User registration is success.
         """
@@ -291,8 +291,8 @@ class TestRegisterAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         register_payload = {
             "payload": {
@@ -301,7 +301,7 @@ class TestRegisterAPI:
                     "password": "test_user@123",
                     "password1": "test_user@123",
                     "captcha_id": captcha_id,
-                    "captcha_number": 1234,
+                    "captcha_value": 1234,
                 }
             }
         }
@@ -329,8 +329,8 @@ class TestRegisterAPI:
         captcha_id = captcha_response.headers.get("X-Captcha-ID")
         assert captcha_id is not None
 
-        captcha_number = cache1.get(captcha_id)
-        assert captcha_number is not None
+        captcha_value = cache1.get(captcha_id)
+        assert captcha_value is not None
 
         register_payload = {
             "payload": {
@@ -339,7 +339,7 @@ class TestRegisterAPI:
                     "password": "test_user@123",
                     "password1": "test_user@123",
                     "captcha_id": "81978239-ae63-11ef-8027-e45e375cd493",  # custom UUID 1
-                    "captcha_number": captcha_number,
+                    "captcha_value": captcha_value,
                 }
             }
         }
