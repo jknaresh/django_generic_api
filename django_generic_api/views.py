@@ -112,9 +112,9 @@ class GenericSaveAPIView(APIView):
 class GenericFetchAPIView(APIView):
 
     # authenticates user by token
-    @method_decorator(validate_access_token)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
+    # @method_decorator(validate_access_token)
+    # def dispatch(self, *args, **kwargs):
+    #     return super().dispatch(*args, **kwargs)
 
     def post(self, *args, **kwargs):
 
