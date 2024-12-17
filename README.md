@@ -159,7 +159,27 @@ BASE_URL = "..."
 
 #example : "http://127.0.0.1:8050", "http://www.abc.com"
 ```
+---
 
+### Captcha Configuration
+
+- Add captcha service to make your Regisration and Forgot Password API's more secure.
+- Add these changes into your settings file.
+
+```bash
+# Captcha Settings
+INSTALLED_APPS = [
+  "captcha",
+]
+
+# Configure your captcha settings
+CAPTCHA_BACKGROUND_COLOR = "#......"  # Hex code
+CAPTCHA_FOREGROUND_COLOR = "#......" # Hex code
+CAPTCHA_IMAGE_SIZE = (200, 200)
+CAPTCHA_FONT_SIZE = 25
+CAPTCHA_LENGTH = 4
+
+```
 ---
 
 ### URL Configuration

@@ -14,7 +14,6 @@ from .views import (
     GenericForgotPasswordAPIView,
     CaptchaServiceAPIView,
     NewPasswordAPIView,
-    CaptchaVerifyAPIView,
 )
 
 urlpatterns = [
@@ -34,12 +33,7 @@ urlpatterns = [
         GenericForgotPasswordAPIView.as_view(),
         name="forgotPassword",
     ),
-    path("captcha/", CaptchaServiceAPIView.as_view(), name="captcha"),
-    path(
-        "verify_captcha/",
-        CaptchaVerifyAPIView.as_view(),
-        name="verify_captcha",
-    ),
+    path("generate_captcha/", CaptchaServiceAPIView.as_view(), name="captcha"),
     path(
         "newpassword/<str:encoded_token>/",
         NewPasswordAPIView.as_view(),

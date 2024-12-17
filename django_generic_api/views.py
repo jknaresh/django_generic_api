@@ -3,9 +3,7 @@ import time
 from urllib.parse import quote, unquote
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.contrib.auth import logout
-from django.contrib.auth import password_validation
+from django.contrib.auth import get_user_model, logout, password_validation
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
@@ -38,16 +36,13 @@ from .utils import (
     is_valid_domain,
 )
 from .config import create_batch_size, expiry_hours
-from captcha.image import ImageCaptcha
 from io import BytesIO
 from django.http import FileResponse
 import random
 import uuid
-from django.core.cache import cache
 
 from captcha.models import CaptchaStore
 from captcha.helpers import captcha_image_url
-from PIL import Image
 
 
 class GenericSaveAPIView(APIView):
@@ -253,6 +248,31 @@ class GenericRegisterAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        captcha_key = validate_register_data.captcha_key
+        captcha_value = validate_register_data.captcha_value
+
+        try:
+            # Validate the captcha response
+            captcha = CaptchaStore.objects.get(hashkey=captcha_key)
+            if captcha.response == captcha_value.lower():
+                captcha.delete()  # Clean up after successful validation
+            else:
+                return Response(
+                    {
+                        "error": "Invalid captcha response.",
+                        "code": "DGA-V025",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except CaptchaStore.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid or expired captcha key.",
+                    "code": "DGA-V027",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         email = validate_register_data.email
 
         user = User.objects.filter(username=email).exists()
@@ -362,6 +382,31 @@ class GenericForgotPasswordAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        captcha_key = validated_userdata.captcha_key
+        captcha_value = validated_userdata.captcha_value
+
+        try:
+            # Validate the captcha response
+            captcha = CaptchaStore.objects.get(hashkey=captcha_key)
+            if captcha.response == captcha_value.lower():
+                captcha.delete()  # Clean up after successful validation
+            else:
+                return Response(
+                    {
+                        "error": "Invalid captcha response.",
+                        "code": "DGA-V026",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except CaptchaStore.DoesNotExist:
+            return Response(
+                {
+                    "error": "Invalid or expired captcha key.",
+                    "code": "DGA-V036",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         username = validated_userdata.email
         user_model = get_user_model()
 
@@ -369,7 +414,7 @@ class GenericForgotPasswordAPIView(APIView):
             user = user_model.objects.get(username=username)
         except user_model.DoesNotExist:
             return Response(
-                {"error": "User not found", "code": "DGA-V027"},
+                {"error": "User not found", "code": "DGA-V037"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
@@ -472,76 +517,41 @@ class CaptchaServiceAPIView(APIView):
 
     # post method
     def post(self, request, *args, **kwargs):
-        # Generate a new captcha key
-        captcha_key = CaptchaStore.generate_key()
-        # Generate the image URL (served from your Django app)
-        image_url = captcha_image_url(captcha_key)
+        try:
+            # Generate a new captcha key
+            captcha_key = CaptchaStore.generate_key()
+            # Generate the image URL
+            image_url = captcha_image_url(captcha_key)
 
-        # Return the image URL and captcha key to the client
-        return Response(
-            {
-                "captcha_key": captcha_key,
-                "image_url": request.build_absolute_uri(image_url),
-            }
-        )
-
-    # get method
-    def get(self, request, *args, **kwargs):
-        # Generate a new captcha key
-        captcha_key = CaptchaStore.generate_key()
-        # Generate the image URL (served from your Django app)
-        image_url = captcha_image_url(captcha_key)
-
-        # Return the image URL and captcha key to the client
-        return Response(
-            {
-                "captcha_key": captcha_key,
-                "image_url": request.build_absolute_uri(image_url),
-            }
-        )
-
-
-class CaptchaVerifyAPIView(APIView):
-    """
-    API View to verify the captcha.
-    """
-
-    def post(self, request, *args, **kwargs):
-        captcha_key = request.data.get("captcha_key")
-        captcha_response = request.data.get("captcha_response")
-
-        if not captcha_key or not captcha_response:
             return Response(
                 {
-                    "error": "Captcha key and response are required.",
-                    "code": "DGA-V025",
-                },
+                    "captcha_key": captcha_key,
+                    "image_url": request.build_absolute_uri(image_url),
+                }
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e), "code": "DGA-V029"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+    # get method
+    def get(self, request, *args, **kwargs):
         try:
-            # Validate the captcha response
-            captcha = CaptchaStore.objects.get(hashkey=captcha_key)
-            if captcha.response == captcha_response.lower():
-                captcha.delete()  # Clean up after successful validation
-                return Response(
-                    {"message": "Captcha verified successfully."},
-                    status=status.HTTP_200_OK,
-                )
-            else:
-                return Response(
-                    {
-                        "error": "Invalid captcha response.",
-                        "code": "DGA-V026",
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        except CaptchaStore.DoesNotExist:
+            # Generate a new captcha key
+            captcha_key = CaptchaStore.generate_key()
+            # Generate the image URL
+            image_url = captcha_image_url(captcha_key)
+
             return Response(
                 {
-                    "error": "Invalid or expired captcha key.",
-                    "code": "DGA-V027",
-                },
+                    "captcha_key": captcha_key,
+                    "image_url": request.build_absolute_uri(image_url),
+                }
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e), "code": "DGA-V030"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

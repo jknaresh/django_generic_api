@@ -3,6 +3,11 @@ from django.conf import settings
 from .config import (
     user_rate,
     anon_rate,
+    # captcha_bg_color,
+    # captcha_fg_color,
+    # captcha_img_size,
+    # captcha_font_size,
+    # captcha_length,
 )
 
 
@@ -35,22 +40,14 @@ class DjangoGenericApiConfig(AppConfig):
             if not settings.REST_FRAMEWORK.get(key):
                 settings.REST_FRAMEWORK[key] = value
 
-        # Predefining cache settings
-        GENERIC_API_PACKAGE_CACHE_SETTINGS = {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-            "LOCATION": "unique-cache-name",
-        }
-
-        """
-        1. If settings does not have cache, define as cache.default.
-        2. If settings does not have cache.default, add cache configuration.
-        """
-        if not hasattr(settings, "CACHES"):
-            setattr(
-                settings,
-                "CACHES",
-                {"default": GENERIC_API_PACKAGE_CACHE_SETTINGS},
-            )
-        else:
-            if not settings.CACHES.get("default"):
-                settings.CACHES["default"] = GENERIC_API_PACKAGE_CACHE_SETTINGS
+        # # Captcha Settings
+        # if not hasattr(settings, "CAPTCHA_BACKGROUND_COLOR"):
+        #     setattr(settings, "CAPTCHA_BACKGROUND_COLOR", captcha_bg_color)
+        # if not hasattr(settings, "CAPTCHA_FOREGROUND_COLOR"):
+        #     setattr(settings, "CAPTCHA_FOREGROUND_COLOR", captcha_fg_color)
+        # if not hasattr(settings, "CAPTCHA_IMAGE_SIZE"):
+        #     setattr(settings, "CAPTCHA_IMAGE_SIZE", captcha_img_size)
+        # if not hasattr(settings, "CAPTCHA_FONT_SIZE"):
+        #     setattr(settings, "CAPTCHA_FONT_SIZE", captcha_font_size)
+        # if not hasattr(settings, "CAPTCHA_LENGTH"):
+        #     setattr(settings, "CAPTCHA_LENGTH", captcha_length)

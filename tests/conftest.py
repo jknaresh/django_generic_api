@@ -25,6 +25,7 @@ def pytest_configure():
             "rest_framework_simplejwt",
             "django_generic_api",
             "django_generic_api.tests.demo_app",
+            "captcha",
         ],
         DATABASES={
             "default": {
@@ -82,6 +83,11 @@ def pytest_configure():
                 ".NumericPasswordValidator",
             },
         ],
+        CAPTCHA_BACKGROUND_COLOR="#ffffff",
+        CAPTCHA_FOREGROUND_COLOR="#d4c9c9",
+        CAPTCHA_IMAGE_SIZE=(200, 200),
+        CAPTCHA_FONT_SIZE=25,
+        CAPTCHA_LENGTH=7,
     )
 
     django.setup()

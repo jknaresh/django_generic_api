@@ -1,4 +1,6 @@
 import pytest
+from pydantic import UUID1
+
 from fixtures.api import api_client
 from django.core.cache import cache as cache1
 from unittest.mock import patch
@@ -12,47 +14,46 @@ class TestCaptchaAPI:
         Captcha success scenario using post method.
         """
 
-        captcha_response = api_client.post("/captcha/")
-        assert captcha_response.headers["Content-Type"] == "image/png"
-
-        captcha_id = captcha_response.headers.get("X-Captcha-ID")
-        captcha_value = cache1.get(captcha_id)
+        captcha_response = api_client.post("/generate_captcha/")
 
         # captcha is an image
-        assert captcha_response["Content-Type"] == "image/png"
+        assert captcha_response["Content-Type"] == "application/json"
         assert captcha_response.status_code == 200
-        assert captcha_id is not None
-        assert captcha_value is not None
+        assert "captcha_key" in captcha_response.data
+        assert "image_url" in captcha_response.data
 
     def test_captcha_get_success(self, api_client):
         """
         Captcha success scenario using get method.
         """
 
-        captcha_response = api_client.get("/captcha/")
-        assert captcha_response.headers["Content-Type"] == "image/png"
+        captcha_response = api_client.get("/generate_captcha/")
 
-        captcha_id = captcha_response.headers.get("X-Captcha-ID")
-        captcha_value = cache1.get(captcha_id)
-
-        # captcha is an image
-        assert captcha_response["Content-Type"] == "image/png"
+        assert captcha_response["Content-Type"] == "application/json"
         assert captcha_response.status_code == 200
-        assert captcha_id is not None
-        assert captcha_value is not None
+        assert "captcha_key" in captcha_response.data
+        assert "image_url" in captcha_response.data
 
-    def test_captcha_get_cache_timeout(self, api_client):
+    def test_captcha_post_failure(self, api_client):
         """
-        Negative scenario: Cache returns None as cache timeouts
+        Test Captcha API failure scenario when CaptchaStore.generate_key fails.
         """
-        captcha_response = api_client.get("/captcha/")
 
-        assert captcha_response.headers["Content-Type"] == "image/png"
+        # Mock CaptchaStore.generate_key to raise an exception
+        with patch(
+            "captcha.models.CaptchaStore.generate_key"
+        ) as mock_generate_key:
+            mock_generate_key.side_effect = Exception(
+                "Failed to generate captcha key"
+            )
 
-        captcha_id = captcha_response.headers.get("X-Captcha-ID")
+            # Make a POST request to the captcha endpoint
+            captcha_response = api_client.post("/generate_captcha/")
 
-        # after timeout, cache returns None
-        with patch("django.core.cache.cache.get", return_value=None):
-            captcha_value = cache1.get(captcha_id)
-
-        assert captcha_value is None
+            # Assertions
+            assert (
+                captcha_response.data["error"]
+                == "Failed to generate captcha key"
+            )
+            assert captcha_response.data["code"] == "DGA-V029"
+            assert captcha_response.status_code == 400

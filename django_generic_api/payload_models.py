@@ -82,10 +82,14 @@ class GenericRegisterPayload(BaseModel, PydanticConfigV1):
     email: EmailStr
     password: SecretStr
     password1: SecretStr
+    captcha_key: str
+    captcha_value: str
 
 
 class GenericForgotPasswordPayload(BaseModel, PydanticConfigV1):
     email: EmailStr
+    captcha_key: str
+    captcha_value: str
 
 
 class GenericNewPasswordPayload(BaseModel, PydanticConfigV1):
