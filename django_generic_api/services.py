@@ -52,50 +52,6 @@ def generate_token(user):
     ]
 
 
-# Define your token validation function as a decorator
-def validate_access_token(view_function):
-    @wraps(view_function)
-    def _wrapped_view(request, *args, **kwargs):
-        try:
-            if not request.user.is_authenticated:
-                auth_header = request.headers.get("Authorization")
-                if not auth_header:
-                    raise AuthenticationFailed(
-                        {"detail": "Unauthorized access", "code": "DGA-S001"}
-                    )
-                if auth_header and not auth_header.startswith("Bearer "):
-                    raise AuthenticationFailed(
-                        {"detail": "Invalid Token", "code": "DGA-S002"}
-                    )
-                token_str = auth_header.split(" ")[1]
-
-                token = AccessToken(token_str)  # Decoding token
-                user_id = token["user_id"]
-                user_model = get_user_model()
-                user = user_model.objects.get(id=user_id)
-                setattr(request, "user", user)
-        except AuthenticationFailed as e:
-            return JsonResponse(
-                {
-                    "error": e.detail["detail"],
-                    "code": e.detail["code"],
-                },
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-        except Exception as e:
-            return JsonResponse(
-                {
-                    "error": f"Authentication failed: {str(e)}",
-                    "code": "DGA-S003",
-                },
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
-        return view_function(request, *args, **kwargs)
-
-    return _wrapped_view
-
-
 def get_model_config_schema(model):
     """
     Converts a Django ORM model into a Pydantic model object.
