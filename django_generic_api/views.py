@@ -39,9 +39,9 @@ from .config import create_batch_size, expiry_hours
 
 class GenericSaveAPIView(APIView):
 
-    @method_decorator(validate_access_token)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
+    # @method_decorator(validate_access_token)
+    # def dispatch(self, *args, **kwargs):
+    #     return super().dispatch(*args, **kwargs)
 
     def post(self, *args, **kwargs):
 
