@@ -464,7 +464,6 @@ url: "http://domain-name/api/save/",
 
 ```bash
 header["Content-Type"]="application/json"
-header["X-CSRFToken"]=csrfvalue
 header["Authorization"]="Bearer <access token>"
 ```
 
@@ -595,7 +594,6 @@ url: "http://domain-name/api/fetch/",
 
 ```bash
 header["Content-Type"]="application/json"
-header["X-CSRFToken"]=csrfvalue
 header["Authorization"]="Bearer <access token>"
 ```
 
@@ -682,7 +680,6 @@ url: "http://domain-name/api/save/",
 
 ```bash
 header["Content-Type"]="application/json"
-header["X-CSRFToken"]=csrfvalue
 header["Authorization"]="Bearer <access token>"
 ```
 

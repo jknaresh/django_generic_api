@@ -24,7 +24,6 @@ from .payload_models import (
 )
 from .services import (
     get_model_by_name,
-    validate_access_token,
     handle_save_input,
     fetch_data,
     generate_token,
@@ -46,10 +45,6 @@ from captcha.helpers import captcha_image_url
 
 
 class GenericSaveAPIView(APIView):
-
-    @method_decorator(validate_access_token)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
 
     def post(self, *args, **kwargs):
 
@@ -118,11 +113,6 @@ class GenericSaveAPIView(APIView):
 
 
 class GenericFetchAPIView(APIView):
-
-    # authenticates user by token
-    # @method_decorator(validate_access_token)
-    # def dispatch(self, *args, **kwargs):
-    #     return super().dispatch(*args, **kwargs)
 
     def post(self, *args, **kwargs):
 
