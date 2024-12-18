@@ -13,5 +13,5 @@ python setup.py pytest
 ```bash 
 python setup.py pytest --addopts "<path_to_your_test_file>"
 
-# example : python setup.py pytest --addopts "django_generic_api/tests/test_basic.py"
+# example : python setup.py pytest --addopts "tests/test_basic.py"
 ```

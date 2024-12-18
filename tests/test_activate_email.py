@@ -5,7 +5,7 @@ import time
 import pytest
 from django.contrib.auth.models import User
 
-from fixtures.API import (
+from fixtures.api import (
     api_client,
     non_existing_user,
     inactive_user_id,

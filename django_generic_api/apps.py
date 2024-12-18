@@ -3,6 +3,11 @@ from django.conf import settings
 from .config import (
     user_rate,
     anon_rate,
+    # captcha_bg_color,
+    # captcha_fg_color,
+    # captcha_img_size,
+    # captcha_font_size,
+    # captcha_length,
 )
 
 
@@ -32,5 +37,17 @@ class DjangoGenericApiConfig(AppConfig):
 
         # Apply these defaults directly to `api_settings`
         for key, value in DEFAULT_DRF_THROTTLE_SETTINGS.items():
-            if key not in settings.REST_FRAMEWORK:
+            if not settings.REST_FRAMEWORK.get(key):
                 settings.REST_FRAMEWORK[key] = value
+
+        # # Captcha Settings
+        # if not hasattr(settings, "CAPTCHA_BACKGROUND_COLOR"):
+        #     setattr(settings, "CAPTCHA_BACKGROUND_COLOR", captcha_bg_color)
+        # if not hasattr(settings, "CAPTCHA_FOREGROUND_COLOR"):
+        #     setattr(settings, "CAPTCHA_FOREGROUND_COLOR", captcha_fg_color)
+        # if not hasattr(settings, "CAPTCHA_IMAGE_SIZE"):
+        #     setattr(settings, "CAPTCHA_IMAGE_SIZE", captcha_img_size)
+        # if not hasattr(settings, "CAPTCHA_FONT_SIZE"):
+        #     setattr(settings, "CAPTCHA_FONT_SIZE", captcha_font_size)
+        # if not hasattr(settings, "CAPTCHA_LENGTH"):
+        #     setattr(settings, "CAPTCHA_LENGTH", captcha_length)
