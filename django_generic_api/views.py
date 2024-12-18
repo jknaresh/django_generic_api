@@ -548,9 +548,10 @@ class CaptchaServiceAPIView(APIView):
 
 class NewPasswordAPIView(APIView):
 
-    def post(self, request, encoded_token, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
 
         # Decode token and get the user ID
+        encoded_token = kwargs.get("encoded_token")
         try:
             token = unquote(encoded_token)
             decoded_token = base64.urlsafe_b64decode(token.encode()).decode()
