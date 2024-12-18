@@ -171,14 +171,6 @@ BASE_URL = "..."
 INSTALLED_APPS = [
   "captcha",
 ]
-
-# Configure your captcha settings
-CAPTCHA_BACKGROUND_COLOR = "#......"  # Hex code
-CAPTCHA_FOREGROUND_COLOR = "#......" # Hex code
-CAPTCHA_IMAGE_SIZE = (200, 200)
-CAPTCHA_FONT_SIZE = 25
-CAPTCHA_LENGTH = 4
-
 ```
 ---
 
@@ -347,26 +339,60 @@ HTTP Method: "GET" / "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/captcha/",
+url: "http://domain-name/api/generate_captcha/",
 ```
 
 ### <span style="color: green;">Response for Captcha:</span>
 
 ```bash
 {
-    <Captcha_Image>
+    "captcha_key" : <captcha_key>,
+    "captcha_value" : <image_url>
+    # example for image url = "http://127.0.0.1:8050/api/captcha/image/c3efb9d994299a54312e2bb864f93c7aff600c4c/"
 }
 ```
 
 ### Usage: 
-- Extract the "captcha_number" from the CAPTCHA image.
-- Retrieve the "captcha_id" from the X-Captcha-ID response header.
-- Use both attributes in subsequent requests requiring CAPTCHA validation.
+- Extract "captcha_key" and "captcha_value" from response.
+- Use both attributes in register and forgot password api requests for CAPTCHA validation.
+
+
+### Extraction of captcha_value:
+
+- captcha_value is recieved as a image url in response.
+- This is an example on displaying it into your html page.
+
+```bash
+
+# HTML:
+    <div id="captchaContainer"></div>
+
+# Javascript AJAX:
+    $.ajax({
+        url: '/api/generate_captcha/',
+        method: 'POST' / 'GET',
+        headers: headers,
+        success: function(response) {
+            // Capture the captcha_key from the response JSON
+            captcha_key = response.captcha_key;
+            // Handle the image URL from the response
+            const imageUrl = response.image_url;
+
+            // Update the image on the page
+            $('#captchaContainer').html('<img id="captchaImage" src="' + imageUrl + '" alt="CAPTCHA" />');
+        },
+        error: function(xhr, status, error) {
+            console.error('Error:', error);
+        }
+    });
+```
+
+
 ---
 
 ## Register API
 
-- Send a GET request to Captcha API to get "captcha_id" and "captcha_number".
+- Send a request to Captcha API to get "captcha_key" and "captcha_value".
 - To register a user, post the data on url '/< prefix >/register/'.
 - As user sends registration request, a user activation link is sent to their
   email, as user clicks on
@@ -393,7 +419,7 @@ url: "http://domain-name/api/register/",
             "email":"user@example.com",
             "password":"123456",
             "password1":"123456",
-            "captcha_id": "<captcha_id>",
+            "captcha_key": "<captcha_key>",
             "captcha_value": "<captcha_value>"
         }
     }
@@ -762,8 +788,8 @@ url: "http://domain-name/api/forgotPassword/",
     "payload":{
         "variables":{
             "email":"user@example.com",
-            "captcha_id": "<captcha_id>",
-            "captcha_number": <captcha_number>
+            "captcha_key": "<captcha_key>",
+            "captcha_value": "<captcha_value>"
         }
     }
 }
