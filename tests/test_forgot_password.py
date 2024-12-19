@@ -27,7 +27,7 @@ class TestForgotPasswordAPI:
             captcha_response = api_client.post("/generate_captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
-            assert "image_url" in captcha_response.data
+            assert "captcha_url" in captcha_response.data
 
             captcha_key = captcha_response.data["captcha_key"]
 
@@ -64,7 +64,7 @@ class TestForgotPasswordAPI:
             captcha_response = api_client.post("/generate_captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
-            assert "image_url" in captcha_response.data
+            assert "captcha_url" in captcha_response.data
 
             # Use the mocked behavior for invalid captcha key
             captcha_key = captcha_response.data["captcha_key"]
@@ -107,7 +107,7 @@ class TestForgotPasswordAPI:
             captcha_response = api_client.post("/generate_captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
-            assert "image_url" in captcha_response.data
+            assert "captcha_url" in captcha_response.data
 
             # Use the mocked captcha value for testing
             captcha_key = captcha_response.data["captcha_key"]
@@ -174,7 +174,7 @@ class TestForgotPasswordAPI:
             captcha_response = api_client.post("/generate_captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
-            assert "image_url" in captcha_response.data
+            assert "captcha_url" in captcha_response.data
 
             # Use the mocked captcha value for testing
             captcha_key = captcha_response.data["captcha_key"]
