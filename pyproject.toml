@@ -18,6 +18,7 @@ email-validator = "^2.2.0"
 djangorestframework-simplejwt = "^5.3.1"
 jsonschema = "^4.23.0"
 django-cors-headers = "^4.6.0"
+django-simple-captcha = "^0.6.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
