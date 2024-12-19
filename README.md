@@ -351,48 +351,12 @@ url: "http://domain-name/api/generate_captcha/",
     # example for image url = "http://127.0.0.1:8050/api/captcha/image/c3efb9d994299a54312e2bb864f93c7aff600c4c/"
 }
 ```
-
-### Usage: 
-- Extract "captcha_key" and "captcha_value" from response.
-- Use both attributes in register and forgot password api requests for CAPTCHA validation.
-
-
-### Extraction of captcha_value:
-
-- captcha_value is recieved as a image url in response.
-- This is an example on displaying it into your html page.
-
-```bash
-
-# HTML:
-    <div id="captchaContainer"></div>
-
-# Javascript AJAX:
-    $.ajax({
-        url: '/api/generate_captcha/',
-        method: 'POST' / 'GET',
-        headers: headers,
-        success: function(response) {
-            // Capture the captcha_key from the response JSON
-            captcha_key = response.captcha_key;
-            // Handle the image URL from the response
-            const imageUrl = response.image_url;
-
-            // Update the image on the page
-            $('#captchaContainer').html('<img id="captchaImage" src="' + imageUrl + '" alt="CAPTCHA" />');
-        },
-        error: function(xhr, status, error) {
-            console.error('Error:', error);
-        }
-    });
-```
-
-
 ---
 
 ## Register API
 
-- Send a request to Captcha API to get "captcha_key" and "captcha_value".
+- Send a request to Captcha API to get "captcha_key" and "captcha_url".
+- The captcha_url is an image containing a value. Extract this value and send it as captcha_value in the register API.
 - To register a user, post the data on url '/< prefix >/register/'.
 - As user sends registration request, a user activation link is sent to their
   email, as user clicks on
@@ -765,7 +729,8 @@ header["Authorization"]="Bearer <access token>"
 
 ## Forgot Password API
 
-- Send a GET request to Captcha API to get "captcha_id" and "captcha_number".
+- Send a request to Captcha API to get "captcha_key" and "captcha_url".
+- The captcha_url is an image containing a value. Extract this value and send it as captcha_value in the forgot password API.
 - This API enables users to initiate the password recovery process.
 - When a user forgets their password, they can submit a request to receive a password reset link via email.
 
