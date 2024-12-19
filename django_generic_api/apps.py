@@ -32,5 +32,5 @@ class DjangoGenericApiConfig(AppConfig):
 
         # Apply these defaults directly to `api_settings`
         for key, value in DEFAULT_DRF_THROTTLE_SETTINGS.items():
-            if key not in settings.REST_FRAMEWORK:
+            if not settings.REST_FRAMEWORK.get(key):
                 settings.REST_FRAMEWORK[key] = value

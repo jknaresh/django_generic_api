@@ -45,7 +45,6 @@ try:
         "EMAIL_SETTINGS", "EMAIL_ACTIVATION_LINK_EXPIRY_HOURS", fallback=24
     )
 
-
 except configparser.NoOptionError as e:
     raise ValueError(
         f"Improperly configured: Missing required configuration key: {e}"
