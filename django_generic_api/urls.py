@@ -1,8 +1,8 @@
+from captcha import urls as captcha_urls
 from django.urls import path, include
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
-from captcha import urls as captcha_urls
 
 from .views import (
     GenericFetchAPIView,

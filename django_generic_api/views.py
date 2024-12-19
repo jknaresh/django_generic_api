@@ -2,18 +2,20 @@ import base64
 import time
 from urllib.parse import quote, unquote
 
+from captcha.helpers import captcha_image_url
+from captcha.models import CaptchaStore
 from django.conf import settings
 from django.contrib.auth import get_user_model, logout, password_validation
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
-from django.utils.decorators import method_decorator
+from django.shortcuts import get_object_or_404
 from pydantic import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.shortcuts import get_object_or_404
 
+from .config import create_batch_size, expiry_hours
 from .payload_models import (
     FetchPayload,
     SavePayload,
@@ -34,14 +36,6 @@ from .utils import (
     store_user_ip,
     is_valid_domain,
 )
-from .config import create_batch_size, expiry_hours
-from io import BytesIO
-from django.http import FileResponse
-import random
-import uuid
-
-from captcha.models import CaptchaStore
-from captcha.helpers import captcha_image_url
 
 
 class GenericSaveAPIView(APIView):
@@ -52,7 +46,8 @@ class GenericSaveAPIView(APIView):
 
         saveInput = payload.get("saveInput", {})
 
-        # Does not allow saving more than the customized number of records at once.
+        # Does not allow saving more than the customized number of records
+        # at once.
         if len(saveInput) > create_batch_size:
             return Response(
                 {
@@ -417,8 +412,10 @@ class GenericForgotPasswordAPIView(APIView):
         try:
             subject = "Change your password"
             message = (
-                f"This link is to generate a new password: \n\n{new_password_link}, "
-                "\n\nSend a POST request to this link with defined payload to generate a new password."
+                f"This link is to generate a new password: \n\n"
+                f"{new_password_link}, "
+                "\n\nSend a POST request to this link with defined payload "
+                "to generate a new password."
             )
             from_email = settings.EMAIL_HOST_USER
             recipient_list = [username]

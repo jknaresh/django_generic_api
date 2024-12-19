@@ -1,9 +1,11 @@
 import json
 from unittest.mock import patch, MagicMock
+
 import pytest
+from captcha.models import CaptchaStore
 
 from fixtures.api import api_client, login_user
-from captcha.models import CaptchaStore
+
 
 # Register test cases use post method for captcha implementation
 

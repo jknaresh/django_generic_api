@@ -1,9 +1,8 @@
+from unittest.mock import patch
+
 import pytest
-from pydantic import UUID1
 
 from fixtures.api import api_client
-from django.core.cache import cache as cache1
-from unittest.mock import patch
 
 
 @pytest.mark.django_db

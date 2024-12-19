@@ -5,7 +5,6 @@ import django
 from django.conf import settings
 from django.core.management import call_command
 
-
 sys.path.extend(
     [
         os.path.dirname(os.path.dirname(__file__)),  # Base directory

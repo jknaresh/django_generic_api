@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 from django.conf import settings
+
 from .config import (
     user_rate,
     anon_rate,
@@ -20,8 +21,10 @@ class DjangoGenericApiConfig(AppConfig):
                 "rest_framework.throttling.UserRateThrottle",
             ],
             "DEFAULT_THROTTLE_RATES": {
-                "user": f"{user_rate}/hour",  # Rate limit for authenticated users
-                "anon": f"{anon_rate}/hour",  # Rate limit for unauthenticated users,
+                "user": f"{user_rate}/hour",
+                # Rate limit for authenticated users
+                "anon": f"{anon_rate}/hour",
+                # Rate limit for unauthenticated users,
             },
             "EXCEPTION_HANDLER": "django_generic_api.utils.custom_exception_handler",
         }

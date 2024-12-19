@@ -108,13 +108,16 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
 }
 ```
+
 ---
 
 ### Configuation settings
 
 - Users can customize the configurations.
-- To customize as per your needs, create a config file named as "django_generic_api.ini".
-- Place this file in same directory as your manage.py file within your Django project.
+- To customize as per your needs, create a config file named as "
+  django_generic_api.ini".
+- Place this file in same directory as your manage.py file within your Django
+  project.
 
 ```bash
 [REST_FRAMEWORK]
@@ -159,11 +162,13 @@ BASE_URL = "..."
 
 #example : "http://127.0.0.1:8050", "http://www.abc.com"
 ```
+
 ---
 
 ### Captcha Configuration
 
-- Add captcha service to make your Regisration and Forgot Password API's more secure.
+- Add captcha service to make your Regisration and Forgot Password API's more
+  secure.
 - Add these changes into your settings file.
 
 ```bash
@@ -172,6 +177,7 @@ INSTALLED_APPS = [
   "captcha",
 ]
 ```
+
 ---
 
 ### URL Configuration
@@ -324,10 +330,13 @@ header["Content-Type"]="application/json"
     "access": "..."
 }
 ```
+
 ---
+
 ## Captcha API
 
-- This API allows users to obtain a CAPTCHA image and its id for verification purposes.
+- This API allows users to obtain a CAPTCHA image and its id for verification
+  purposes.
 - This API supports both GET and POST methods.
 - To get a captcha, perform the request as
 
@@ -336,6 +345,7 @@ header["Content-Type"]="application/json"
 ```bash
 HTTP Method: "GET" / "POST"
 ```
+
 ### URL construction:
 
 ```bash
@@ -351,12 +361,14 @@ url: "http://domain-name/api/generate_captcha/",
     # example for image url = "http://127.0.0.1:8050/api/captcha/image/c3efb9d994299a54312e2bb864f93c7aff600c4c/"
 }
 ```
+
 ---
 
 ## Register API
 
 - Send a request to Captcha API to get "captcha_key" and "captcha_url".
-- The captcha_url is an image containing a value. Extract this value and send it as captcha_value in the register API.
+- The captcha_url is an image containing a value. Extract this value and send
+  it as captcha_value in the register API.
 - To register a user, post the data on url '/< prefix >/register/'.
 - As user sends registration request, a user activation link is sent to their
   email, as user clicks on
@@ -726,13 +738,14 @@ header["Authorization"]="Bearer <access token>"
 
 ---
 
-
 ## Forgot Password API
 
 - Send a request to Captcha API to get "captcha_key" and "captcha_url".
-- The captcha_url is an image containing a value. Extract this value and send it as captcha_value in the forgot password API.
+- The captcha_url is an image containing a value. Extract this value and send
+  it as captcha_value in the forgot password API.
 - This API enables users to initiate the password recovery process.
-- When a user forgets their password, they can submit a request to receive a password reset link via email.
+- When a user forgets their password, they can submit a request to receive a
+  password reset link via email.
 
 ### Method:
 
@@ -773,9 +786,11 @@ url: "http://domain-name/api/forgotPassword/",
 ## New Password API
 
 - This API enables users to reset their password securely.
-- Users must first initiate the password reset process by sending a POST request to the Forgot Password API.
-- A password reset link will be sent to their registered email address. 
-- Once the link is received, users can use it to update their password by making a POST request as outlined below.
+- Users must first initiate the password reset process by sending a POST
+  request to the Forgot Password API.
+- A password reset link will be sent to their registered email address.
+- Once the link is received, users can use it to update their password by
+  making a POST request as outlined below.
 
 ### Method:
 
