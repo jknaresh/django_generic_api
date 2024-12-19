@@ -516,7 +516,7 @@ class CaptchaServiceAPIView(APIView):
             return Response(
                 {
                     "captcha_key": captcha_key,
-                    "captcha_value": request.build_absolute_uri(image_url),
+                    "captcha_url": request.build_absolute_uri(image_url),
                 }
             )
         except Exception as e:
@@ -536,7 +536,7 @@ class CaptchaServiceAPIView(APIView):
             return Response(
                 {
                     "captcha_key": captcha_key,
-                    "image_url": request.build_absolute_uri(image_url),
+                    "captcha_url": request.build_absolute_uri(image_url),
                 }
             )
         except Exception as e:

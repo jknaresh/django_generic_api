@@ -347,7 +347,7 @@ url: "http://domain-name/api/generate_captcha/",
 ```bash
 {
     "captcha_key" : <captcha_key>,
-    "captcha_value" : <image_url>
+    "captcha_url" : <image_url>
     # example for image url = "http://127.0.0.1:8050/api/captcha/image/c3efb9d994299a54312e2bb864f93c7aff600c4c/"
 }
 ```

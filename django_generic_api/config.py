@@ -1,8 +1,6 @@
 import os
 import configparser
 
-# from ast import literal_eval
-
 
 def get_project_root():
     # Get the project root directory (where manage.py is located)
@@ -46,24 +44,6 @@ try:
     expiry_hours = config.getint(
         "EMAIL_SETTINGS", "EMAIL_ACTIVATION_LINK_EXPIRY_HOURS", fallback=24
     )
-
-    # captcha_bg_color = config.get(
-    #     "CAPTCHA_SETTINGS", "CAPTCHA_BACKGROUND_COLOR", fallback="#32a852"
-    # )
-    # captcha_fg_color = config.get(
-    #     "CAPTCHA_SETTINGS", "CAPTCHA_FOREGROUND_COLOR", fallback="#d4c9c9"
-    # )
-    # captcha_img_size = literal_eval(
-    #     config.get(
-    #         "CAPTCHA_SETTINGS", "CAPTCHA_IMAGE_SIZE", fallback="(200, 200)"
-    #     )
-    # )
-    # captcha_font_size = config.getint(
-    #     "CAPTCHA_SETTINGS", "CAPTCHA_FONT_SIZE", fallback=25
-    # )
-    # captcha_length = config.getint(
-    #     "CAPTCHA_SETTINGS", "CAPTCHA_LENGTH", fallback=7
-    # )
 
 except configparser.NoOptionError as e:
     raise ValueError(
