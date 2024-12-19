@@ -1,4 +1,5 @@
 from typing import Dict, Optional
+
 from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.db.models import Q

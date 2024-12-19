@@ -1,9 +1,11 @@
 import json
-import pytest
 from unittest.mock import patch, MagicMock
 
-from fixtures.api import api_client, login_user
+import pytest
 from captcha.models import CaptchaStore
+
+from fixtures.api import api_client, login_user
+
 
 # Forgot password test cases use post method for captcha implementation
 

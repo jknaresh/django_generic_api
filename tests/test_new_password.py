@@ -1,7 +1,9 @@
-import pytest
-from fixtures.api import api_client, inactive_user_id, registration_token
 import json
 from urllib.parse import quote
+
+import pytest
+
+from fixtures.api import api_client, inactive_user_id, registration_token
 
 BASE_URL = "http://127.0.0.1:8050"
 
