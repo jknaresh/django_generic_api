@@ -9,7 +9,6 @@ from pydantic import (
     Field,
 )
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from .utils import (
     get_model_fields_with_properties,
     is_fields_exist,
@@ -29,12 +28,30 @@ DEFAULT_APPS = {
 
 def get_model_by_name(model_name):
     """Fetch a model dynamically by searching all installed apps."""
-    for app_config in apps.get_app_configs():
-        if not DEFAULT_APPS.get(app_config.name):
-            model = app_config.models.get(model_name.lower())
-            if model:
-                return model
-    raise ValueError
+    try:
+        appName, modelName = model_name.split(".")
+    except ValueError:
+        raise ValueError(
+            {
+                "error": "Invalid format. Use 'appName.modelName'.",
+                "code": "DGA-S012",
+            }
+        )
+
+    try:
+        app_config = apps.get_app_config(appName)
+    except LookupError:
+        raise LookupError(
+            {
+                "error": f"{appName} must be registered in INSTALLED_APPS.",
+                "code": "DGA-S013",
+            }
+        )
+
+    if not DEFAULT_APPS.get(app_config.name):
+        model = app_config.models.get(modelName.lower())
+        if model:
+            return model
 
 
 def generate_token(user):
