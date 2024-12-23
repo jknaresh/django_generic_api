@@ -50,8 +50,11 @@ def get_model_by_name(model_name):
 
     if not DEFAULT_APPS.get(app_config.name):
         model = app_config.models.get(modelName.lower())
-        if model:
-            return model
+        if not model:
+            raise ValueError(
+                {"error": "Model not found", "code": "DGA-S014"},
+            )
+        return model
 
 
 def generate_token(user):
