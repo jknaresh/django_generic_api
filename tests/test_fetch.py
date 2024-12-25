@@ -496,7 +496,7 @@ class TestGenericFetchAPI:
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-S014"
+        assert response_data["code"] == "DGA-V007"
 
     def test_fetch_unauthorized(self, customer1, api_client, add_perm_token):
         """

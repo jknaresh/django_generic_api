@@ -28,33 +28,20 @@ DEFAULT_APPS = {
 
 def get_model_by_name(model_name):
     """Fetch a model dynamically by searching all installed apps."""
-    try:
+
+    if "." in model_name:
         appName, modelName = model_name.split(".")
-    except ValueError:
-        raise ValueError(
-            {
-                "error": "Invalid format. Use 'appName.modelName'.",
-                "code": "DGA-S012",
-            }
-        )
-
-    try:
         app_config = apps.get_app_config(appName)
-    except LookupError:
-        raise LookupError(
-            {
-                "error": f"{appName} must be registered in INSTALLED_APPS.",
-                "code": "DGA-S013",
-            }
-        )
-
-    if not DEFAULT_APPS.get(app_config.name):
         model = app_config.models.get(modelName.lower())
-        if not model:
-            raise ValueError(
-                {"error": "Model not found", "code": "DGA-S014"},
-            )
-        return model
+        if model:
+            return model
+    else:
+        for app_config in apps.get_app_configs():
+            if not DEFAULT_APPS.get(app_config.name):
+                model = app_config.models.get(model_name.lower())
+                if model:
+                    return model
+    raise ValueError
 
 
 def generate_token(user):

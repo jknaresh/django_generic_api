@@ -207,7 +207,7 @@ class TestGenericSaveAPI:
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-S014"
+        assert response_data["code"] == "DGA-V003"
 
     def test_save_input_length_greater_than_10(
         self, api_client, add_perm_token
