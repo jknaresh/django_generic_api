@@ -29,10 +29,8 @@ DEFAULT_APPS = {
 def get_model_by_name(model_name):
     """Fetch a model dynamically by searching all installed apps."""
 
-    if "." in model_name:
-        appName, modelName = model_name.split(".")
-        app_config = apps.get_app_config(appName)
-        model = app_config.models.get(modelName.lower())
+    if model_name.__contains__("."):
+        model = apps.get_model(model_name)
         if model:
             return model
     else:

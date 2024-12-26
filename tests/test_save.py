@@ -22,7 +22,7 @@ usage1 = save_perm_user
 @pytest.mark.django_db
 class TestGenericSaveAPI:
 
-    def test_create_record(self, api_client, add_perm_token):
+    def test_create_record_with_appname(self, api_client, add_perm_token):
         """
         User has sent correct payload format.
         """
@@ -30,6 +30,41 @@ class TestGenericSaveAPI:
             "payload": {
                 "variables": {
                     "modelName": "demo_app.Customer",
+                    "id": None,
+                    "saveInput": [
+                        {
+                            "name": "test_user1",
+                            "dob": "2020-01-21",
+                            "email": "ltest1@mail.com",
+                            "phone_no": "012345",
+                            "address": "HYD",
+                            "pin_code": "100",
+                            "status": "123",
+                        }
+                    ],
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
+        response = api_client.post(
+            "/save/",
+            save_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 201
+        assert response_data["data"] == [{"id": [1]}]
+        assert response_data["message"] == ["Record created successfully."]
+
+    def test_create_record_without_appname(self, api_client, add_perm_token):
+        """
+        User's payload does not consist appname.
+        """
+        save_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "Customer",
                     "id": None,
                     "saveInput": [
                         {
@@ -97,6 +132,80 @@ class TestGenericSaveAPI:
 
         updated_data = Customer.objects.get(id=data_id)
         assert updated_data.name == "ABCD"
+
+    def test_create_record_with_incorrect_appname(
+        self, api_client, add_perm_token
+    ):
+        """
+        User has sent correct payload format.
+        """
+        save_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app1.Customer",
+                    "id": None,
+                    "saveInput": [
+                        {
+                            "name": "test_user1",
+                            "dob": "2020-01-21",
+                            "email": "ltest1@mail.com",
+                            "phone_no": "012345",
+                            "address": "HYD",
+                            "pin_code": "100",
+                            "status": "123",
+                        }
+                    ],
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
+        response = api_client.post(
+            "/save/",
+            save_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 400
+        assert response_data["error"] == "Model not found"
+        assert response_data["code"] == "DGA-V003"
+
+    def test_create_record_with_incorrect_model_name(
+        self, api_client, add_perm_token
+    ):
+        """
+        User has sent correct payload format.
+        """
+        save_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app.Customer1",
+                    "id": None,
+                    "saveInput": [
+                        {
+                            "name": "test_user1",
+                            "dob": "2020-01-21",
+                            "email": "ltest1@mail.com",
+                            "phone_no": "012345",
+                            "address": "HYD",
+                            "pin_code": "100",
+                            "status": "123",
+                        }
+                    ],
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
+        response = api_client.post(
+            "/save/",
+            save_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 400
+        assert response_data["error"] == "Model not found"
+        assert response_data["code"] == "DGA-V003"
 
     def test_invalid_payload_format(self, api_client, add_perm_token):
         """

@@ -318,6 +318,122 @@ class TestGenericFetchAPI:
             },
         ]
 
+    def test_fetch_without_app_name(
+        self, customer1, api_client, view_perm_token
+    ):
+        """
+        User fetches without appname in modelName.
+        """
+        fetch_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "customer",
+                    "fields": ["name", "email"],
+                    "filters": [
+                        {
+                            "operator": "eq",
+                            "name": "phone_no",
+                            "value": ["123456"],
+                            "operation": "or",
+                        }
+                    ],
+                    "pageNumber": 1,
+                    "pageSize": 10,
+                    "sort": {"field": "name", "order_by": "desc"},
+                    "distinct": False,
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {view_perm_token}"}
+        response = api_client.post(
+            "/fetch/",
+            fetch_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 200
+        assert response_data["total"] == 1
+        assert response_data["data"] == [
+            {"name": customer1.name, "email": customer1.email}
+        ]
+
+    def test_fetch_with_incorrect_app_name(
+        self, customer1, api_client, view_perm_token
+    ):
+        """
+        User fetches with incorrect appname in modelName.
+        """
+        fetch_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app1.customer",
+                    "fields": ["name", "email"],
+                    "filters": [
+                        {
+                            "operator": "eq",
+                            "name": "phone_no",
+                            "value": ["123456"],
+                            "operation": "or",
+                        }
+                    ],
+                    "pageNumber": 1,
+                    "pageSize": 10,
+                    "sort": {"field": "name", "order_by": "desc"},
+                    "distinct": False,
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {view_perm_token}"}
+        response = api_client.post(
+            "/fetch/",
+            fetch_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 400
+        assert response_data["error"] == "Model not found"
+        assert response_data["code"] == "DGA-V007"
+
+    def test_fetch_with_incorrect_model_name(
+        self, customer1, api_client, view_perm_token
+    ):
+        """
+        User fetches with incorrect appname in modelName.
+        """
+        fetch_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app.customer1",
+                    "fields": ["name", "email"],
+                    "filters": [
+                        {
+                            "operator": "eq",
+                            "name": "phone_no",
+                            "value": ["123456"],
+                            "operation": "or",
+                        }
+                    ],
+                    "pageNumber": 1,
+                    "pageSize": 10,
+                    "sort": {"field": "name", "order_by": "desc"},
+                    "distinct": False,
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {view_perm_token}"}
+        response = api_client.post(
+            "/fetch/",
+            fetch_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 400
+        assert response_data["error"] == "Model not found"
+        assert response_data["code"] == "DGA-V007"
+
     def test_payload_missing_field_property(
         self, customer1, api_client, view_perm_token
     ):
