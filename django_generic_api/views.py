@@ -73,7 +73,7 @@ class GenericSaveAPIView(APIView):
 
         try:
             model = get_model_by_name(model_name)
-        except ValueError:
+        except (ValueError, LookupError) as e:
             return Response(
                 {"error": "Model not found", "code": "DGA-V003"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -138,11 +138,12 @@ class GenericFetchAPIView(APIView):
         # check if user has permission to view the data.
         try:
             model = get_model_by_name(model_name)
-        except ValueError:
+        except (ValueError, LookupError) as e:
             return Response(
                 {"error": "Model not found", "code": "DGA-V007"},
-                status=status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_400_BAD_REQUEST,
             )
+
         if not self.request.user.has_perm(make_permission_str(model, "fetch")):
             return Response(
                 {

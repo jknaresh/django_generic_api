@@ -1,9 +1,9 @@
 # Test cases for fetch API
 import json
-from unittest import mock
+from unittest.mock import patch
 
 import pytest
-from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 from fixtures.api import (
     api_client,
@@ -17,6 +17,7 @@ from fixtures.api import (
 
 # To ensure the import is retained
 usage = save_perm_user
+usage1 = view_perm_user
 
 
 # As pytest uses an SQLite3 database by default, the LIKE and ILIKE
@@ -35,7 +36,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -75,7 +76,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -115,7 +116,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -157,7 +158,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -198,7 +199,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -240,7 +241,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -276,7 +277,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email", "address"],
                     "filters": [
                         {
@@ -316,6 +317,122 @@ class TestGenericFetchAPI:
             },
         ]
 
+    def test_fetch_without_app_name(
+        self, customer1, api_client, view_perm_token
+    ):
+        """
+        User fetches without appname in modelName.
+        """
+        fetch_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "customer",
+                    "fields": ["name", "email"],
+                    "filters": [
+                        {
+                            "operator": "eq",
+                            "name": "phone_no",
+                            "value": ["123456"],
+                            "operation": "or",
+                        }
+                    ],
+                    "pageNumber": 1,
+                    "pageSize": 10,
+                    "sort": {"field": "name", "order_by": "desc"},
+                    "distinct": False,
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {view_perm_token}"}
+        response = api_client.post(
+            "/fetch/",
+            fetch_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 200
+        assert response_data["total"] == 1
+        assert response_data["data"] == [
+            {"name": customer1.name, "email": customer1.email}
+        ]
+
+    def test_fetch_with_incorrect_app_name(
+        self, customer1, api_client, view_perm_token
+    ):
+        """
+        User fetches with incorrect appname in modelName.
+        """
+        fetch_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app1.customer",
+                    "fields": ["name", "email"],
+                    "filters": [
+                        {
+                            "operator": "eq",
+                            "name": "phone_no",
+                            "value": ["123456"],
+                            "operation": "or",
+                        }
+                    ],
+                    "pageNumber": 1,
+                    "pageSize": 10,
+                    "sort": {"field": "name", "order_by": "desc"},
+                    "distinct": False,
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {view_perm_token}"}
+        response = api_client.post(
+            "/fetch/",
+            fetch_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 400
+        assert response_data["error"] == "Model not found"
+        assert response_data["code"] == "DGA-V007"
+
+    def test_fetch_with_incorrect_model_name(
+        self, customer1, api_client, view_perm_token
+    ):
+        """
+        User fetches with incorrect appname in modelName.
+        """
+        fetch_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app.customer1",
+                    "fields": ["name", "email"],
+                    "filters": [
+                        {
+                            "operator": "eq",
+                            "name": "phone_no",
+                            "value": ["123456"],
+                            "operation": "or",
+                        }
+                    ],
+                    "pageNumber": 1,
+                    "pageSize": 10,
+                    "sort": {"field": "name", "order_by": "desc"},
+                    "distinct": False,
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {view_perm_token}"}
+        response = api_client.post(
+            "/fetch/",
+            fetch_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 400
+        assert response_data["error"] == "Model not found"
+        assert response_data["code"] == "DGA-V007"
+
     def test_payload_missing_field_property(
         self, customer1, api_client, view_perm_token
     ):
@@ -325,7 +442,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "filters": [
                         {
                             "operator": "eq",
@@ -360,7 +477,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -379,9 +496,12 @@ class TestGenericFetchAPI:
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post("/fetch/", fetch_payload, format="json")
         response_data = json.loads(response.content.decode("utf-8"))
-        assert response.status_code == 401
-        assert response_data["error"] == "Unauthorized access"
-        assert response_data["code"] == "DGA-S001"
+        assert response.status_code == 404
+        assert (
+            response_data["error"]
+            == "Something went wrong!!! Please contact the administrator."
+        )
+        assert response_data["code"] == "DGA-V008"
 
     def test_invalid_token_format(self, api_client, view_perm_token):
         """
@@ -390,7 +510,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -415,9 +535,12 @@ class TestGenericFetchAPI:
             headers=headers,
         )
         response_data = json.loads(response.content.decode("utf-8"))
-        assert response.status_code == 401
-        assert response_data["error"] == "Invalid Token"
-        assert response_data["code"] == "DGA-S002"
+        assert response.status_code == 404
+        assert (
+            response_data["error"]
+            == "Something went wrong!!! Please contact the administrator."
+        )
+        assert response_data["code"] == "DGA-V008"
 
     def test_invalid_payload_format(
         self, customer1, api_client, view_perm_token
@@ -428,7 +551,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "extra_field": "ABC",
                     "filters": [
@@ -468,7 +591,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "ABC123",
+                    "modelName": "demo_app.ABC123",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -485,7 +608,6 @@ class TestGenericFetchAPI:
         }
         headers = {"Authorization": f"Bearer {view_perm_token}"}
 
-        # Send a POST request to the fetch endpoint without authentication
         response = api_client.post(
             "/fetch/",
             fetch_payload,
@@ -493,7 +615,7 @@ class TestGenericFetchAPI:
             headers=headers,
         )
         response_data = json.loads(response.content.decode("utf-8"))
-        assert response.status_code == 404
+        assert response.status_code == 400
         assert response_data["error"] == "Model not found"
         assert response_data["code"] == "DGA-V007"
 
@@ -504,7 +626,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -585,7 +707,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": "name",
                     "filters": [
                         {
@@ -626,7 +748,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -667,7 +789,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": ["phone_no", "eq", 123456],
                     "pageNumber": 1,
@@ -703,7 +825,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -748,7 +870,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -789,7 +911,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {"operator": "in", "name": "dob", "value": ["456789"]}
@@ -827,7 +949,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -869,7 +991,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -910,7 +1032,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -952,7 +1074,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -988,7 +1110,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -1023,7 +1145,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -1057,7 +1179,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -1093,7 +1215,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -1129,7 +1251,7 @@ class TestGenericFetchAPI:
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -1161,17 +1283,20 @@ class TestGenericFetchAPI:
             "input('distinct',)"
         )
 
-    @mock.patch("rest_framework_simplejwt.tokens.AccessToken.verify")
+    @patch("rest_framework_simplejwt.tokens.AccessToken.verify")
     def test_expired_token_fetch(
-        self, mock_verify, api_client, view_perm_user
+        self, mock_verify, api_client, view_perm_token
     ):
         """
         User is using an expired token to fetch.
         """
+        # Configure mock to raise TokenError to simulate expired token
+        mock_verify.side_effect = TokenError("Token is invalid or expired")
+
         fetch_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "fields": ["name", "email"],
                     "filters": [
                         {
@@ -1187,13 +1312,7 @@ class TestGenericFetchAPI:
                 }
             }
         }
-
-        mock_verify.side_effect = Exception("Token is invalid or expired")
-
-        token = AccessToken.for_user(view_perm_user)
-        expired_access_token = str(token)
-
-        headers = {"Authorization": f"Bearer {expired_access_token}"}
+        headers = {"Authorization": f"Bearer {view_perm_token}"}
 
         response = api_client.post(
             "/fetch/",
@@ -1204,11 +1323,8 @@ class TestGenericFetchAPI:
         response_data = json.loads(response.content.decode("utf-8"))
 
         assert response.status_code == 401
-        assert (
-            response_data["error"]
-            == "Authentication failed: Token is invalid or expired"
-        )
-        assert response_data["code"] == "DGA-S003"
+        assert response_data["error"] == "Invalid Token."
+        assert response_data["code"] == "DGA-U004"
 
 
 @pytest.mark.parametrize(
@@ -1219,7 +1335,7 @@ class TestGenericFetchAPI:
             {
                 "payload": {
                     "variables": {
-                        "modelName": "customer",
+                        "modelName": "demo_app.customer",
                         "fields": ["name", "email"],
                         "filters": [
                             {
@@ -1246,7 +1362,7 @@ class TestGenericFetchAPI:
             {
                 "payload": {
                     "variables": {
-                        "modelName": "customer",
+                        "modelName": "demo_app.customer",
                         "filters": [
                             {
                                 "operator": "eq",

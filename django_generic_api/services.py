@@ -29,11 +29,17 @@ DEFAULT_APPS = {
 
 def get_model_by_name(model_name):
     """Fetch a model dynamically by searching all installed apps."""
-    for app_config in apps.get_app_configs():
-        if not DEFAULT_APPS.get(app_config.name):
-            model = app_config.models.get(model_name.lower())
-            if model:
-                return model
+
+    if model_name.__contains__("."):
+        model = apps.get_model(model_name)
+        if model:
+            return model
+    else:
+        for app_config in apps.get_app_configs():
+            if not DEFAULT_APPS.get(app_config.name):
+                model = app_config.models.get(model_name.lower())
+                if model:
+                    return model
     raise ValueError
 
 

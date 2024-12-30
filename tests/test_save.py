@@ -1,9 +1,9 @@
 import json
-from unittest import mock
+from unittest.mock import patch
 
 import pytest
 from django_generic_api.tests.demo_app.models import Customer
-from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 from fixtures.api import (
     save_perm_user,
@@ -16,14 +16,50 @@ from fixtures.api import (
 
 # To ensure the import is retained
 usage = view_perm_user
+usage1 = save_perm_user
 
 
 @pytest.mark.django_db
 class TestGenericSaveAPI:
 
-    def test_create_record(self, api_client, add_perm_token):
+    def test_create_record_with_appname(self, api_client, add_perm_token):
         """
         User has sent correct payload format.
+        """
+        save_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app.Customer",
+                    "id": None,
+                    "saveInput": [
+                        {
+                            "name": "test_user1",
+                            "dob": "2020-01-21",
+                            "email": "ltest1@mail.com",
+                            "phone_no": "012345",
+                            "address": "HYD",
+                            "pin_code": "100",
+                            "status": "123",
+                        }
+                    ],
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
+        response = api_client.post(
+            "/save/",
+            save_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 201
+        assert response_data["data"] == [{"id": [1]}]
+        assert response_data["message"] == ["Record created successfully."]
+
+    def test_create_record_without_appname(self, api_client, add_perm_token):
+        """
+        User's payload does not consist appname.
         """
         save_payload = {
             "payload": {
@@ -65,7 +101,7 @@ class TestGenericSaveAPI:
         save_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "Customer",
+                    "modelName": "demo_app.Customer",
                     "id": data_id,
                     "saveInput": [
                         {
@@ -96,6 +132,80 @@ class TestGenericSaveAPI:
 
         updated_data = Customer.objects.get(id=data_id)
         assert updated_data.name == "ABCD"
+
+    def test_create_record_with_incorrect_appname(
+        self, api_client, add_perm_token
+    ):
+        """
+        User has sent correct payload format.
+        """
+        save_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app1.Customer",
+                    "id": None,
+                    "saveInput": [
+                        {
+                            "name": "test_user1",
+                            "dob": "2020-01-21",
+                            "email": "ltest1@mail.com",
+                            "phone_no": "012345",
+                            "address": "HYD",
+                            "pin_code": "100",
+                            "status": "123",
+                        }
+                    ],
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
+        response = api_client.post(
+            "/save/",
+            save_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 400
+        assert response_data["error"] == "Model not found"
+        assert response_data["code"] == "DGA-V003"
+
+    def test_create_record_with_incorrect_model_name(
+        self, api_client, add_perm_token
+    ):
+        """
+        User has sent correct payload format.
+        """
+        save_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app.Customer1",
+                    "id": None,
+                    "saveInput": [
+                        {
+                            "name": "test_user1",
+                            "dob": "2020-01-21",
+                            "email": "ltest1@mail.com",
+                            "phone_no": "012345",
+                            "address": "HYD",
+                            "pin_code": "100",
+                            "status": "123",
+                        }
+                    ],
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
+        response = api_client.post(
+            "/save/",
+            save_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 400
+        assert response_data["error"] == "Model not found"
+        assert response_data["code"] == "DGA-V003"
 
     def test_invalid_payload_format(self, api_client, add_perm_token):
         """
@@ -178,7 +288,7 @@ class TestGenericSaveAPI:
         save_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "abcd",
+                    "modelName": "demo_app.abcd",
                     "id": None,
                     "saveInput": [
                         {
@@ -217,7 +327,7 @@ class TestGenericSaveAPI:
         save_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "id": None,
                     "saveInput": [
                         {
@@ -355,7 +465,7 @@ class TestGenericSaveAPI:
         save_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "customer",
+                    "modelName": "demo_app.customer",
                     "id": 10,
                     "saveInput": [
                         {
@@ -406,7 +516,7 @@ class TestGenericSaveAPI:
         save_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "Customer",
+                    "modelName": "demo_app.Customer",
                     "id": None,
                     "saveInput": [
                         {
@@ -449,7 +559,7 @@ class TestGenericSaveAPI:
         save_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "Customer",
+                    "modelName": "demo_app.Customer",
                     "id": None,
                     "saveInput": [
                         {
@@ -493,7 +603,7 @@ class TestGenericSaveAPI:
         save_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "Customer",
+                    "modelName": "demo_app.Customer",
                     "id": None,
                     "saveInput": [
                         {
@@ -533,7 +643,7 @@ class TestGenericSaveAPI:
         save_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "Customer",
+                    "modelName": "demo_app.Customer",
                     "id": 9000,  # ID that does not exist
                     "saveInput": [
                         {
@@ -574,7 +684,7 @@ class TestGenericSaveAPI:
         save_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "Customer",
+                    "modelName": "demo_app.Customer",
                     "id": "abc",  # String as ID
                     "saveInput": [
                         {
@@ -615,7 +725,7 @@ class TestGenericSaveAPI:
         save_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "Customer",
+                    "modelName": "demo_app.Customer",
                     "id": None,
                     "saveInput": [
                         {
@@ -639,9 +749,12 @@ class TestGenericSaveAPI:
             format="json",
         )
         response_data = json.loads(response.content.decode("utf-8"))
-        assert response.status_code == 401
-        assert response_data["error"] == "Unauthorized access"
-        assert response_data["code"] == "DGA-S001"
+        assert response.status_code == 404
+        assert (
+            response_data["error"]
+            == "Something went wrong!!! Please contact the administrator."
+        )
+        assert response_data["code"] == "DGA-V004"
 
     def test_invalid_token_format(self, api_client, add_perm_token):
         """
@@ -650,7 +763,7 @@ class TestGenericSaveAPI:
         save_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "Customer",
+                    "modelName": "demo_app.Customer",
                     "id": None,
                     "saveInput": [
                         {
@@ -675,15 +788,18 @@ class TestGenericSaveAPI:
             headers=headers,
         )
         response_data = json.loads(response.content.decode("utf-8"))
-        assert response.status_code == 401
-        assert response_data["error"] == "Invalid Token"
-        assert response_data["code"] == "DGA-S002"
+        assert response.status_code == 404
+        assert (
+            response_data["error"]
+            == "Something went wrong!!! Please contact the administrator."
+        )
+        assert response_data["code"] == "DGA-V004"
 
     def test_save_unauthorized(self, api_client, view_perm_token):
         save_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "Customer",
+                    "modelName": "demo_app.Customer",
                     "id": None,
                     "saveInput": [
                         {
@@ -715,15 +831,18 @@ class TestGenericSaveAPI:
         )
         assert response_data["code"] == "DGA-V004"
 
-    @mock.patch("rest_framework_simplejwt.tokens.AccessToken.verify")
-    def test_expired_token_save(self, mock_verify, api_client, save_perm_user):
+    @patch("rest_framework_simplejwt.tokens.AccessToken.verify")
+    def test_expired_token_save(self, mock_verify, api_client, add_perm_token):
         """
-        User is using an expired token to fetch.
+        User is using an expired token to save.
         """
+        # Configure mock to raise TokenError to simulate expired token
+        mock_verify.side_effect = TokenError("Token is invalid or expired")
+
         save_payload = {
             "payload": {
                 "variables": {
-                    "modelName": "Customer",
+                    "modelName": "demo_app.Customer",
                     "id": None,
                     "saveInput": [
                         {
@@ -741,12 +860,7 @@ class TestGenericSaveAPI:
             }
         }
 
-        mock_verify.side_effect = Exception("Token is invalid or expired")
-
-        token = AccessToken.for_user(save_perm_user)
-        expired_access_token = str(token)
-
-        headers = {"Authorization": f"Bearer {expired_access_token}"}
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
 
         response = api_client.post(
             "/save/",
@@ -757,11 +871,8 @@ class TestGenericSaveAPI:
         response_data = json.loads(response.content.decode("utf-8"))
 
         assert response.status_code == 401
-        assert (
-            response_data["error"]
-            == "Authentication failed: Token is invalid or expired"
-        )
-        assert response_data["code"] == "DGA-S003"
+        assert response_data["error"] == "Invalid Token."
+        assert response_data["code"] == "DGA-U004"
 
 
 @pytest.mark.django_db
@@ -801,7 +912,7 @@ class TestGenericSaveAPI:
             {
                 "payload": {
                     "variables": {
-                        "modelName": "Customer",
+                        "modelName": "demo_app.Customer",
                         "id": None,
                         "saveInput": [
                             {

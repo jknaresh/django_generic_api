@@ -11,9 +11,15 @@ from uuid import UUID
 
 from django.core.exceptions import FieldDoesNotExist
 from pydantic import ConfigDict, EmailStr, AnyUrl, IPvAnyAddress
+from rest_framework import status
 from rest_framework.exceptions import Throttled
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
+from rest_framework_simplejwt.exceptions import (
+    InvalidToken,
+    TokenError,
+    AuthenticationFailed,
+)
 
 actions = {
     "fetch": "view",
@@ -168,6 +174,25 @@ def custom_exception_handler(exc, context):
             },
             status=exc.status_code,
         )
+
+    if isinstance(exc, (InvalidToken, TokenError)):
+        return Response(
+            {
+                "error": "Invalid Token.",
+                "code": "DGA-U004",
+            },
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    if isinstance(exc, AuthenticationFailed):
+        return Response(
+            {
+                "error": "Invalid token format.",
+                "code": "DGA-U005",
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     return response
 
 
