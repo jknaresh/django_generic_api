@@ -36,24 +36,15 @@ from .utils import (
     store_user_ip,
     is_valid_domain,
 )
+
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import SessionAuthentication
-from django.contrib.auth.models import AnonymousUser
 
 
 class GenericSaveAPIView(APIView):
     authentication_classes = [SessionAuthentication, JWTAuthentication]
 
     def post(self, *args, **kwargs):
-
-        if isinstance(self.request.user, AnonymousUser):
-            return Response(
-                {
-                    "error": "Use proper authentication.",
-                    "code": "DGA-V038",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
         payload = self.request.data.get("payload", {}).get("variables", {})
 
@@ -124,15 +115,6 @@ class GenericFetchAPIView(APIView):
     authentication_classes = [SessionAuthentication, JWTAuthentication]
 
     def post(self, *args, **kwargs):
-
-        if isinstance(self.request.user, AnonymousUser):
-            return Response(
-                {
-                    "error": "Use proper authentication.",
-                    "code": "DGA-V039",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
         payload = self.request.data.get("payload", {}).get("variables", {})
         try:

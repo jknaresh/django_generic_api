@@ -749,9 +749,12 @@ class TestGenericSaveAPI:
             format="json",
         )
         response_data = json.loads(response.content.decode("utf-8"))
-        assert response.status_code == 400
-        assert response_data["error"] == "Use proper authentication."
-        assert response_data["code"] == "DGA-V038"
+        assert response.status_code == 404
+        assert (
+            response_data["error"]
+            == "Something went wrong!!! Please contact the administrator."
+        )
+        assert response_data["code"] == "DGA-V004"
 
     def test_invalid_token_format(self, api_client, add_perm_token):
         """
@@ -785,9 +788,12 @@ class TestGenericSaveAPI:
             headers=headers,
         )
         response_data = json.loads(response.content.decode("utf-8"))
-        assert response.status_code == 400
-        assert response_data["error"] == "Use proper authentication."
-        assert response_data["code"] == "DGA-V038"
+        assert response.status_code == 404
+        assert (
+            response_data["error"]
+            == "Something went wrong!!! Please contact the administrator."
+        )
+        assert response_data["code"] == "DGA-V004"
 
     def test_save_unauthorized(self, api_client, view_perm_token):
         save_payload = {

@@ -34,8 +34,6 @@ DGA-U: Errors raised at the utilities level (utils.py)
 | DGA-V018   | User activate   | Server Error! The activation link has expired.                                            |
 | DGA-V019   | User activate   | User Error! The user ID does not exist.                                                   |
 | DGA-V020   | User activate   | Server Error! User is not activated.                                                      |
-| DGA-V038   | Save            | User Error! User is not by session or token-based.                                        |
-| DGA-V038   | Fetch           | User Error! User is not by session or token-based.                                        |                                                                                          |
 | DGA-S001   | Access Token    | User Error! The user is not logged in by session and does not have an access token.       |
 | DGA-S002   | Access Token    | User Error! The token format is invalid.                                                  |                                                                                                                        |
 | DGA-S003   | Access Token    | User Error! Access token authentication failed.                                           |
