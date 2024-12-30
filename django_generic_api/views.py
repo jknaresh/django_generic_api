@@ -37,12 +37,8 @@ from .utils import (
     is_valid_domain,
 )
 
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.authentication import SessionAuthentication
-
 
 class GenericSaveAPIView(APIView):
-    authentication_classes = [SessionAuthentication, JWTAuthentication]
 
     def post(self, *args, **kwargs):
 
@@ -112,7 +108,6 @@ class GenericSaveAPIView(APIView):
 
 
 class GenericFetchAPIView(APIView):
-    authentication_classes = [SessionAuthentication, JWTAuthentication]
 
     def post(self, *args, **kwargs):
 
