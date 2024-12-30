@@ -9,6 +9,7 @@ from pydantic import (
     Field,
 )
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from .utils import (
     get_model_fields_with_properties,
     is_fields_exist,

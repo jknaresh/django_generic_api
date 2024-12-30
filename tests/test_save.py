@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 from django_generic_api.tests.demo_app.models import Customer
+from rest_framework_simplejwt.exceptions import TokenError
 
 from fixtures.api import (
     save_perm_user,
@@ -12,7 +13,6 @@ from fixtures.api import (
     api_client,
     customer1,
 )
-from rest_framework_simplejwt.exceptions import TokenError
 
 # To ensure the import is retained
 usage = view_perm_user

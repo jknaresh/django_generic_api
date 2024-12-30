@@ -1,8 +1,9 @@
 # Test cases for fetch API
 import json
+from unittest.mock import patch
 
 import pytest
-from unittest.mock import patch
+from rest_framework_simplejwt.exceptions import TokenError
 
 from fixtures.api import (
     api_client,
@@ -13,8 +14,6 @@ from fixtures.api import (
     customer1,
     customer2,
 )
-from rest_framework_simplejwt.exceptions import TokenError
-
 
 # To ensure the import is retained
 usage = save_perm_user
