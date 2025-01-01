@@ -28,7 +28,7 @@ actions = {
     "remove": "delete",
 }
 
-# Define a dictionary to map Django fields to Pydantic types
+# Dictionary to map Django fields to Pydantic types
 DJANGO_TO_PYDANTIC_TYPE_MAP = {
     "CharField": str,
     "IntegerField": int,
@@ -69,6 +69,10 @@ DJANGO_TO_PYDANTIC_TYPE_MAP = {
 
 
 class PydanticConfigV1:
+    """
+    Defining configuration for pydantic objects.
+    """
+
     model_config = ConfigDict(
         extra="forbid",  # Forbid extra fields
         str_strip_whitespace=True,  # Remove white spaces
@@ -76,6 +80,12 @@ class PydanticConfigV1:
 
 
 def make_permission_str(model, action):
+    """
+    Returns a permission string.
+
+    param : model (Django model class), action: string
+    returns : permission string in '<app_name>.<action>_<model_name>' format.
+    """
     model_meta = getattr(model, "_meta")
     action = actions.get(action)
     permission = f"{model_meta.app_label}.{action}_{model_meta.model_name}"
@@ -111,6 +121,15 @@ def get_model_fields_with_properties(model, field_list=None):
 
 
 def is_fields_exist(model, fields):
+    """
+    Checks if field exists in a model.
+    Checks the existence of a foreign key field in the associated model.
+    Returns error if not yet field is passed.
+
+    param : model (Django model class), fields (List of fields).
+    returns : True / Error.
+    """
+
     valid_fields = []
     for field in fields:
         if not field.__contains__("__"):
@@ -142,6 +161,12 @@ def is_fields_exist(model, fields):
 
 
 def registration_token(user_id):
+    """
+    Generates an encoded token.
+
+    param : user_id (int)
+    returns : encoded token
+    """
     timestamp = int(time.time())
     token = f"{user_id}:{timestamp}"
     encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
@@ -150,6 +175,12 @@ def registration_token(user_id):
 
 
 def store_user_ip(user_id, user_ip):
+    """
+    Writes user IP address to a text file.
+
+    param : user_id (int), user_ip (string)
+    returns : None
+    """
     csv_file_path = os.path.join(os.getcwd(), "user_ips.csv")
 
     file_exists = os.path.isfile(csv_file_path)
@@ -164,6 +195,12 @@ def store_user_ip(user_id, user_ip):
 
 
 def custom_exception_handler(exc, context):
+    """
+    Returns a custom DRF error.
+
+    param : exc (Exception), context (dict)
+    returns : Response
+    """
     response = exception_handler(exc, context)
 
     if isinstance(exc, Throttled):
@@ -197,6 +234,12 @@ def custom_exception_handler(exc, context):
 
 
 def is_valid_domain(domain):
+    """
+    Checks if user's email domain is valid or not.
+
+    param : domain (string)
+    returns : True / False
+    """
     base_path = Path(__file__).resolve().parent
     domain_file = base_path / "valid_domains.txt"
     domain_bytes = domain.lower().encode("utf-8")
