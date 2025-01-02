@@ -1,8 +1,5 @@
 from setuptools import setup, find_packages
 
-with open("requirements.txt") as f:
-    install_requires = f.read().splitlines()
-
 setup(
     name="django_generic_api",
     version="0.1.0a261",
@@ -32,7 +29,19 @@ setup(
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     ],
-    install_requires=install_requires,
+    install_requires=[
+        "django>=4.2.16",
+        "djangorestframework>=3.15.2",
+        "pydantic>=2.9.1",
+        "email-validator>=2.2.0",
+        "djangorestframework-simplejwt>=5.3.1",
+        "jsonschema>=4.23.0",
+        "django-cors-headers>=4.4.0",
+        "pytest>=8.3.3",
+        "model-bakery>=1.20.0",
+        "pytest-django>=4.9.0",
+        "django-simple-captcha>=0.6.0",
+    ],
     setup_requires=[
         "pytest-runner",
     ],
