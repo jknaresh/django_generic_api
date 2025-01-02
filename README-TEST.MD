@@ -5,13 +5,13 @@
 ### To run all test cases:
 
 ```bash 
-python setup.py pytest
+python -m pytest
 ```
 
 ### To run individual file:
 
 ```bash 
-python setup.py pytest --addopts "<path_to_your_test_file>"
+python -m pytest "<path_to_your_test_file>"
 
-# example : python setup.py pytest --addopts "tests/test_basic.py"
+# example : python -m pytest "tests/test_basic.py"
 ```
