@@ -34,7 +34,7 @@ from .utils import (
     make_permission_str,
     registration_token,
     store_user_ip,
-    is_valid_domain,
+    is_valid_email_domain,
 )
 
 
@@ -332,7 +332,7 @@ class GenericRegisterAPIView(APIView):
                 )
 
         email_domain = email.split("@")[-1]
-        if not is_valid_domain(email_domain):
+        if not is_valid_email_domain(email_domain):
             return Response(
                 {"error": "Invalid email domain", "code": "DGA-V022"},
                 status=status.HTTP_400_BAD_REQUEST,
