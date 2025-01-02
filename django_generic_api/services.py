@@ -28,7 +28,15 @@ DEFAULT_APPS = {
 
 
 def get_model_by_name(model_name):
-    """Fetch a model dynamically by searching all installed apps."""
+    """
+    Fetches a model dynamically by searching through all installed apps.
+    The expected formats for model_name are: 'app_name.model_name' or 'model_name'.
+    If the model is found, the function returns the model.
+    If the model is not found, it raises an error.
+
+    param : model_name
+    return : model object/error
+    """
 
     if model_name.__contains__("."):
         model = apps.get_model(model_name)
@@ -44,6 +52,12 @@ def get_model_by_name(model_name):
 
 
 def generate_token(user):
+    """
+    Generates an auth access token and a refresh token for user authentication.
+
+    param : Django user instance
+    returns : A pair of access anf refresh token
+    """
     refresh = RefreshToken.for_user(user)
     return [
         {
@@ -213,7 +227,14 @@ def fetch_data(
 
 
 def apply_filters(model, filters):
-    """Apply dynamic filters using Q objects."""
+    """
+    Apply dynamic filters using Q objects.
+    Raises error if 'filters.value' is not suitable for 'filters.name' field type.
+    Supported operators are (eq, in, not, gt, like, ilike).
+
+    param : model (Django model), filters (List of filter objects).
+    returns : String representation of Q object / ValueError.
+    """
     query1 = Q()
     last_logical_operation = "and"
     for filter_item in filters:
@@ -255,7 +276,21 @@ def apply_filters(model, filters):
 
 
 def handle_save_input(model, record_id, save_input):
-    """Handle creating or updating a record."""
+    """
+    Create or Update a record.
+    Gets a json schema of model configuration.
+    Returns Error if record_id exists when length of save_input is greater than 1.
+    Returns Error if non-existing fields are passed.
+    Fills with defaults value for a field when value is not given and null=True.
+    Returns Error if value is not suitable to insert/update in a field type.
+    Returns Error if non-existing record id is passed.
+    When save_input is correct:
+        - Updates the record if record_id is passed.
+        - Creates a new record if record_id is null.
+
+    param : model (Django model), record_id (null/integer), save_input (List of dict).
+    return : Success message / Error message.
+    """
 
     model_schema_pydantic_model = get_model_config_schema(model)
     model_schema = model_schema_pydantic_model.model_json_schema()

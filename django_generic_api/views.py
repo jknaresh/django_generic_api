@@ -39,6 +39,15 @@ from .utils import (
 
 
 class GenericSaveAPIView(APIView):
+    """
+    Save API.
+    - Length of payload if checked.
+    - Strict typing is enabled for payload.
+    - Checks if model exists or not.
+    - Checks if user has 'add' or 'change' permission.
+    - Save functionality.
+
+    """
 
     def post(self, *args, **kwargs):
 
@@ -108,6 +117,13 @@ class GenericSaveAPIView(APIView):
 
 
 class GenericFetchAPIView(APIView):
+    """
+    Fetch API
+    - Strict typing is enabled for payload.
+    - Checks if model exists or not.
+    - Checks if user has 'view' permission.
+    - Fetch fuctionality.
+    """
 
     def post(self, *args, **kwargs):
 
@@ -172,6 +188,13 @@ class GenericFetchAPIView(APIView):
 
 
 class GenericLoginAPIView(APIView):
+    """
+    Login API
+    - Strict typing for payload is done.
+    - Checks if user exists or not.
+    - Validates user's password.
+    - Generates token if user is not session based.
+    """
 
     def post(self, *args, **kwargs):
         payload = self.request.data.get("payload", {}).get("variables", {})
@@ -223,6 +246,16 @@ class GenericLoginAPIView(APIView):
 
 
 class GenericRegisterAPIView(APIView):
+    """
+    Register API
+    - Strict typing of payload is enabled.
+    - Captcha is validated.
+    - Checks is email already exists or not.
+    - Passwords are validated.
+    - Email domain validation is done.
+    - Creates a inactive user.
+    - Sends a user activation email.
+    """
 
     def post(self, *args, **kwargs):
         payload = self.request.data.get("payload", {}).get("variables", {})
@@ -357,6 +390,13 @@ class GenericRegisterAPIView(APIView):
 
 
 class GenericForgotPasswordAPIView(APIView):
+    """
+    Forgot Password API
+    - Strict typing of payload is enabled.
+    - Captcha is validated.
+    - Checks if user exists or not.
+    - New password generation email is sent.
+    """
 
     def post(self, *args, **kwargs):
         payload = self.request.data.get("payload", {}).get("variables", {})
@@ -442,6 +482,9 @@ class GenericForgotPasswordAPIView(APIView):
 
 
 class LogoutAPIView(APIView):
+    """
+    Logout API.
+    """
 
     def post(self, *args, **kwargs):
         logout(self.request)
@@ -451,6 +494,12 @@ class LogoutAPIView(APIView):
 
 
 class AccountActivateAPIView(APIView):
+    """
+    Account activation API
+    - Decodes the token.
+    - Checks if user is already active.
+    - Activates user account and stores User's IP address.
+    """
 
     def get(self, request, encoded_token, *args, **kwargs):
         try:
@@ -502,6 +551,10 @@ class AccountActivateAPIView(APIView):
 
 
 class CaptchaServiceAPIView(APIView):
+    """
+    Captcha Service API
+    - Post and Get method are used to generate captcha key and image.
+    """
 
     # post method
     def post(self, request, *args, **kwargs):
@@ -545,6 +598,14 @@ class CaptchaServiceAPIView(APIView):
 
 
 class NewPasswordAPIView(APIView):
+    """
+    New Password API
+    - Decodes the token.
+    - Strict typing of payload is enabled.
+    - Checks if user exists or not.
+    - Password validation is done.
+    - User's password is updated and user is activated.
+    """
 
     def post(self, request, *args, **kwargs):
 
