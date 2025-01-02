@@ -1102,7 +1102,10 @@ class TestGenericFetchAPI:
 
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V006"
-        assert response_data["error"] == "Input should be greater than or equal to 1('pageSize',)"
+        assert (
+            response_data["error"]
+            == "Input should be greater than or equal to 1('pageSize',)"
+        )
 
     def test_unknown_format_sort_property(
         self, customer1, api_client, view_perm_token
