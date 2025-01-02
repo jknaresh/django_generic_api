@@ -83,7 +83,7 @@ def make_permission_str(model, action):
     """
     Returns a permission string.
 
-    param : model (Django model), action: string
+    param : model (Django model), action: string(fetch, save, edit, remove).
     returns : permission string as '<app_name>.<action>_<model_name>' format.
     """
     model_meta = getattr(model, "_meta")
@@ -233,7 +233,7 @@ def custom_exception_handler(exc, context):
     return response
 
 
-def is_valid_domain(domain):
+def is_valid_email_domain(domain):
     """
     Checks if the email domain is valid or not.
 
