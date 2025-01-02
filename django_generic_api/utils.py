@@ -70,7 +70,7 @@ DJANGO_TO_PYDANTIC_TYPE_MAP = {
 
 class PydanticConfigV1:
     """
-    Defining configuration for pydantic objects.
+    Custom configuration for pydantic objects.
     """
 
     model_config = ConfigDict(
@@ -83,8 +83,8 @@ def make_permission_str(model, action):
     """
     Returns a permission string.
 
-    param : model (Django model class), action: string
-    returns : permission string in '<app_name>.<action>_<model_name>' format.
+    param : model (Django model), action: string
+    returns : permission string as '<app_name>.<action>_<model_name>' format.
     """
     model_meta = getattr(model, "_meta")
     action = actions.get(action)
@@ -122,11 +122,11 @@ def get_model_fields_with_properties(model, field_list=None):
 
 def is_fields_exist(model, fields):
     """
-    Checks if field exists in a model.
+    Checks if field exists in the model.
     Checks the existence of a foreign key field in the associated model.
-    Returns error if not yet field is passed.
+    Returns error if non-existing field is passed.
 
-    param : model (Django model class), fields (List of fields).
+    param : model (Django model), fields (List of fields).
     returns : True / Error.
     """
 
@@ -162,7 +162,7 @@ def is_fields_exist(model, fields):
 
 def registration_token(user_id):
     """
-    Generates an encoded token.
+    Generates a timestamp encoded token.
 
     param : user_id (int)
     returns : encoded token
@@ -196,7 +196,7 @@ def store_user_ip(user_id, user_ip):
 
 def custom_exception_handler(exc, context):
     """
-    Returns a custom DRF error.
+    Generates a custom DRF error response instead of the default error response.
 
     param : exc (Exception), context (dict)
     returns : Response
@@ -235,7 +235,7 @@ def custom_exception_handler(exc, context):
 
 def is_valid_domain(domain):
     """
-    Checks if user's email domain is valid or not.
+    Checks if the email domain is valid or not.
 
     param : domain (string)
     returns : True / False

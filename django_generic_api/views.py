@@ -249,7 +249,7 @@ class GenericRegisterAPIView(APIView):
     """
     Register API
     - Strict typing of payload is enabled.
-    - Captcha validation is done.
+    - Captcha is validated.
     - Checks is email already exists or not.
     - Passwords are validated.
     - Email domain validation is done.
@@ -393,7 +393,7 @@ class GenericForgotPasswordAPIView(APIView):
     """
     Forgot Password API
     - Strict typing of payload is enabled.
-    - Captcha validation is done.
+    - Captcha is validated.
     - Checks if user exists or not.
     - New password generation email is sent.
     """
@@ -604,7 +604,7 @@ class NewPasswordAPIView(APIView):
     - Strict typing of payload is enabled.
     - Checks if user exists or not.
     - Password validation is done.
-    - User's password is updated and activates the user.
+    - User's password is updated and user is activated.
     """
 
     def post(self, request, *args, **kwargs):
