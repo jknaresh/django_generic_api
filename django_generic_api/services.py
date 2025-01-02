@@ -204,7 +204,6 @@ def fetch_data(
 
     # pagination
     if page_number and page_size:
-        page_size = min(page_size, 100)
         # SQL-level pagination using slicing
         start_index = (page_number - 1) * page_size
         end_index = start_index + page_size

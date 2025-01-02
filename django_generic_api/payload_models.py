@@ -7,6 +7,7 @@ from pydantic import (
     JsonValue,
     SecretStr,
     EmailStr,
+    Field,
 )
 
 from .utils import PydanticConfigV1
@@ -53,8 +54,8 @@ class FetchPayload(BaseModel, PydanticConfigV1):
     modelName: str
     fields: List[str]
     filters: List[FetchFilter]
-    pageNumber: Optional[int] = None
-    pageSize: Optional[int] = None
+    pageNumber: Optional[int] = Field(default=1, ge=1)
+    pageSize: Optional[int] = Field(default=10, ge=1, le=100)
     sort: Optional[FetchSort] = None
     distinct: Optional[bool] = None
 
