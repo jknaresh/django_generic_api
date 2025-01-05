@@ -20,6 +20,10 @@ from rest_framework_simplejwt.exceptions import (
     TokenError,
     AuthenticationFailed,
 )
+import random
+import string
+from django.conf import settings
+
 
 actions = {
     "fetch": "view",
@@ -271,3 +275,44 @@ def get_field_properties(field1):
         field_properties["default"] = field1.get_default()
 
     return field_properties
+
+
+def random_digit_challenge():
+
+    length = getattr(settings, "CAPTCHA_LENGTH", 4)
+    ret = ""
+    for i in range(length):
+        ret += str(random.randint(0, 9))
+    return ret, ret
+
+
+def random_lowercase_challenge():
+    length = getattr(settings, "CAPTCHA_LENGTH", 4)
+    ret = ""
+    for i in range(length):
+        ret += random.choice(string.ascii_lowercase)
+    return ret, ret
+
+
+def random_uppercase_challenge():
+    length = getattr(settings, "CAPTCHA_LENGTH", 4)
+    ret = ""
+    for i in range(length):
+        ret += random.choice(string.ascii_uppercase)
+    return ret, ret
+
+
+def mixed_digit_lowercase_challenge():
+    length = getattr(settings, "CAPTCHA_LENGTH", 4)
+    ret = ""
+    for i in range(length):
+        ret += random.choice(string.digits + string.ascii_lowercase)
+    return ret, ret
+
+
+def mixed_digit_uppercase_challenge():
+    length = getattr(settings, "CAPTCHA_LENGTH", 4)
+    ret = ""
+    for i in range(length):
+        ret += random.choice(string.digits + string.ascii_uppercase)
+    return ret, ret

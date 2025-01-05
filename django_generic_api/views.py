@@ -273,7 +273,7 @@ class GenericRegisterAPIView(APIView):
         try:
             # Validate the captcha response
             captcha = CaptchaStore.objects.get(hashkey=captcha_key)
-            if captcha.response == captcha_value.lower():
+            if captcha.challenge == captcha_value:
                 captcha.delete()  # Clean up after successful validation
             else:
                 return Response(

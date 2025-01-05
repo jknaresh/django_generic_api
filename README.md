@@ -167,15 +167,36 @@ BASE_URL = "..."
 
 ### Captcha Configuration
 
-- Add captcha service to make your Regisration and Forgot Password API's more
-  secure.
-- Add these changes into your settings file.
+- For Registration and Forgot Password, a captcha is required.
+- To add captcha, add these settings.
 
 ```bash
 # Captcha Settings
 INSTALLED_APPS = [
   "captcha",
 ]
+
+CAPTCHA_BACKGROUND_COLOR = hex code # Defaults to: '#ffffff'
+CAPTCHA_FOREGROUND_COLOR = hex code # Defaults to: '#001100'
+CAPTCHA_IMAGE_SIZE = tuple (width, height) # Defaults to: None
+CAPTCHA_FONT_SIZE = int # Defaults to: 22
+CAPTCHA_LENGTH = int # Defaults to: 4
+```
+
+- To customize the content of captcha, add this settings.
+- Chose any one of the following functions.
+- If not used, defaults to upper case characters only.
+```bash
+CAPTCHA_CHALLENGE_FUNCT = 'django_generic_api.utils.random_digit_challenge'
+# example: 9876
+CAPTCHA_CHALLENGE_FUNCT = 'django_generic_api.utils.random_lowercase_challenge'
+# example: abcd
+CAPTCHA_CHALLENGE_FUNCT = 'django_generic_api.utils.random_uppercase_challenge'
+# example: ABCD
+CAPTCHA_CHALLENGE_FUNCT = 'django_generic_api.utils.mixed_digit_lowercase_challenge'
+# example: a1b2
+CAPTCHA_CHALLENGE_FUNCT = 'django_generic_api.utils.mixed_digit_uppercase_challenge'
+# example: A1B2
 ```
 
 ---
