@@ -88,6 +88,7 @@ def pytest_configure():
         CAPTCHA_IMAGE_SIZE=(200, 200),
         CAPTCHA_FONT_SIZE=25,
         CAPTCHA_LENGTH=7,
+        CAPTCHA_REQUIRED=True,
     )
 
     django.setup()

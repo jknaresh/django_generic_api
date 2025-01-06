@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 from captcha.models import CaptchaStore
+from django.conf import settings
 
 from fixtures.api import api_client, login_user
 
@@ -23,7 +24,7 @@ class TestForgotPasswordAPI:
         with patch("captcha.models.CaptchaStore.objects.get") as mock_get:
             # Set up the mocked CaptchaStore object
             mock_captcha = MagicMock()
-            mock_captcha.response = mocked_captcha_value.lower()
+            mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
             captcha_response = api_client.post("/generate_captcha/")
@@ -103,7 +104,7 @@ class TestForgotPasswordAPI:
         with patch("captcha.models.CaptchaStore.objects.get") as mock_get:
             # Set up the mocked CaptchaStore object
             mock_captcha = MagicMock()
-            mock_captcha.response = mocked_captcha_value.lower()
+            mock_captcha.response = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
             captcha_response = api_client.post("/generate_captcha/")
@@ -158,7 +159,10 @@ class TestForgotPasswordAPI:
 
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
-        assert response_data["error"] == "Field required"
+        assert (
+            response_data["error"]
+            == "Value error, Captcha key and value are required when `CAPTCHA_REQUIRED` is True."
+        )
         assert response_data["code"] == "DGA-V017"
 
     def test_user_not_found(self, api_client):
@@ -170,7 +174,7 @@ class TestForgotPasswordAPI:
         with patch("captcha.models.CaptchaStore.objects.get") as mock_get:
             # Set up the mocked CaptchaStore object
             mock_captcha = MagicMock()
-            mock_captcha.response = mocked_captcha_value.lower()
+            mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
             captcha_response = api_client.post("/generate_captcha/")
@@ -229,3 +233,144 @@ class TestForgotPasswordAPI:
         assert response.status_code == 400
         assert response_data["error"] == "Extra inputs are not permitted"
         assert response_data["code"] == "DGA-V017"
+
+    def test_captcha_attributes_sent_captcha_required_true(
+        self, api_client, login_user
+    ):
+        """
+        Captcha attributes are sent when CAPTCHA_REQUIRED is True
+        """
+
+        assert settings.CAPTCHA_REQUIRED
+        # Define the mocked captcha value
+        mocked_captcha_value = "ABCD"
+
+        with patch("captcha.models.CaptchaStore.objects.get") as mock_get:
+            # Set up the mocked CaptchaStore object
+            mock_captcha = MagicMock()
+            mock_captcha.challenge = mocked_captcha_value
+            mock_get.return_value = mock_captcha
+
+            captcha_response = api_client.post("/generate_captcha/")
+            assert captcha_response.status_code == 200
+            assert "captcha_key" in captcha_response.data
+            assert "captcha_url" in captcha_response.data
+
+            captcha_key = captcha_response.data["captcha_key"]
+
+            forgot_password_payload = {
+                "payload": {
+                    "variables": {
+                        "email": "user@gmail.com",
+                        "captcha_key": captcha_key,
+                        "captcha_value": mocked_captcha_value,
+                    }
+                }
+            }
+
+            response = api_client.post(
+                "/forgotPassword/",
+                forgot_password_payload,
+                format="json",
+            )
+
+            response_data = response.json()
+
+            # Assertions
+            assert response.status_code == 200
+            assert "message" in response_data
+
+    def test_captcha_attributes_not_sent_captcha_required_true(
+        self, api_client
+    ):
+        assert settings.CAPTCHA_REQUIRED
+        """
+        Captcha attributes are sent when CAPTCHA_REQUIRED is False
+        """
+        forgot_password_payload = {
+            "payload": {
+                "variables": {
+                    "email": "user@gmail.com",
+                }
+            }
+        }
+
+        response = api_client.post(
+            "/forgotPassword/",
+            forgot_password_payload,
+            format="json",
+        )
+
+        response_data = response.json()
+
+        assert response.status_code == 400
+        assert (
+            response_data["error"]
+            == "Value error, Captcha key and value are required when `CAPTCHA_REQUIRED` is True."
+        )
+        assert response_data["code"] == "DGA-V017"
+
+    def test_captcha_attributes_sent_captcha_required_false(
+        self, api_client, monkeypatch
+    ):
+        """
+        Captcha attributes are sent when CAPTCHA_REQUIRED is False
+        """
+
+        monkeypatch.setattr("django.conf.settings.CAPTCHA_REQUIRED", False)
+
+        assert not settings.CAPTCHA_REQUIRED
+
+        forgot_password_payload = {
+            "payload": {
+                "variables": {
+                    "email": "user@gmail.com",
+                    "captcha_key": "captcha_key",
+                    "captcha_value": "mocked_captcha_value",
+                }
+            }
+        }
+
+        response = api_client.post(
+            "/forgotPassword/",
+            forgot_password_payload,
+            format="json",
+        )
+
+        response_data = response.json()
+        assert response.status_code == 400
+        assert (
+            response_data["error"]
+            == "Value error, Captcha key and value should not be provided when `CAPTCHA_REQUIRED` is False."
+        )
+        assert response_data["code"] == "DGA-V017"
+
+    def test_captcha_attributes_not_sent_captcha_required_false(
+        self, api_client, login_user, monkeypatch
+    ):
+        """
+        Captcha attributes are not sent when CAPTCHA_REQUIRED is False
+        """
+        monkeypatch.setattr("django.conf.settings.CAPTCHA_REQUIRED", False)
+
+        assert not settings.CAPTCHA_REQUIRED
+
+        forgot_password_payload = {
+            "payload": {
+                "variables": {
+                    "email": "user@gmail.com",
+                }
+            }
+        }
+
+        response = api_client.post(
+            "/forgotPassword/",
+            forgot_password_payload,
+            format="json",
+        )
+
+        response_data = response.json()
+
+        # Assertions
+        assert response.status_code == 200
+        assert "message" in response_data

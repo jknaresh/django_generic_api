@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 from captcha.models import CaptchaStore
-
+from django.conf import settings
 from fixtures.api import api_client, login_user
 
 
@@ -24,7 +24,7 @@ class TestRegisterAPI:
         with patch("captcha.models.CaptchaStore.objects.get") as mock_get:
             # Set up the mocked CaptchaStore object
             mock_captcha = MagicMock()
-            mock_captcha.response = mocked_captcha_value.lower()
+            mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
             captcha_response = api_client.post("/generate_captcha/")
@@ -65,7 +65,7 @@ class TestRegisterAPI:
         with patch("captcha.models.CaptchaStore.objects.get") as mock_get:
             # Set up the mocked CaptchaStore object
             mock_captcha = MagicMock()
-            mock_captcha.response = mocked_captcha_value.lower()
+            mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
             captcha_response = api_client.post("/generate_captcha/")
@@ -193,7 +193,7 @@ class TestRegisterAPI:
         with patch("captcha.models.CaptchaStore.objects.get") as mock_get:
             # Set up the mocked CaptchaStore object
             mock_captcha = MagicMock()
-            mock_captcha.response = mocked_captcha_value.lower()
+            mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
             captcha_response = api_client.post("/generate_captcha/")
@@ -234,7 +234,7 @@ class TestRegisterAPI:
         with patch("captcha.models.CaptchaStore.objects.get") as mock_get:
             # Set up the mocked CaptchaStore object
             mock_captcha = MagicMock()
-            mock_captcha.response = mocked_captcha_value.lower()
+            mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
             captcha_response = api_client.post("/generate_captcha/")
@@ -276,7 +276,7 @@ class TestRegisterAPI:
         with patch("captcha.models.CaptchaStore.objects.get") as mock_get:
             # Set up the mocked CaptchaStore object
             mock_captcha = MagicMock()
-            mock_captcha.response = mocked_captcha_value.lower()
+            mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
             captcha_response = api_client.post("/generate_captcha/")
@@ -391,3 +391,141 @@ class TestRegisterAPI:
             assert response.status_code == 400
             assert response_data["error"] == "Invalid or expired captcha key."
             assert response_data["code"] == "DGA-V027"
+
+    def test_captcha_attributes_sent_captcha_required_true(self, api_client):
+        """
+        Captcha attributes are sent when CAPTCHA_REQUIRED is True
+        """
+        # Define the mocked captcha value
+        mocked_captcha_value = "ABCD"
+
+        with patch("captcha.models.CaptchaStore.objects.get") as mock_get:
+            # Set up the mocked CaptchaStore object
+            mock_captcha = MagicMock()
+            mock_captcha.challenge = mocked_captcha_value
+            mock_get.return_value = mock_captcha
+
+            captcha_response = api_client.post("/generate_captcha/")
+            assert captcha_response.status_code == 200
+            assert "captcha_key" in captcha_response.data
+            assert "captcha_url" in captcha_response.data
+
+            captcha_key = captcha_response.data["captcha_key"]
+
+            register_payload = {
+                "payload": {
+                    "variables": {
+                        "email": "abc@gmail.com",
+                        "password": "test_user@123",
+                        "password1": "test_user@123",
+                        "captcha_key": captcha_key,
+                        "captcha_value": mocked_captcha_value,
+                    }
+                }
+            }
+
+            response = api_client.post(
+                "/register/",
+                register_payload,
+                format="json",
+            )
+
+            response_data = json.loads(response.content.decode("utf-8"))
+            assert response.status_code == 200
+            assert "message" in response_data
+
+    def test_captcha_attributes_not_sent_captcha_required_true(
+        self, api_client
+    ):
+        """
+        Captcha attributes are not sent when CAPTCHA_REQUIRED is True
+        """
+        register_payload = {
+            "payload": {
+                "variables": {
+                    "email": "abc@gmail.com",
+                    "password": "test_user@123",
+                    "password1": "test_user@123",
+                }
+            }
+        }
+
+        response = api_client.post(
+            "/register/",
+            register_payload,
+            format="json",
+        )
+
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 400
+        assert (
+            response_data["error"]
+            == "Value error, Captcha key and value are required when `CAPTCHA_REQUIRED` is True."
+        )
+        assert response_data["code"] == "DGA-V013"
+
+    def test_captcha_attributes_sent_captcha_required_false(
+        self, api_client, monkeypatch
+    ):
+        """
+        Captcha attributes are sent when CAPTCHA_REQUIRED is False
+        """
+        monkeypatch.setattr("django.conf.settings.CAPTCHA_REQUIRED", False)
+
+        assert not settings.CAPTCHA_REQUIRED
+
+        register_payload = {
+            "payload": {
+                "variables": {
+                    "email": "abc@gmail.com",
+                    "password": "test_user@123",
+                    "password1": "test_user@123",
+                    "captcha_key": "dummy_captcha_key",
+                    "captcha_value": "dummy_captcha_value",
+                }
+            }
+        }
+
+        response = api_client.post(
+            "/register/",
+            register_payload,
+            format="json",
+        )
+
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 400
+        assert (
+            response_data["error"]
+            == "Value error, Captcha key and value should not be provided when `CAPTCHA_REQUIRED` is False."
+        )
+        assert response_data["code"] == "DGA-V013"
+
+    def test_captcha_attributes_not_sent_captcha_required_false(
+        self, api_client, monkeypatch
+    ):
+        """
+        Captcha attributes are not sent when CAPTCHA_REQUIRED is False
+        """
+        monkeypatch.setattr("django.conf.settings.CAPTCHA_REQUIRED", False)
+
+        assert not settings.CAPTCHA_REQUIRED
+
+        register_payload = {
+            "payload": {
+                "variables": {
+                    "email": "abc@gmail.com",
+                    "password": "test_user@123",
+                    "password1": "test_user@123",
+                }
+            }
+        }
+
+        response = api_client.post(
+            "/register/",
+            register_payload,
+            format="json",
+        )
+
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 200
+        assert "message" in response_data
