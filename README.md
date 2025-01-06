@@ -186,6 +186,7 @@ CAPTCHA_LENGTH = int # Defaults to: 4
 - To customize the content of captcha, add this settings.
 - Chose any one of the following functions.
 - If not used, defaults to upper case characters only.
+
 ```bash
 CAPTCHA_CHALLENGE_FUNCT = 'django_generic_api.utils.random_digit_challenge'
 # example: 9876

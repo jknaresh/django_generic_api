@@ -3,12 +3,15 @@ import csv
 import datetime
 import mmap
 import os
+import random
+import string
 import time
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, List
 from uuid import UUID
 
+from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
 from pydantic import ConfigDict, EmailStr, AnyUrl, IPvAnyAddress
 from rest_framework import status
@@ -20,10 +23,6 @@ from rest_framework_simplejwt.exceptions import (
     TokenError,
     AuthenticationFailed,
 )
-import random
-import string
-from django.conf import settings
-
 
 actions = {
     "fetch": "view",
@@ -200,7 +199,8 @@ def store_user_ip(user_id, user_ip):
 
 def custom_exception_handler(exc, context):
     """
-    Generates a custom DRF error response instead of the default error response.
+    Generates a custom DRF error response instead of the default error
+    response.
 
     param : exc (Exception), context (dict)
     returns : Response
@@ -313,7 +313,8 @@ def random_uppercase_challenge():
 
 def mixed_digit_lowercase_challenge():
     """
-    Generates a challenge for Captcha api with random digits (0-9) and lowercase letters (a-z).
+    Generates a challenge for Captcha api with random digits (0-9) and
+    lowercase letters (a-z).
     """
     length = getattr(settings, "CAPTCHA_LENGTH", 4)
     ret = ""
@@ -324,7 +325,8 @@ def mixed_digit_lowercase_challenge():
 
 def mixed_digit_uppercase_challenge():
     """
-    Generates a challenge for Captcha api with random digits (0-9) and uppercase letters (A-Z).
+    Generates a challenge for Captcha api with random digits (0-9) and
+    uppercase letters (A-Z).
     """
     length = getattr(settings, "CAPTCHA_LENGTH", 4)
     ret = ""

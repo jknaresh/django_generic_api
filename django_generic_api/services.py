@@ -30,7 +30,8 @@ DEFAULT_APPS = {
 def get_model_by_name(model_name):
     """
     Fetches a model dynamically by searching through all installed apps.
-    The expected formats for model_name are: 'app_name.model_name' or 'model_name'.
+    The expected formats for model_name are: 'app_name.model_name' or
+    'model_name'.
     If the model is found, the function returns the model.
     If the model is not found, it raises an error.
 
@@ -229,7 +230,8 @@ def fetch_data(
 def apply_filters(model, filters):
     """
     Apply dynamic filters using Q objects.
-    Raises error if 'filters.value' is not suitable for 'filters.name' field type.
+    Raises error if 'filters.value' is not suitable for 'filters.name' field
+    type.
     Supported operators are (eq, in, not, gt, like, ilike).
 
     param : model (Django model), filters (List of filter objects).
@@ -279,16 +281,19 @@ def handle_save_input(model, record_id, save_input):
     """
     Create or Update a record.
     Gets a json schema of model configuration.
-    Returns Error if record_id exists when length of save_input is greater than 1.
+    Returns Error if record_id exists when length of save_input is greater
+    than 1.
     Returns Error if non-existing fields are passed.
-    Fills with defaults value for a field when value is not given and null=True.
+    Fills with defaults value for a field when value is not given and
+    null=True.
     Returns Error if value is not suitable to insert/update in a field type.
     Returns Error if non-existing record id is passed.
     When save_input is correct:
         - Updates the record if record_id is passed.
         - Creates a new record if record_id is null.
 
-    param : model (Django model), record_id (null/integer), save_input (List of dict).
+    param : model (Django model), record_id (null/integer), save_input (List
+    of dict).
     return : Success message / Error message.
     """
 
