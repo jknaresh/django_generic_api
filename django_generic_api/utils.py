@@ -278,6 +278,9 @@ def get_field_properties(field1):
 
 
 def random_digit_challenge():
+    """
+    Generates a challenge for Captcha api with random digits (0-9).
+    """
 
     length = getattr(settings, "CAPTCHA_LENGTH", 4)
     ret = ""
@@ -287,6 +290,9 @@ def random_digit_challenge():
 
 
 def random_lowercase_challenge():
+    """
+    Generates a challenge for Captcha api with random lowercase letters (a-z).
+    """
     length = getattr(settings, "CAPTCHA_LENGTH", 4)
     ret = ""
     for i in range(length):
@@ -295,6 +301,9 @@ def random_lowercase_challenge():
 
 
 def random_uppercase_challenge():
+    """
+    Generates a challenge for Captcha api with random uppercase letters (A-Z).
+    """
     length = getattr(settings, "CAPTCHA_LENGTH", 4)
     ret = ""
     for i in range(length):
@@ -303,6 +312,9 @@ def random_uppercase_challenge():
 
 
 def mixed_digit_lowercase_challenge():
+    """
+    Generates a challenge for Captcha api with random digits (0-9) and lowercase letters (a-z).
+    """
     length = getattr(settings, "CAPTCHA_LENGTH", 4)
     ret = ""
     for i in range(length):
@@ -311,6 +323,9 @@ def mixed_digit_lowercase_challenge():
 
 
 def mixed_digit_uppercase_challenge():
+    """
+    Generates a challenge for Captcha api with random digits (0-9) and uppercase letters (A-Z).
+    """
     length = getattr(settings, "CAPTCHA_LENGTH", 4)
     ret = ""
     for i in range(length):
