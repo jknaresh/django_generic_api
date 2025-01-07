@@ -21,18 +21,6 @@ class TestCaptchaAPI:
         assert "captcha_key" in captcha_response.data
         assert "captcha_url" in captcha_response.data
 
-    def test_captcha_get_success(self, api_client):
-        """
-        Captcha success scenario using get method.
-        """
-
-        captcha_response = api_client.get("/generate_captcha/")
-
-        assert captcha_response["Content-Type"] == "application/json"
-        assert captcha_response.status_code == 200
-        assert "captcha_key" in captcha_response.data
-        assert "captcha_url" in captcha_response.data
-
     def test_captcha_post_failure(self, api_client):
         """
         Test Captcha API failure scenario when CaptchaStore.generate_key fails.

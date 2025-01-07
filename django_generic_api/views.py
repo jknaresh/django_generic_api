@@ -7,6 +7,7 @@ from captcha.models import CaptchaStore
 from django.conf import settings
 from django.contrib.auth import get_user_model, logout, password_validation
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
@@ -595,6 +596,16 @@ class CaptchaServiceAPIView(APIView):
 
     # post method
     def post(self, request, *args, **kwargs):
+        # Every 10 minutes expecting to clean captcha data.
+        try:
+            captcha_timeout = getattr(settings, "CAPTCHA_TIMEOUT", 5)
+
+            if not cache.get("CLEAN_CAPTCHA"):
+                CaptchaStore.remove_expired()
+                cache.set("CLEAN_CAPTCHA", 1, captcha_timeout + 1)
+        except Exception as e:
+            pass
+
         try:
             # Generate a new captcha key
             captcha_key = CaptchaStore.generate_key()
@@ -610,26 +621,6 @@ class CaptchaServiceAPIView(APIView):
         except Exception as e:
             return Response(
                 {"error": str(e), "code": "DGA-V029"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-    # get method
-    def get(self, request, *args, **kwargs):
-        try:
-            # Generate a new captcha key
-            captcha_key = CaptchaStore.generate_key()
-            # Generate the image URL
-            image_url = captcha_image_url(captcha_key)
-
-            return Response(
-                {
-                    "captcha_key": captcha_key,
-                    "captcha_url": request.build_absolute_uri(image_url),
-                }
-            )
-        except Exception as e:
-            return Response(
-                {"error": str(e), "code": "DGA-V030"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
