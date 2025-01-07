@@ -267,30 +267,34 @@ class GenericRegisterAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        captcha_key = validate_register_data.captcha_key
-        captcha_value = validate_register_data.captcha_value
+        captcha_required = getattr(settings, "CAPTCHA_REQUIRED", False)
 
-        try:
-            # Validate the captcha response
-            captcha = CaptchaStore.objects.get(hashkey=captcha_key)
-            if captcha.response == captcha_value.lower():
-                captcha.delete()  # Clean up after successful validation
-            else:
+        # If CAPTCHA_REQUIRED is True, validate the captcha
+        if captcha_required:
+            captcha_key = validate_register_data.captcha_key
+            captcha_value = validate_register_data.captcha_value
+
+            try:
+                # Validate the captcha response
+                captcha = CaptchaStore.objects.get(hashkey=captcha_key)
+                if captcha.challenge == captcha_value:
+                    captcha.delete()  # Clean up after successful validation
+                else:
+                    return Response(
+                        {
+                            "error": "Invalid captcha response.",
+                            "code": "DGA-V025",
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            except CaptchaStore.DoesNotExist:
                 return Response(
                     {
-                        "error": "Invalid captcha response.",
-                        "code": "DGA-V025",
+                        "error": "Invalid or expired captcha key.",
+                        "code": "DGA-V027",
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        except CaptchaStore.DoesNotExist:
-            return Response(
-                {
-                    "error": "Invalid or expired captcha key.",
-                    "code": "DGA-V027",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
         email = validate_register_data.email
 
@@ -408,30 +412,34 @@ class GenericForgotPasswordAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        captcha_key = validated_userdata.captcha_key
-        captcha_value = validated_userdata.captcha_value
+        captcha_required = getattr(settings, "CAPTCHA_REQUIRED", False)
 
-        try:
-            # Validate the captcha response
-            captcha = CaptchaStore.objects.get(hashkey=captcha_key)
-            if captcha.response == captcha_value.lower():
-                captcha.delete()  # Clean up after successful validation
-            else:
+        # If CAPTCHA_REQUIRED is True, validate the captcha
+        if captcha_required:
+            captcha_key = validated_userdata.captcha_key
+            captcha_value = validated_userdata.captcha_value
+
+            try:
+                # Validate the captcha response
+                captcha = CaptchaStore.objects.get(hashkey=captcha_key)
+                if captcha.challenge == captcha_value:
+                    captcha.delete()  # Clean up after successful validation
+                else:
+                    return Response(
+                        {
+                            "error": "Invalid captcha response.",
+                            "code": "DGA-V026",
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            except CaptchaStore.DoesNotExist:
                 return Response(
                     {
-                        "error": "Invalid captcha response.",
-                        "code": "DGA-V026",
+                        "error": "Invalid or expired captcha key.",
+                        "code": "DGA-V036",
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        except CaptchaStore.DoesNotExist:
-            return Response(
-                {
-                    "error": "Invalid or expired captcha key.",
-                    "code": "DGA-V036",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
         username = validated_userdata.email
         user_model = get_user_model()

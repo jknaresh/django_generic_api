@@ -60,7 +60,8 @@ def pytest_configure():
                 "anon": "100/hour",  # Rate limit for unauthenticated users,
                 # 100 request per 1 hour
             },
-            "EXCEPTION_HANDLER": "django_generic_api.django_generic_api.utils.custom_exception_handler",
+            "EXCEPTION_HANDLER": "django_generic_api.django_generic_api.utils"
+            ".custom_exception_handler",
         },
         CORS_ALLOWED_ORIGINS=["http://192.168.2.218", "http://localhost:8599"],
         CORS_ALLOW_ALL_ORIGINS=True,
@@ -87,6 +88,7 @@ def pytest_configure():
         CAPTCHA_IMAGE_SIZE=(200, 200),
         CAPTCHA_FONT_SIZE=25,
         CAPTCHA_LENGTH=7,
+        CAPTCHA_REQUIRED=True,
     )
 
     django.setup()

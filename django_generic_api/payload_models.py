@@ -8,9 +8,11 @@ from pydantic import (
     SecretStr,
     EmailStr,
     Field,
+    model_validator,
 )
 
 from .utils import PydanticConfigV1
+from django.conf import settings
 
 
 class SavePayload(BaseModel, PydanticConfigV1):
@@ -83,14 +85,56 @@ class GenericRegisterPayload(BaseModel, PydanticConfigV1):
     email: EmailStr
     password: SecretStr
     password1: SecretStr
-    captcha_key: str
-    captcha_value: str
+    captcha_key: Optional[str] = None
+    captcha_value: Optional[str] = None
+
+    @model_validator(mode="before")
+    def validate_captcha(cls, values):
+        captcha_required = getattr(settings, "CAPTCHA_REQUIRED", False)
+        captchaKey = values.get("captcha_key")
+        captchaValue = values.get("captcha_value")
+
+        # If CAPTCHA_REQUIRED is True, ensure captcha_key and captcha_value are provided
+        if captcha_required:
+            if not captchaKey or not captchaValue:
+                raise ValueError(
+                    "Captcha key and value are required when `CAPTCHA_REQUIRED` is True."
+                )
+        else:
+            # If CAPTCHA_REQUIRED is False, ensure captcha_key and captcha_value are NOT provided
+            if captchaKey or captchaValue:
+                raise ValueError(
+                    "Captcha key and value should not be provided when `CAPTCHA_REQUIRED` is False."
+                )
+
+        return values
 
 
 class GenericForgotPasswordPayload(BaseModel, PydanticConfigV1):
     email: EmailStr
-    captcha_key: str
-    captcha_value: str
+    captcha_key: Optional[str] = None
+    captcha_value: Optional[str] = None
+
+    @model_validator(mode="before")
+    def validate_captcha(cls, values):
+        captcha_required = getattr(settings, "CAPTCHA_REQUIRED", False)
+        captchaKey = values.get("captcha_key")
+        captchaValue = values.get("captcha_value")
+
+        # If CAPTCHA_REQUIRED is True, ensure captcha_key and captcha_value are provided
+        if captcha_required:
+            if not captchaKey or not captchaValue:
+                raise ValueError(
+                    "Captcha key and value are required when `CAPTCHA_REQUIRED` is True."
+                )
+        else:
+            # If CAPTCHA_REQUIRED is False, ensure captcha_key and captcha_value are NOT provided
+            if captchaKey or captchaValue:
+                raise ValueError(
+                    "Captcha key and value should not be provided when `CAPTCHA_REQUIRED` is False."
+                )
+
+        return values
 
 
 class GenericNewPasswordPayload(BaseModel, PydanticConfigV1):

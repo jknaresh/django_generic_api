@@ -167,9 +167,18 @@ BASE_URL = "..."
 
 ### Captcha Configuration
 
-- Add captcha service to make your Regisration and Forgot Password API's more
-  secure.
-- Add these changes into your settings file.
+- Captcha validation can be optionally enabled for Registration and Forgot Password APIs.
+
+**Enabling Captcha Validation**
+- To enable captcha validation, add these settings.
+```bash
+CAPTCHA_REQUIRED = True  # Defaults to False
+```
+- If `CAPTCHA_REQUIRED` is set to True, both `captcha_key` and `captcha_value` must be included in the request payload for the Registration and Forgot Password APIs.
+- If `CAPTCHA_REQUIRED` is set to False, these fields must not be provided.
+
+**Configuring Captcha Settings**
+- Include the `captcha` app in your `INSTALLED_APPS` list:
 
 ```bash
 # Captcha Settings
@@ -177,7 +186,37 @@ INSTALLED_APPS = [
   "captcha",
 ]
 ```
+- You can customize the captcha appearance and functionality using the following settings.
+```bash
+CAPTCHA_BACKGROUND_COLOR = hex code # Defaults to: '#ffffff'
+CAPTCHA_FOREGROUND_COLOR = hex code # Defaults to: '#001100'
+CAPTCHA_IMAGE_SIZE = tuple (width, height) # Defaults to: None
+CAPTCHA_FONT_SIZE = int # Defaults to: 22
+CAPTCHA_LENGTH = int # Defaults to: 4
+```
+**Customizing Captcha Content**
+- To customize the content of captcha, add this settings.
+- Chose any one of the following functions.
+- If not used, defaults to upper case characters only.
 
+```bash
+CAPTCHA_CHALLENGE_FUNCT = 'django_generic_api.utils.random_digit_challenge'
+# example: 9876
+CAPTCHA_CHALLENGE_FUNCT = 'django_generic_api.utils.random_lowercase_challenge'
+# example: abcd
+CAPTCHA_CHALLENGE_FUNCT = 'django_generic_api.utils.random_uppercase_challenge'
+# example: ABCD
+CAPTCHA_CHALLENGE_FUNCT = 'django_generic_api.utils.mixed_digit_lowercase_challenge'
+# example: a1b2
+CAPTCHA_CHALLENGE_FUNCT = 'django_generic_api.utils.mixed_digit_uppercase_challenge'
+# example: A1B2
+```
+- You can configure the content of captcha by [your own generator.](https://django-simple-captcha.readthedocs.io/en/latest/advanced.html#roll-your-own)
+- After configuring the generator, simply point your `CAPTCHA_CHALLENGE_FUNCT` to the function.
+```bash
+CAPTCHA_CHALLENGE_FUNCT = '<your_path.to.generator>'
+# example = 'django_app.utils.generator_function'
+```
 ---
 
 ### URL Configuration
