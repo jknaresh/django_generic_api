@@ -312,8 +312,8 @@ header["X-CSRFToken"]=csrfvalue
       "variables": {
           "email": "user.username",
           "password": "****",
-          "captcha_key": "<captcha_key>",  // If CAPTCHA_REQUIRED is set True in settings.py
-          "captcha_value": "<captcha_value>"  // If CAPTCHA_REQUIRED is set True in settings.py
+          "captcha_key": "<captcha_key>", // If CAPTCHA_REQUIRED is set True in settings.py
+          "captcha_value": "<captcha_value>" // If CAPTCHA_REQUIRED is set True in settings.py
       }
   }
 }
