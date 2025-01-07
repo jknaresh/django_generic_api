@@ -206,6 +206,35 @@ class GenericLoginAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        captcha_required = getattr(settings, "CAPTCHA_REQUIRED", False)
+
+        # If CAPTCHA_REQUIRED is True, validate the captcha
+        if captcha_required:
+            captcha_key = validated_userdata.captcha_key
+            captcha_value = validated_userdata.captcha_value
+
+            try:
+                # Validate the captcha response
+                captcha = CaptchaStore.objects.get(hashkey=captcha_key)
+                if captcha.challenge == captcha_value:
+                    captcha.delete()  # Clean up after successful validation
+                else:
+                    return Response(
+                        {
+                            "error": "Invalid captcha response.",
+                            "code": "DGA-V025",
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            except CaptchaStore.DoesNotExist:
+                return Response(
+                    {
+                        "error": "Invalid or expired captcha key.",
+                        "code": "DGA-V027",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         username = validated_userdata.email
         password = validated_userdata.password.get_secret_value()
 
