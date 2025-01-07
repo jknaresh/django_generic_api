@@ -167,10 +167,10 @@ BASE_URL = "..."
 
 ### Captcha Configuration
 
-- Captcha validation can be optionally enabled for Registration and Forgot Password APIs.
+- Captcha validation can be optionally enabled for Login, Registration and Forgot Password APIs.
 
 **Enabling Captcha Validation**
-- To enable captcha validation, add these settings.
+- To enable captcha validation, add this to settings.py .
 ```bash
 CAPTCHA_REQUIRED = True  # Defaults to False
 ```
@@ -311,7 +311,9 @@ header["X-CSRFToken"]=csrfvalue
   "payload": {
       "variables": {
           "email": "user.username",
-          "password": "****"
+          "password": "****",
+          "captcha_key": "<captcha_key>",  // If CAPTCHA_REQUIRED is set True in settings.py
+          "captcha_value": "<captcha_value>"  // If CAPTCHA_REQUIRED is set True in settings.py
       }
   }
 }
@@ -434,8 +436,8 @@ url: "http://domain-name/api/register/",
             "email":"user@example.com",
             "password":"123456",
             "password1":"123456",
-            "captcha_key": "<captcha_key>",
-            "captcha_value": "<captcha_value>"
+            "captcha_key": "<captcha_key>", // If CAPTCHA_REQUIRED is set True in settings.py
+            "captcha_value": "<captcha_value>" // If CAPTCHA_REQUIRED is set True in settings.py
         }
     }
 }
@@ -805,8 +807,8 @@ url: "http://domain-name/api/forgotPassword/",
     "payload":{
         "variables":{
             "email":"user@example.com",
-            "captcha_key": "<captcha_key>",
-            "captcha_value": "<captcha_value>"
+            "captcha_key": "<captcha_key>", // If CAPTCHA_REQUIRED is set True in settings.py
+            "captcha_value": "<captcha_value>"  // If CAPTCHA_REQUIRED is set True in settings.py
         }
     }
 }

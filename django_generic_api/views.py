@@ -596,6 +596,8 @@ class CaptchaServiceAPIView(APIView):
     # post method
     def post(self, request, *args, **kwargs):
         try:
+            # Delete expired captcha records
+            CaptchaStore.remove_expired()
             # Generate a new captcha key
             captcha_key = CaptchaStore.generate_key()
             # Generate the image URL
@@ -616,6 +618,8 @@ class CaptchaServiceAPIView(APIView):
     # get method
     def get(self, request, *args, **kwargs):
         try:
+            # Delete expired captcha records
+            CaptchaStore.remove_expired()
             # Generate a new captcha key
             captcha_key = CaptchaStore.generate_key()
             # Generate the image URL
