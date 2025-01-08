@@ -1,5 +1,86 @@
 # Django Generic API
 
+<!-- TOC -->
+* [Django Generic API](#django-generic-api)
+  * [Overview](#overview)
+  * [Features](#features)
+  * [Installation](#installation)
+* [Integration](#integration)
+    * [CORS Setup](#cors-setup)
+    * [Token based authentication settings](#token-based-authentication-settings)
+    * [Configuation settings](#configuation-settings)
+    * [Email settings](#email-settings)
+    * [Captcha Configuration](#captcha-configuration)
+    * [URL Configuration](#url-configuration)
+    * [Limiting User Requests](#limiting-user-requests)
+* [Parameters for requests](#parameters-for-requests)
+  * [Fetching and Saving Data](#fetching-and-saving-data)
+* [Model APIs](#model-apis)
+  * [Access Token API / Login API](#access-token-api) 
+    * [Method:](#method)
+    * [URL construction:](#url-construction)
+    * [Header:](#header)
+    * [<span style="color: red;">Payload for Login:</span>](#span-stylecolor-redpayload-for-loginspan)
+    * [<span style="color: green;">Response for Login:</span>](#span-stylecolor-greenresponse-for-loginspan)
+  * [Refresh Token API](#refresh-token-api)
+    * [Method:](#method-1)
+    * [URL construction:](#url-construction-1)
+    * [Header](#header-1)
+    * [<span style="color: red;">Payload for Logout:</span>](#span-stylecolor-redpayload-for-logoutspan)
+    * [<span style="color: green;">Response for Logout:</span>](#span-stylecolor-greenresponse-for-logoutspan)
+  * [Captcha API](#captcha-api)
+    * [Method:](#method-2)
+    * [URL construction:](#url-construction-2)
+    * [<span style="color: green;">Response for Captcha:</span>](#span-stylecolor-greenresponse-for-captchaspan)
+  * [Register API](#register-api)
+    * [Method:](#method-3)
+    * [URL construction:](#url-construction-3)
+    * [<span style="color: red;">Payload for Register:</span>](#span-stylecolor-redpayload-for-registerspan)
+    * [<span style="color: green;">Response for Register:</span>](#span-stylecolor-greenresponse-for-registerspan)
+  * [Log Out](#log-out)
+    * [Method:](#method-4)
+    * [URL construction:](#url-construction-4)
+    * [Header](#header-2)
+    * [<span style="color: green;">Response for Logout:</span>](#span-stylecolor-greenresponse-for-logoutspan-1)
+  * [Save data](#save-data)
+    * [Method:](#method-5)
+    * [URL construction:](#url-construction-5)
+    * [Header:](#header-3)
+    * [<span style="color: red;">Payload for single record:</span>](#span-stylecolor-redpayload-for-single-recordspan)
+    * [<span style="color: green;">Response for single record:</span>](#span-stylecolor-greenresponse-for-single-recordspan)
+    * [<span style="color: red;">Payload for multiple record:</span>](#span-stylecolor-redpayload-for-multiple-recordspan)
+    * [<span style="color: green;">Response for multiple record:</span>](#span-stylecolor-greenresponse-for-multiple-recordspan)
+    * [Description for Fields](#description-for-fields)
+  * [Fetch data](#fetch-data)
+    * [Method:](#method-6)
+    * [URL construction:](#url-construction-6)
+    * [Header:](#header-4)
+    * [<span style="color: red;">Payload for Fetch Data:</span>](#span-stylecolor-redpayload-for-fetch-dataspan)
+    * [<span style="color: green;">Response for Fetch Data:</span>](#span-stylecolor-greenresponse-for-fetch-dataspan)
+    * [Description of Fields](#description-of-fields)
+  * [Update data](#update-data)
+    * [Method:](#method-7)
+    * [URL construction:](#url-construction-7)
+    * [Header:](#header-5)
+    * [<span style="color: red;">Payload for Update Record:</span>](#span-stylecolor-redpayload-for-update-recordspan)
+    * [<span style="color: green;">Response for Update Record:</span>](#span-stylecolor-greenresponse-for-update-recordspan)
+    * [Description for Fields](#description-for-fields-1)
+  * [Forgot Password API](#forgot-password-api)
+    * [Method:](#method-8)
+    * [URL construction:](#url-construction-8)
+    * [<span style="color: red;">Payload for Forgot Password:</span>](#span-stylecolor-redpayload-for-forgot-passwordspan)
+    * [<span style="color: green;">Response for Forgot Password:</span>](#span-stylecolor-greenresponse-for-forgot-passwordspan)
+  * [New Password API](#new-password-api)
+    * [Method:](#method-9)
+    * [URL construction:](#url-construction-9)
+    * [<span style="color: red;">Payload for New Password:</span>](#span-stylecolor-redpayload-for-new-passwordspan)
+    * [<span style="color: green;">Response for New Password:</span>](#span-stylecolor-greenresponse-for-new-passwordspan)
+  * [Fetch UserProfile API](#fetch-userprofile-api)
+    * [Method:](#method-10)
+    * [URL construction:](#url-construction-10)
+    * [<span style="color: green;">Response for New Password:</span>](#span-stylecolor-greenresponse-for-new-passwordspan-1)
+<!-- TOC -->
+
 ## Overview
 
 - Django Generic API is a reusable Django app designed to perform dynamic CRUD
@@ -15,6 +96,10 @@
 - Enabled with pagination and order by features.
 - User authentication and management (Login, Registration, Logout, Forgot
   Password).
+- Supports session based authentication and token based authentication.( also supports custom authentication classes.)
+- Implemented with Captcha validation for Login, Registration, Forgot Password.
+- APIs to fetch user's data.
+- Enabled with rate limiting for authenticated users and anonymous users.
 
 ## Installation
 
@@ -99,6 +184,8 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         #This is for Token based authentication.
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        
+        # You can add more authentication classes (Custom authentication classes are also supported.)
     )
 }
 
@@ -863,5 +950,40 @@ url: "http://domain-name/api/newpassword/<encoded_token>",
 ```json
 {
     "message": "Your password has been reset."
+}
+```
+
+---
+
+## Fetch UserProfile API
+
+- This API enables users to fetch their user profile information.
+- Users can use this API to retrieve their profile details (Email, First Name,Last Name).
+- User must be authenticated beforehand to access this API.
+- Details of the user who is logged in is returned in the response.
+
+### Method:
+
+```bash
+HTTP Method: "POST"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/user_info/"
+```
+
+### <span style="color: green;">Response for New Password:</span>
+
+```json
+{
+    "data": [
+        {
+            "email": "abc@admin.com",
+            "first_name": "Abcd",
+            "last_name": "Efgh"
+        }
+    ]
 }
 ```
