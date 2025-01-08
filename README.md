@@ -94,9 +94,9 @@
 - Handle dynamic save operations, including creating or updating records, for any Django model.
 - Effortlessly manage relationships and process complex data structures.
 - Integrated pagination and sorting features for efficient data handling.
-- Comprehensive user authentication and management, including Login, Registration, Logout, and Password Recovery.
+- Comprehensive user authentication and management, including Login, Registration, Logout, and Forgot Password.
 - Supports both session and token based authentication, supports custom authentication classes.
-- User can opt in captcha validation for Login, Registration, Forgot Password.
+- Can captcha validation opt in for Login, Registration, Forgot Password.
 - APIs to fetch user information.
 - Equipped with rate limiting to regulate access for authenticated and anonymous users.
 
