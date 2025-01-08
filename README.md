@@ -91,8 +91,7 @@
 ## Features
 
 - Perform dynamic fetch and save operations seamlessly.
-- Handle dynamic save operations, including creating or updating records, for any Django model.
-- Effortlessly manage relationships and process complex data structures.
+- Handle dynamic save operations, including creating or updating records, excluding Django internal models.
 - Integrated pagination and sorting features for efficient data handling.
 - Comprehensive user authentication and management, including Login, Registration, Logout, and Forgot Password.
 - Supports both session and token based authentication, supports custom authentication classes.
@@ -184,7 +183,7 @@ REST_FRAMEWORK = {
         #This is for Token based authentication.
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         
-        # Supports other authentication classes.
+        # Supports custom / user-defined authentication classes as per DRF.
     )
 }
 
