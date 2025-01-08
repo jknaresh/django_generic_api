@@ -96,9 +96,9 @@
 - Integrated pagination and sorting features for efficient data handling.
 - Comprehensive user authentication and management, including Login, Registration, Logout, and Forgot Password.
 - Supports both session and token based authentication, supports custom authentication classes.
-- Can captcha validation opt in for Login, Registration, Forgot Password.
-- APIs to fetch user information.
-- Equipped with rate limiting to regulate access for authenticated and anonymous users.
+- Provides optional CAPTCHA validation for login, registration and Forgot Password.
+- Includes APIs to retrieve user information.
+- Features rate limiting to manage access for both authenticated and anonymous users.
 
 ## Installation
 
