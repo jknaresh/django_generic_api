@@ -703,3 +703,31 @@ class NewPasswordAPIView(APIView):
             {"message": "Your password has been reset."},
             status=status.HTTP_200_OK,
         )
+
+
+class UserInfoAPIView(APIView):
+    """
+    User Info API.
+    -  This API is used to get details of user in case of non session authentication methods
+    """
+
+    def post(self, *args, **kwargs):
+
+        if not self.request.user.is_authenticated:
+            return Response(
+                {"error": "User not authenticated.", "code": "DGA-V030"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {
+                "data": [
+                    {
+                        "email": self.request.user.email,
+                        "first_name": self.request.user.first_name,
+                        "last_name": self.request.user.last_name,
+                    }
+                ]
+            },
+            status=status.HTTP_200_OK,
+        )

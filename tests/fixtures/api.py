@@ -33,7 +33,7 @@ def generate_token(user):
 
 
 @pytest.fixture
-def all_perm_user_fixture():
+def all_perm_user():
     """
     User with add and view perm.
     """
@@ -81,6 +81,15 @@ def no_perm_user():
 
 
 @pytest.fixture
+def inactive_user():
+    """
+    User is inactive
+    """
+    user = baker.make_recipe("demo_app.inactive_user")
+    return user
+
+
+@pytest.fixture
 def all_perm_token(all_perm_user):
     """
     Token for all_perm user
@@ -119,6 +128,17 @@ def no_perm_token(no_perm_user):
     Token for no perm user
     """
     token = generate_token(no_perm_user)
+    access_token = token[0]["access"]
+
+    return access_token
+
+
+@pytest.fixture
+def inactive_user_token(inactive_user):
+    """
+    Token for all_perm user
+    """
+    token = generate_token(inactive_user)
     access_token = token[0]["access"]
 
     return access_token

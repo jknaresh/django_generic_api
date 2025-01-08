@@ -14,6 +14,7 @@ from .views import (
     GenericForgotPasswordAPIView,
     CaptchaServiceAPIView,
     NewPasswordAPIView,
+    UserInfoAPIView,
 )
 
 urlpatterns = [
@@ -40,4 +41,5 @@ urlpatterns = [
         name="newpassword",
     ),
     path("captcha/", include(captcha_urls)),
+    path("user_info/", UserInfoAPIView.as_view(), name="user_info"),
 ]
