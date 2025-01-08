@@ -956,10 +956,8 @@ url: "http://domain-name/api/newpassword/<encoded_token>",
 
 ## Fetch User Info API
 
-- This API enables users to fetch their user profile information.
-- Users can use this API to retrieve their profile details (Email, First Name,Last Name).
-- User must be authenticated beforehand to access this API.
-- Details of the user who is logged in is returned in the response.
+- Users must be authenticated prior to accessing this API.
+- Users can utilize this API to fetch details such as email, first name, and last name.
 
 ### Method:
 
