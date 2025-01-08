@@ -228,7 +228,7 @@ def custom_exception_handler(exc, context):
     if isinstance(exc, AuthenticationFailed):
         return Response(
             {
-                "error": "Invalid token format.",
+                "error": str(exc.detail["detail"]),
                 "code": "DGA-U005",
             },
             status=status.HTTP_400_BAD_REQUEST,

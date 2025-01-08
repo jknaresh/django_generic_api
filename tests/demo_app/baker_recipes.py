@@ -22,7 +22,12 @@ customer_2 = Recipe(
 test_instance = Recipe(Customer, name="instance_1", address="GOA")
 
 all_perm_user = Recipe(
-    User, username="allpermuser@gmail.com", password="123456"
+    User,
+    username="allpermuser@gmail.com",
+    password="123456",
+    email="all_perm@test.com",
+    first_name="test1",
+    last_name="test2",
 )
 
 save_perm_user = Recipe(
@@ -48,4 +53,8 @@ inactive_user_id = Recipe(
 non_existing_user = Recipe(
     User,
     username="non_existing_user@gmail.com",
+)
+
+inactive_user = Recipe(
+    User, username="inactiveuser@gmail.com", is_active=False
 )
