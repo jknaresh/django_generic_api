@@ -89,6 +89,7 @@ def pytest_configure():
         CAPTCHA_FONT_SIZE=25,
         CAPTCHA_LENGTH=7,
         CAPTCHA_REQUIRED=True,
+        USER_INFO_FIELDS=("first_name", "last_name", "is_active"),
     )
 
     django.setup()

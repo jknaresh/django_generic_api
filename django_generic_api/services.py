@@ -1,20 +1,23 @@
 from typing import Dict, Optional
 
 from django.apps import apps
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from pydantic import (
-    BaseModel,
     create_model,
     Field,
 )
+from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from pydantic.config import ConfigDict
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .utils import (
     get_model_fields_with_properties,
     is_fields_exist,
-    PydanticConfigV1,
     DJANGO_TO_PYDANTIC_TYPE_MAP,
+    user_info_to_pydantic_model,
 )
 
 DEFAULT_APPS = {
@@ -125,13 +128,19 @@ def get_model_config_schema(model):
             Field(default=default_value, **field_constraints),
         )
 
+    config_dict = ConfigDict(
+        title=model.__name__,
+        extra="forbid",  # Forbid extra fields
+        str_strip_whitespace=True,  # Remove white spaces from strings
+    )
+
     # Dynamically create a Pydantic model
     pydantic_model = create_model(
         model.__name__ + "Pydantic",  # Name of the Pydantic model
         **model_fields,  # Model fields passed as keyword arguments
-        __base__=BaseModel,  # Base class for Pydantic models
+        __config__=config_dict,
     )
-    pydantic_model.__config__ = PydanticConfigV1
+
     return pydantic_model
 
 
@@ -311,29 +320,6 @@ def handle_save_input(model, record_id, save_input):
 
     for saveInput in save_input:
 
-        # info: restricts extra fields in saveInput
-        results = set(saveInput.keys()) - model_fields
-        if len(results) > 0:
-            raise ValueError(
-                {"error": f"Extra field {results}", "code": "DGA-S009"}
-            )
-
-        for field_name, value in list(saveInput.items()):
-            model_meta = getattr(model, "_meta", None)
-            model_field = model_meta.get_field(field_name)
-
-            if (
-                model_field.has_default()
-                and not value
-                and not model_field.null
-            ):
-                saveInput.pop(field_name)
-
-            try:
-                model_field.get_prep_value(value)
-            except Exception as e:
-                raise ValueError({"error": e, "code": "DGA-S010"})
-
         # Validate against schema
         try:
             model_schema_pydantic_model(**saveInput)
@@ -345,6 +331,23 @@ def handle_save_input(model, record_id, save_input):
             raise ValueError(
                 {"error": f"{error_msg}. {error_loc}", "code": "DGA-S006"}
             )
+
+        for field_name, value in list(saveInput.items()):
+            model_meta = getattr(model, "_meta", None)
+            model_field = model_meta.get_field(field_name)
+
+            if (
+                model_field.has_default()
+                and not value
+                and value is not False
+                and not model_field.null
+            ):
+                saveInput.pop(field_name)
+
+            try:
+                model_field.get_prep_value(value)
+            except Exception as e:
+                raise ValueError({"error": e, "code": "DGA-S010"})
 
         try:
             if record_id:
@@ -374,3 +377,55 @@ def handle_save_input(model, record_id, save_input):
 
     message = list(set(messages))
     return instances, message
+
+
+def handle_user_info_update(save_input, user_id):
+
+    if not hasattr(settings, "USER_INFO_FIELDS"):
+        raise AttributeError(
+            {
+                "error": "Configure 'USER_INFO_FIELDS' to update user information.",
+                "code": "DGA-S012",
+            }
+        )
+
+    user_info_pydantic_model = user_info_to_pydantic_model(
+        fields=settings.USER_INFO_FIELDS
+    )
+
+    try:
+        user_info_pydantic_model(**save_input)
+    except Exception as e:
+        error_msg = e.errors()[0].get("msg")
+        error_loc = e.errors()[0].get("loc")
+
+        raise ValueError(
+            {"error": f"{error_msg}. {error_loc}", "code": "DGA-S013"}
+        )
+
+    for key, value in list(save_input.items()):
+        model_meta = getattr(User, "_meta", None)
+        model_field = model_meta.get_field(key)
+
+        if (
+            model_field.has_default()
+            and not value
+            and value is not False
+            and not model_field.null
+        ):
+            save_input.pop(key)
+
+        try:
+            model_field.get_prep_value(value)
+        except Exception as e:
+            raise ValueError({"error": e, "code": "DGA-S010"})
+
+    user_model = get_user_model()
+    user = user_model.objects.get(id=user_id)
+
+    for key, value in list(save_input.items()):
+        setattr(user, key, value)
+    user.save()
+    message = f"{user.username}'s info is updated"
+
+    return message

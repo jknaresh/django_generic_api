@@ -546,7 +546,7 @@ class TestGenericSaveAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': \"Extra field {'ABC'}\", 'code': 'DGA-S009'}"
+            == "{'error': \"Extra inputs are not permitted. ('ABC',)\", 'code': 'DGA-S006'}"
         )
         assert response_data["code"] == "DGA-V005"
 
@@ -588,9 +588,7 @@ class TestGenericSaveAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': ValidationError(['“01Jan2003” value has an "
-            "invalid date format. It must be in YYYY-MM-DD "
-            "format.']), 'code': 'DGA-S010'}"
+            == "{'error': \"Input should be a valid date or datetime, input is too short. ('dob',)\", 'code': 'DGA-S006'}"
         )
         assert response_data["code"] == "DGA-V005"
 
@@ -830,6 +828,43 @@ class TestGenericSaveAPI:
             == "Something went wrong!!! Please contact the administrator."
         )
         assert response_data["code"] == "DGA-V004"
+
+    def test_save_default_true_is_set_false(self, api_client, add_perm_token):
+        save_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app.Customer",
+                    "id": None,
+                    "saveInput": [
+                        {
+                            "name": "test_user1",
+                            "dob": "2020-01-21",
+                            "email": "ltest1@mail.com",
+                            "phone_no": "012345",
+                            "address": "HYD",
+                            "pin_code": "100",
+                            "inserted_timestamp": "2024-11-10 11:11:11",
+                            "status": "123",
+                            "is_alive": False,
+                        }
+                    ],
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
+        response = api_client.post(
+            "/save/",
+            save_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = json.loads(response.content.decode("utf-8"))
+        assert response.status_code == 201
+        assert response_data["data"] == [{"id": [1]}]
+        assert response_data["message"] == ["Record created successfully."]
+
+        inserted_data = Customer.objects.get(id=1)
+        assert inserted_data.is_alive == False
 
     @patch("rest_framework_simplejwt.tokens.AccessToken.verify")
     def test_expired_token_save(self, mock_verify, api_client, add_perm_token):

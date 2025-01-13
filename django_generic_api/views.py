@@ -24,12 +24,14 @@ from .payload_models import (
     GenericRegisterPayload,
     GenericForgotPasswordPayload,
     GenericNewPasswordPayload,
+    GenericUserUpdatePayload,
 )
 from .services import (
     get_model_by_name,
     handle_save_input,
     fetch_data,
     generate_token,
+    handle_user_info_update,
 )
 from .utils import (
     make_permission_str,
@@ -713,6 +715,7 @@ class UserInfoAPIView(APIView):
 
     def post(self, *args, **kwargs):
 
+        # checks if user has valid authorizarization header.
         if not self.request.user.is_authenticated:
             return Response(
                 {"error": "User not authenticated.", "code": "DGA-V030"},
@@ -731,3 +734,40 @@ class UserInfoAPIView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+    def put(self, *args, **kwargs):
+
+        # checks if user has valid authorizarization header.
+        if not self.request.user.is_authenticated:
+            return Response(
+                {"error": "User not authenticated.", "code": "DGA-V031"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        payload = self.request.data.get("payload", {}).get("variables", {})
+
+        saveInput = payload.get("saveInput", {})
+
+        try:
+            # Validate the payload using the Pydantic model
+            validated_payload_data = GenericUserUpdatePayload(**payload)
+        except ValidationError as e:
+            return Response(
+                {"error": e.errors()[0].get("msg"), "code": "DGA-V032"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        save_input = validated_payload_data.saveInput
+
+        user_id = self.request.user.id
+        try:
+            message = handle_user_info_update(save_input, user_id)
+            return Response(
+                {"data": [{"id": user_id}], "message": message},
+                status=status.HTTP_201_CREATED,
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e), "code": "DGA-V033"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

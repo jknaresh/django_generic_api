@@ -31,6 +31,7 @@ class Customer(BaseClass):
     address = models.CharField(max_length=1023, null=False)  # Address
     pin_code = models.CharField(max_length=6, null=False)  # Postal/ZIP code
     status = models.CharField(max_length=5)
+    is_alive = models.BooleanField(default=True, null=False)
 
     def __str__(self):
         return self.name

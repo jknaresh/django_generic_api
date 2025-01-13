@@ -21,6 +21,10 @@ class SavePayload(BaseModel, PydanticConfigV1):
     saveInput: JsonValue
 
 
+class GenericUserUpdatePayload(BaseModel, PydanticConfigV1):
+    saveInput: JsonValue
+
+
 class OperatorByEnum(str, Enum):
     EQ = "eq"
     IN = "in"

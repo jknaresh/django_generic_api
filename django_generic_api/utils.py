@@ -10,10 +10,18 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any, List
 from uuid import UUID
-
+from typing import Dict, Optional
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
-from pydantic import ConfigDict, EmailStr, AnyUrl, IPvAnyAddress
+from django.contrib.auth.models import User
+from pydantic import (
+    ConfigDict,
+    EmailStr,
+    AnyUrl,
+    IPvAnyAddress,
+    create_model,
+    Field,
+)
 from rest_framework import status
 from rest_framework.exceptions import Throttled
 from rest_framework.response import Response
@@ -333,3 +341,58 @@ def mixed_digit_uppercase_challenge():
     for i in range(length):
         ret += random.choice(string.digits + string.ascii_uppercase)
     return ret, ret
+
+
+def user_info_to_pydantic_model(fields):
+    """
+    Converts specified fields from the Django User model into a Pydantic model.
+
+    :param fields: Tuple of field names from the User model to include in the Pydantic model.
+    :return: A dynamically created Pydantic model.
+    """
+    model_fields: Dict[str, tuple] = {}
+    model_meta = getattr(User, "_meta", None)
+
+    for field_name in fields:
+        field = next(
+            (f for f in model_meta.fields if f.name == field_name), None
+        )
+        if not field:
+            raise ValueError(f"'{field_name}' not found in the User model.")
+
+        field_constraints = {}
+
+        is_optional = field.null or field.blank or field.has_default()
+        default_value = field.get_default() if field.has_default() else None
+
+        django_field_type = field.get_internal_type()
+
+        # Map Django field type to Pydantic type
+        mapped_type = DJANGO_TO_PYDANTIC_TYPE_MAP.get(django_field_type)
+
+        field_type = Optional[mapped_type] if is_optional else mapped_type
+
+        # Assign max_length constraint if applicable
+        if hasattr(field, "max_length"):
+            field_constraints["max_length"] = field.max_length
+
+        # Add the field to model_fields with its type and constraints
+        model_fields[field.name] = (
+            field_type,
+            Field(default=default_value, **field_constraints),
+        )
+
+    config_dict = ConfigDict(
+        title="UserInfo",
+        extra="forbid",  # Forbid extra fields
+        str_strip_whitespace=True,  # Remove white spaces from strings
+    )
+
+    # Dynamically create a Pydantic model with the specified fields
+    pydantic_model = create_model(
+        "UserInfoPydantic",  # Name of the Pydantic model
+        **model_fields,  # Field definitions passed as keyword arguments
+        __config__=config_dict,
+    )
+
+    return pydantic_model

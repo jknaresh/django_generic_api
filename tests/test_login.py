@@ -195,7 +195,7 @@ class TestLoginAPI:
             mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate_captcha/")
+            captcha_response = api_client.post("/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
