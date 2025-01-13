@@ -13,7 +13,7 @@ class TestCaptchaAPI:
         Captcha success scenario using post method.
         """
 
-        captcha_response = api_client.post("/generate_captcha/")
+        captcha_response = api_client.post("/generate-captcha/")
 
         # captcha is an image
         assert captcha_response["Content-Type"] == "application/json"
@@ -35,7 +35,7 @@ class TestCaptchaAPI:
             )
 
             # Make a POST request to the captcha endpoint
-            captcha_response = api_client.post("/generate_captcha/")
+            captcha_response = api_client.post("/generate-captcha/")
 
             # Assertions
             assert (
