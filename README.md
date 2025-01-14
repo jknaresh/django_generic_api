@@ -98,6 +98,7 @@
 - Provides optional CAPTCHA validation for login, registration and Forgot Password.
 - Includes APIs to retrieve user information.
 - Features rate limiting to manage access for both authenticated and anonymous users.
+- Versioning of URL, moving forward we will maintain versioning, as of now v1 is alive version. 
 
 ## Installation
 
@@ -379,7 +380,7 @@ HTTP Method: "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/login/",
+url: "http://domain-name/api/v1/login/",
 ```
 
 ### Header:
@@ -432,7 +433,7 @@ HTTP Method: "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/refresh/",
+url: "http://domain-name/api/v1/refresh/",
 ```
 
 ### Header
@@ -475,7 +476,7 @@ HTTP Method: "GET" / "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/generate_captcha/",
+url: "http://domain-name/api/v1/generate_captcha/",
 ```
 
 ### <span style="color: green;">Response for Captcha:</span>
@@ -484,7 +485,7 @@ url: "http://domain-name/api/generate_captcha/",
 {
     "captcha_key" : <captcha_key>,
     "captcha_url" : <image_url>
-    # example for image url = "http://127.0.0.1:8050/api/captcha/image/c3efb9d994299a54312e2bb864f93c7aff600c4c/"
+    # example for image url = "http://127.0.0.1:8050/api/v1/captcha/image/c3efb9d994299a54312e2bb864f93c7aff600c4c/"
 }
 ```
 
@@ -509,7 +510,7 @@ HTTP Method: "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/register/",
+url: "http://domain-name/api/v1/register/",
 ```
 
 ### <span style="color: orange;">Payload for Register:</span>
@@ -551,7 +552,7 @@ HTTP Method: "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/logout/",
+url: "http://domain-name/api/v1/logout/",
 ```
 
 ### Header
@@ -585,7 +586,7 @@ HTTP Method: "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/save/",
+url: "http://domain-name/api/v1/save/",
 ```
 
 ### Header:
@@ -715,7 +716,7 @@ HTTP Method: "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/fetch/",
+url: "http://domain-name/api/v1/fetch/",
 ```
 
 ### Header:
@@ -801,7 +802,7 @@ HTTP Method: "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/save/",
+url: "http://domain-name/api/v1/save/",
 ```
 
 ### Header:
@@ -882,7 +883,7 @@ HTTP Method: "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/forgotPassword/",
+url: "http://domain-name/api/v1/forgotPassword/",
 ```
 
 ### <span style="color: orange;">Payload for Forgot Password:</span>
@@ -927,7 +928,7 @@ HTTP Method: "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/newpassword/<encoded_token>",
+url: "http://domain-name/api/v1/newpassword/<encoded_token>",
 ```
 
 ### <span style="color: orange;">Payload for New Password:</span>
@@ -967,7 +968,7 @@ HTTP Method: "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/user_info/"
+url: "http://domain-name/api/v1/user_info/"
 ```
 
 ### <span style="color: green;">Response for New Password:</span>
