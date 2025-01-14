@@ -27,7 +27,7 @@ class TestAccountActivateAPI:
         encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
 
         response = api_client.get(
-            f"/activate/{encoded_token}/",
+            f"/v1/activate/{encoded_token}/",
             format="json",
         )
 
@@ -51,7 +51,7 @@ class TestAccountActivateAPI:
         encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
 
         response = api_client.get(
-            f"/activate/{encoded_token}/",
+            f"/v1/activate/{encoded_token}/",
             format="json",
         )
 
@@ -71,7 +71,7 @@ class TestAccountActivateAPI:
         user.delete()
 
         response = api_client.get(
-            f"/activate/{encoded_token}/",
+            f"/v1/activate/{encoded_token}/",
             format="json",
         )
 
@@ -89,7 +89,7 @@ class TestAccountActivateAPI:
         encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
 
         response = api_client.get(
-            f"/activate/{encoded_token}/",
+            f"/v1/activate/{encoded_token}/",
             format="json",
         )
 
@@ -139,7 +139,7 @@ def test_activate_user(
     token = f"{user_id}:{int(time.time())}"
     encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
 
-    response = api_client.get(f"/activate/{encoded_token}/", format="json")
+    response = api_client.get(f"/v1/activate/{encoded_token}/", format="json")
     response_data = json.loads(response.content.decode("utf-8"))
 
     assert response.status_code == expected_status

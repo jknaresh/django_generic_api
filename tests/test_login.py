@@ -25,7 +25,7 @@ class TestLoginAPI:
         }
 
         # Sending POST request to login endpoint
-        response = api_client.post("/login/", login_payload, format="json")
+        response = api_client.post("/v1/login/", login_payload, format="json")
         response_data = json.loads(response.content.decode("utf-8"))
 
         # Assertions
@@ -51,7 +51,7 @@ class TestLoginAPI:
         }
 
         response = api_client.post(
-            "/login/",
+            "/v1/login/",
             login_payload,
             format="json",
         )
@@ -79,7 +79,7 @@ class TestLoginAPI:
         }
 
         response = api_client.post(
-            "/login/",
+            "/v1/login/",
             login_payload,
             format="json",
         )
@@ -103,7 +103,7 @@ class TestLoginAPI:
         }
 
         response = api_client.post(
-            "/login/",
+            "/v1/login/",
             login_payload,
             format="json",
         )
@@ -127,7 +127,7 @@ class TestLoginAPI:
         }
 
         response = api_client.post(
-            "/login/",
+            "/v1/login/",
             login_payload,
             format="json",
         )
@@ -152,7 +152,7 @@ class TestLoginAPI:
 
         headers = {"X-Requested-With": "XMLHttpRequest"}
         response = api_client.post(
-            "/login/", login_payload, format="json", headers=headers
+            "/v1/login/", login_payload, format="json", headers=headers
         )
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
@@ -171,7 +171,7 @@ class TestLoginAPI:
             "payload": {"variables": {"email": 123465, "password": "123456"}}
         }
         response = api_client.post(
-            "/login/",
+            "/v1/login/",
             login_payload,
             format="json",
         )
@@ -195,7 +195,7 @@ class TestLoginAPI:
             mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -213,7 +213,7 @@ class TestLoginAPI:
                 }
             }
 
-            response = api_client.post("/login/", login_payload, format="json")
+            response = api_client.post("/v1/login/", login_payload, format="json")
 
             response_data = json.loads(response.content.decode("utf-8"))
             assert response.status_code == 200
@@ -235,7 +235,7 @@ class TestLoginAPI:
             }
         }
 
-        response = api_client.post("/login/", login_payload, format="json")
+        response = api_client.post("/v1/login/", login_payload, format="json")
 
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
@@ -266,7 +266,7 @@ class TestLoginAPI:
             }
         }
 
-        response = api_client.post("/login/", login_payload, format="json")
+        response = api_client.post("/v1/login/", login_payload, format="json")
 
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
@@ -295,7 +295,7 @@ class TestLoginAPI:
             }
         }
 
-        response = api_client.post("/login/", login_payload, format="json")
+        response = api_client.post("/v1/login/", login_payload, format="json")
 
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 200
@@ -354,7 +354,7 @@ def test_login(
 
     assert not settings.CAPTCHA_REQUIRED
 
-    response = api_client.post("/login/", login_payload, format="json")
+    response = api_client.post("/v1/login/", login_payload, format="json")
     response_data = json.loads(response.content.decode("utf-8"))
 
     assert response.status_code == expected_status

@@ -47,7 +47,7 @@ class TestGenericSaveAPI:
         }
         headers = {"Authorization": f"Bearer {add_perm_token}"}
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -82,7 +82,7 @@ class TestGenericSaveAPI:
         }
         headers = {"Authorization": f"Bearer {add_perm_token}"}
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -119,7 +119,7 @@ class TestGenericSaveAPI:
         }
         headers = {"Authorization": f"Bearer {add_perm_token}"}
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -160,7 +160,7 @@ class TestGenericSaveAPI:
         }
         headers = {"Authorization": f"Bearer {add_perm_token}"}
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -197,7 +197,7 @@ class TestGenericSaveAPI:
         }
         headers = {"Authorization": f"Bearer {add_perm_token}"}
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -234,7 +234,7 @@ class TestGenericSaveAPI:
         headers = {"Authorization": f"Bearer {add_perm_token}"}
 
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -271,7 +271,7 @@ class TestGenericSaveAPI:
         headers = {"Authorization": f"Bearer {add_perm_token}"}
 
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -308,7 +308,7 @@ class TestGenericSaveAPI:
         headers = {"Authorization": f"Bearer {add_perm_token}"}
 
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -447,7 +447,7 @@ class TestGenericSaveAPI:
         headers = {"Authorization": f"Bearer {add_perm_token}"}
 
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -495,7 +495,7 @@ class TestGenericSaveAPI:
         headers = {"Authorization": f"Bearer {add_perm_token}"}
 
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -537,7 +537,7 @@ class TestGenericSaveAPI:
         headers = {"Authorization": f"Bearer {add_perm_token}"}
 
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -579,7 +579,7 @@ class TestGenericSaveAPI:
         headers = {"Authorization": f"Bearer {add_perm_token}"}
 
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -621,7 +621,7 @@ class TestGenericSaveAPI:
         headers = {"Authorization": f"Bearer {add_perm_token}"}
 
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -661,7 +661,7 @@ class TestGenericSaveAPI:
         headers = {"Authorization": f"Bearer {add_perm_token}"}
 
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -702,7 +702,7 @@ class TestGenericSaveAPI:
         headers = {"Authorization": f"Bearer {add_perm_token}"}
 
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -742,7 +742,7 @@ class TestGenericSaveAPI:
         }
 
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
         )
@@ -780,7 +780,7 @@ class TestGenericSaveAPI:
         }
         headers = {"Authorization": f"ABCD {add_perm_token}"}
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -816,7 +816,7 @@ class TestGenericSaveAPI:
         }
         headers = {"Authorization": f"Bearer {view_perm_token}"}
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -855,7 +855,7 @@ class TestGenericSaveAPI:
         }
         headers = {"Authorization": f"Bearer {add_perm_token}"}
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -900,7 +900,7 @@ class TestGenericSaveAPI:
         headers = {"Authorization": f"Bearer {add_perm_token}"}
 
         response = api_client.post(
-            "/save/",
+            "/v1/save/",
             save_payload,
             format="json",
             headers=headers,
@@ -986,7 +986,7 @@ def test_save_api(
     headers = {"Authorization": f"Bearer {add_perm_token}"}
 
     response = api_client.post(
-        "/save/",
+        "/v1/save/",
         payload,
         format="json",
         headers=headers,

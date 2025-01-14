@@ -18,28 +18,30 @@ from .views import (
 )
 
 urlpatterns = [
-    path("fetch/", GenericFetchAPIView.as_view(), name="generic-fetch"),
-    path("save/", GenericSaveAPIView.as_view(), name="generic-save"),
-    path("logout/", LogoutAPIView.as_view(), name="logout"),
-    path("login/", GenericLoginAPIView.as_view(), name="login"),
-    path("register/", GenericRegisterAPIView.as_view(), name="register"),
-    path("refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("v1/fetch/", GenericFetchAPIView.as_view(), name="generic-fetch"),
+    path("v1/save/", GenericSaveAPIView.as_view(), name="generic-save"),
+    path("v1/logout/", LogoutAPIView.as_view(), name="logout"),
+    path("v1/login/", GenericLoginAPIView.as_view(), name="login"),
+    path("v1/register/", GenericRegisterAPIView.as_view(), name="register"),
+    path("v1/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path(
-        "activate/<str:encoded_token>/",
+        "v1/activate/<str:encoded_token>/",
         AccountActivateAPIView.as_view(),
         name="activate",
     ),
     path(
-        "forgotPassword/",
+        "v1/forgotPassword/",
         GenericForgotPasswordAPIView.as_view(),
         name="forgotPassword",
     ),
-    path("generate-captcha/", CaptchaServiceAPIView.as_view(), name="captcha"),
     path(
-        "newpassword/<str:encoded_token>/",
+        "v1/generate-captcha/", CaptchaServiceAPIView.as_view(), name="captcha"
+    ),
+    path(
+        "v1/newpassword/<str:encoded_token>/",
         NewPasswordAPIView.as_view(),
         name="newpassword",
     ),
-    path("captcha/", include(captcha_urls)),
-    path("user-info/", UserInfoAPIView.as_view(), name="user_info"),
+    path("v1/captcha/", include(captcha_urls)),
+    path("v1/user-info/", UserInfoAPIView.as_view(), name="user_info"),
 ]

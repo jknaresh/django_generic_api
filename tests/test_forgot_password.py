@@ -27,7 +27,7 @@ class TestForgotPasswordAPI:
             mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -45,7 +45,7 @@ class TestForgotPasswordAPI:
             }
 
             response = api_client.post(
-                "/forgotPassword/",
+                "/v1/forgotPassword/",
                 forgot_password_payload,
                 format="json",
             )
@@ -64,7 +64,7 @@ class TestForgotPasswordAPI:
         with patch("captcha.models.CaptchaStore.objects.get") as mock_get:
             mock_get.side_effect = CaptchaStore.DoesNotExist
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -83,7 +83,7 @@ class TestForgotPasswordAPI:
 
             # Simulate a request to validate the captcha
             response = api_client.post(
-                "/forgotPassword/",
+                "/v1/forgotPassword/",
                 forgot_password_payload,
                 format="json",
             )
@@ -107,7 +107,7 @@ class TestForgotPasswordAPI:
             mock_captcha.response = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -125,7 +125,7 @@ class TestForgotPasswordAPI:
             }
 
             response = api_client.post(
-                "/forgotPassword/",
+                "/v1/forgotPassword/",
                 forgot_password_payload,
                 format="json",
             )
@@ -152,7 +152,7 @@ class TestForgotPasswordAPI:
         }
 
         response = api_client.post(
-            "/forgotPassword/",
+            "/v1/forgotPassword/",
             forgot_password_payload,
             format="json",
         )
@@ -177,7 +177,7 @@ class TestForgotPasswordAPI:
             mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -195,7 +195,7 @@ class TestForgotPasswordAPI:
             }
 
             response = api_client.post(
-                "/forgotPassword/",
+                "/v1/forgotPassword/",
                 forgot_password_payload,
                 format="json",
             )
@@ -223,7 +223,7 @@ class TestForgotPasswordAPI:
         }
 
         response = api_client.post(
-            "/forgotPassword/",
+            "/v1/forgotPassword/",
             forgot_password_payload,
             format="json",
         )
@@ -251,7 +251,7 @@ class TestForgotPasswordAPI:
             mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -269,7 +269,7 @@ class TestForgotPasswordAPI:
             }
 
             response = api_client.post(
-                "/forgotPassword/",
+                "/v1/forgotPassword/",
                 forgot_password_payload,
                 format="json",
             )
@@ -296,7 +296,7 @@ class TestForgotPasswordAPI:
         }
 
         response = api_client.post(
-            "/forgotPassword/",
+            "/v1/forgotPassword/",
             forgot_password_payload,
             format="json",
         )
@@ -332,7 +332,7 @@ class TestForgotPasswordAPI:
         }
 
         response = api_client.post(
-            "/forgotPassword/",
+            "/v1/forgotPassword/",
             forgot_password_payload,
             format="json",
         )
@@ -364,7 +364,7 @@ class TestForgotPasswordAPI:
         }
 
         response = api_client.post(
-            "/forgotPassword/",
+            "/v1/forgotPassword/",
             forgot_password_payload,
             format="json",
         )
