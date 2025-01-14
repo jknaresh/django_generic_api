@@ -476,7 +476,7 @@ HTTP Method: "GET" / "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/v1/generate_captcha/",
+url: "http://domain-name/api/v1/generate-captcha/",
 ```
 
 ### <span style="color: green;">Response for Captcha:</span>
@@ -957,7 +957,11 @@ url: "http://domain-name/api/v1/newpassword/<encoded_token>",
 ## Fetch User Info API
 
 - Users must be authenticated prior to accessing this API.
-- Users can utilize this API to fetch details such as email, first name, and last name.
+- To select which attributes to fetch, use the variable in settings `USER_INFO_FIELDS`: tuple.
+```bash
+# ex: USER_INFO_FIELDS = (first_name, last_name)
+```
+- The listed attributes are fetched. 
 
 ### Method:
 
@@ -968,19 +972,85 @@ HTTP Method: "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/v1/user_info/"
+url: "http://domain-name/api/v1/user-info/"
 ```
 
-### <span style="color: green;">Response for New Password:</span>
+### Header:
+
+```bash
+header["Content-Type"]="application/json"
+header["Authorization"]="Bearer <access token>"
+```
+
+### <span style="color: green;">Response for User Info:</span>
 
 ```json
 {
     "data": [
         {
-            "email": "abc@admin.com",
-            "first_name": "Abcd",
-            "last_name": "Efgh"
+            "field1": "value1",
+            "field2": "value2",
+            "field3": "value3"
         }
     ]
+}
+```
+
+---
+
+## Update User Info API
+
+- Users can update their user information.
+- For this, set the variable in settings `USER_INFO_FIELDS`: tuple.
+```bash
+# ex: USER_INFO_FIELDS = (first_name, last_name)
+```
+- The listed attributes can be updated.
+
+### Method:
+
+```bash
+HTTP Method: "PUT"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/v1/user-info/"
+```
+
+### Header:
+
+```bash
+header["Content-Type"]="application/json"
+header["Authorization"]="Bearer <access token>"
+```
+
+### <span style="color: orange;">Payload for User Info Update:</span>
+
+```json
+{
+    "payload":{
+        "variables":{
+            "saveInput":[{
+                "field1": "value1",
+                "field2": "value2"
+            }]
+        }
+    }
+}
+
+```
+
+### <span style="color: green;">Response for User Info Update:</span>
+
+```bash
+{
+    "data": [
+        {
+            "id": <user.id>
+        }
+    ],
+    "message": "<user.username>'s info is updated"
 }
 ```
