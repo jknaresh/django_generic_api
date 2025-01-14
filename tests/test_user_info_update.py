@@ -167,7 +167,7 @@ class TestUserInfoUpdateAPI:
         )
         assert response_data["code"] == "DGA-V033"
 
-    def test_user_update_default_true_is_set_false(
+    def test_user_active_boolean_field_set_false_update(
         self, api_client, all_perm_token
     ):
 
@@ -231,8 +231,5 @@ class TestUserInfoUpdateAPI:
         response_data = json.loads(response.content.decode("utf-8"))
 
         assert response.status_code == 400
-        assert (
-            response_data["error"]
-            == "'not_yet_field' not found in the auth.User model."
-        )
+        assert response_data["error"] == "'[not_yet_field]'s not in the model."
         assert response_data["code"] == "DGA-V033"

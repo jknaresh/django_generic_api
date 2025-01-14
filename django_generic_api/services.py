@@ -17,7 +17,7 @@ from .utils import (
     get_model_fields_with_properties,
     is_fields_exist,
     DJANGO_TO_PYDANTIC_TYPE_MAP,
-    field_str_to_field_obj,
+    str_field_to_model_field,
 )
 
 DEFAULT_APPS = {
@@ -87,7 +87,7 @@ def get_model_config_schema(model, fields=None):
     model_meta = getattr(model, "_meta", None)
 
     if fields:
-        fields = field_str_to_field_obj(model, fields)
+        fields = str_field_to_model_field(model, fields)
 
     if not fields:
         fields = model_meta.fields
@@ -442,19 +442,18 @@ def read_user_info(user):
     if not hasattr(settings, "USER_INFO_FIELDS"):
         raise AttributeError(
             {
-                "error": "Configure 'USER_INFO_FIELDS' to update user information.",
+                "error": "Configure 'USER_INFO_FIELDS' to read user information.",
                 "code": "DGA-S015",
             }
         )
 
-    user_info_fields = settings.USER_INFO_FIELDS
-    user_model = get_user_model()
-
-    fields = field_str_to_field_obj(model=user_model, fields=user_info_fields)
+    fields = str_field_to_model_field(
+        model=get_user_model(), fields=settings.USER_INFO_FIELDS
+    )
 
     user_info = {}
 
     for field in fields:
         user_info[field.name] = getattr(user, field.name, None)
 
-    return dict(id=user.id, data=user_info)
+    return dict(data=user_info)

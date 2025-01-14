@@ -829,7 +829,9 @@ class TestGenericSaveAPI:
         )
         assert response_data["code"] == "DGA-V004"
 
-    def test_save_default_true_is_set_false(self, api_client, add_perm_token):
+    def test_user_active_boolean_field_set_false(
+        self, api_client, add_perm_token
+    ):
         save_payload = {
             "payload": {
                 "variables": {

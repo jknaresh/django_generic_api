@@ -10,17 +10,13 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any, List
 from uuid import UUID
-from typing import Dict, Optional
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
-from django.contrib.auth.models import User
 from pydantic import (
     ConfigDict,
     EmailStr,
     AnyUrl,
     IPvAnyAddress,
-    create_model,
-    Field,
 )
 from rest_framework import status
 from rest_framework.exceptions import Throttled
@@ -343,7 +339,7 @@ def mixed_digit_uppercase_challenge():
     return ret, ret
 
 
-def field_str_to_field_obj(model, fields):
+def str_field_to_model_field(model, fields):
     """
     Retrieved field object from model based on field string
 
@@ -374,9 +370,7 @@ def field_str_to_field_obj(model, fields):
     fld_diff = set(fields) - fld_set
     if len(fld_diff) > 0:
         fld_diff = ",".join(fld_diff)
-        raise ValueError(
-            f"'{fld_diff}' not found in the {model_meta.label} model."
-        )
+        raise ValueError(f"'[{fld_diff}]'s not in the model.")
 
     fields = fld
 

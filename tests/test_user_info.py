@@ -30,7 +30,6 @@ class TestUserInfoAPI:
         response_data = json.loads(response.content.decode("utf-8"))
 
         assert response.status_code == 200
-        assert response_data["id"] == 1
         assert response_data["data"] == {
             "first_name": "test1",
             "last_name": "test2",
@@ -87,7 +86,6 @@ class TestUserInfoAPI:
 
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 200
-        assert response_data["id"] == 1
         assert response_data["data"] == {
             "email": "all_perm@test.com",
             "first_name": "test1",
@@ -115,8 +113,5 @@ class TestUserInfoAPI:
         response_data = json.loads(response.content.decode("utf-8"))
 
         assert response.status_code == 400
-        assert (
-            response_data["error"]
-            == "'ABCD' not found in the auth.User model."
-        )
+        assert response_data["error"] == "'[ABCD]'s not in the model."
         assert response_data["code"] == "DGA-V031"
