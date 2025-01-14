@@ -27,7 +27,7 @@ class TestForgotPasswordAPI:
             mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate_captcha/")
+            captcha_response = api_client.post("/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -64,7 +64,7 @@ class TestForgotPasswordAPI:
         with patch("captcha.models.CaptchaStore.objects.get") as mock_get:
             mock_get.side_effect = CaptchaStore.DoesNotExist
 
-            captcha_response = api_client.post("/generate_captcha/")
+            captcha_response = api_client.post("/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -107,7 +107,7 @@ class TestForgotPasswordAPI:
             mock_captcha.response = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate_captcha/")
+            captcha_response = api_client.post("/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -177,7 +177,7 @@ class TestForgotPasswordAPI:
             mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate_captcha/")
+            captcha_response = api_client.post("/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -251,7 +251,7 @@ class TestForgotPasswordAPI:
             mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate_captcha/")
+            captcha_response = api_client.post("/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -285,7 +285,7 @@ class TestForgotPasswordAPI:
     ):
         assert settings.CAPTCHA_REQUIRED
         """
-        Captcha attributes are sent when CAPTCHA_REQUIRED is False
+        Captcha attributes are not sent when CAPTCHA_REQUIRED is True
         """
         forgot_password_payload = {
             "payload": {

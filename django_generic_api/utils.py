@@ -10,10 +10,14 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any, List
 from uuid import UUID
-
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
-from pydantic import ConfigDict, EmailStr, AnyUrl, IPvAnyAddress
+from pydantic import (
+    ConfigDict,
+    EmailStr,
+    AnyUrl,
+    IPvAnyAddress,
+)
 from rest_framework import status
 from rest_framework.exceptions import Throttled
 from rest_framework.response import Response
@@ -333,3 +337,41 @@ def mixed_digit_uppercase_challenge():
     for i in range(length):
         ret += random.choice(string.digits + string.ascii_uppercase)
     return ret, ret
+
+
+def str_field_to_model_field(model, fields):
+    """
+    Retrieved field object from model based on field string
+
+    param : model object, field (list)
+    return : list of field objects
+    """
+    model_meta = getattr(model, "_meta", None)
+
+    fld_set = set()
+    fld = []
+    c1, c2 = 0, len(fields)
+    for field in model_meta.fields:
+        field_name = field.name
+        field_verbose_name = field.verbose_name
+        try:
+            if fields.__contains__(field_name):
+                fld_set.add(field_name)
+                fld.append(field)
+                c1 += 1
+            elif fields.__contains__(field_verbose_name):
+                fld_set.add(field_verbose_name)
+                fld.append(field)
+                c1 += 1
+        except:
+            continue
+        if c1 == c2:
+            break
+    fld_diff = set(fields) - fld_set
+    if len(fld_diff) > 0:
+        fld_diff = ",".join(fld_diff)
+        raise ValueError(f"'[{fld_diff}]'s not in the model.")
+
+    fields = fld
+
+    return fields

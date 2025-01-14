@@ -34,12 +34,12 @@ urlpatterns = [
         GenericForgotPasswordAPIView.as_view(),
         name="forgotPassword",
     ),
-    path("generate_captcha/", CaptchaServiceAPIView.as_view(), name="captcha"),
+    path("generate-captcha/", CaptchaServiceAPIView.as_view(), name="captcha"),
     path(
         "newpassword/<str:encoded_token>/",
         NewPasswordAPIView.as_view(),
         name="newpassword",
     ),
     path("captcha/", include(captcha_urls)),
-    path("user_info/", UserInfoAPIView.as_view(), name="user_info"),
+    path("user-info/", UserInfoAPIView.as_view(), name="user_info"),
 ]

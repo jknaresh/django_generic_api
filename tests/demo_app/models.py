@@ -24,13 +24,16 @@ class BaseClass(models.Model):
 
 
 class Customer(BaseClass):
-    name = models.CharField(max_length=63, null=False)
+    name = models.CharField(
+        max_length=63, null=False, verbose_name="customer_name"
+    )
     dob = models.DateField(null=False)  # Date of birth
     email = models.EmailField(null=False)
     phone_no = models.CharField(max_length=15, null=False)
     address = models.CharField(max_length=1023, null=False)  # Address
     pin_code = models.CharField(max_length=6, null=False)  # Postal/ZIP code
     status = models.CharField(max_length=5)
+    is_alive = models.BooleanField(default=True, null=False)
 
     def __str__(self):
         return self.name
