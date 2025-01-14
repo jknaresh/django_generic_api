@@ -8,7 +8,6 @@ from pydantic import (
     create_model,
     Field,
 )
-from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from pydantic.config import ConfigDict
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -390,13 +389,13 @@ def handle_user_info_update(save_input, user_id):
     if not hasattr(settings, "USER_INFO_FIELDS"):
         raise AttributeError(
             {
-                "error": "Configure 'USER_INFO_FIELDS' to update user information.",
+                "error": "Set setting for 'USER_INFO_FIELDS' to update information.",
                 "code": "DGA-S012",
             }
         )
 
     user_info_pydantic_model = get_model_config_schema(
-        User, fields=settings.USER_INFO_FIELDS
+        get_user_model(), fields=settings.USER_INFO_FIELDS
     )
 
     try:
@@ -410,7 +409,7 @@ def handle_user_info_update(save_input, user_id):
         )
 
     for key, value in list(save_input.items()):
-        model_meta = getattr(User, "_meta", None)
+        model_meta = getattr(get_user_model(), "_meta", None)
         model_field = model_meta.get_field(key)
 
         if (
@@ -442,7 +441,7 @@ def read_user_info(user):
     if not hasattr(settings, "USER_INFO_FIELDS"):
         raise AttributeError(
             {
-                "error": "Configure 'USER_INFO_FIELDS' to read user information.",
+                "error": "Set setting for 'USER_INFO_FIELDS' to read information.",
                 "code": "DGA-S015",
             }
         )
