@@ -30,7 +30,7 @@ class TestNewPasswordAPI:
         }
 
         response = api_client.post(
-            f"/newpassword/{encoded_token}/",
+            f"/v1/newpassword/{encoded_token}/",
             new_password_payload,
             format="json",
         )
@@ -58,7 +58,7 @@ class TestNewPasswordAPI:
         }
 
         response = api_client.post(
-            f"/newpassword/{encoded_token}/",
+            f"/v1/newpassword/{encoded_token}/",
             new_password_payload,
             format="json",
         )
@@ -88,7 +88,7 @@ class TestNewPasswordAPI:
         }
 
         response = api_client.post(
-            f"/newpassword/{encoded_token}/",
+            f"/v1/newpassword/{encoded_token}/",
             new_password_payload,
             format="json",
         )
@@ -117,7 +117,7 @@ class TestNewPasswordAPI:
         }
 
         response = api_client.post(
-            f"/newpassword/{encoded_token}/",
+            f"/v1/newpassword/{encoded_token}/",
             new_password_payload,
             format="json",
         )
@@ -146,7 +146,7 @@ class TestNewPasswordAPI:
         }
 
         response = api_client.post(
-            f"/newpassword/{encoded_token}/",
+            f"/v1/newpassword/{encoded_token}/",
             new_password_payload,
             format="json",
         )
@@ -176,7 +176,7 @@ class TestNewPasswordAPI:
         }
 
         response = api_client.post(
-            f"/newpassword/MzoxNzMzMTUzMjI6/",  # token is tampered
+            f"/v1/newpassword/MzoxNzMzMTUzMjI6/",  # token is tampered
             new_password_payload,
             format="json",
         )

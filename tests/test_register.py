@@ -27,7 +27,7 @@ class TestRegisterAPI:
             mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -47,7 +47,7 @@ class TestRegisterAPI:
             }
 
             response = api_client.post(
-                "/register/",
+                "/v1/register/",
                 register_payload,
                 format="json",
             )
@@ -68,7 +68,7 @@ class TestRegisterAPI:
             mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -88,7 +88,7 @@ class TestRegisterAPI:
             }
 
             response = api_client.post(
-                "/register/",
+                "/v1/register/",
                 register_payload,
                 format="json",
             )
@@ -114,7 +114,7 @@ class TestRegisterAPI:
             mock_captcha.response = mocked_captcha_value.lower()
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -133,7 +133,7 @@ class TestRegisterAPI:
             }
 
             response = api_client.post(
-                "/register/",
+                "/v1/register/",
                 register_payload,
                 format="json",
             )
@@ -154,7 +154,7 @@ class TestRegisterAPI:
             mock_captcha.response = mocked_captcha_value.lower()
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -175,7 +175,7 @@ class TestRegisterAPI:
             }
 
             response = api_client.post(
-                "/register/",
+                "/v1/register/",
                 register_payload,
                 format="json",
             )
@@ -196,7 +196,7 @@ class TestRegisterAPI:
             mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -216,7 +216,7 @@ class TestRegisterAPI:
             }
 
             response = api_client.post(
-                "/register/",
+                "/v1/register/",
                 register_payload,
                 format="json",
             )
@@ -237,7 +237,7 @@ class TestRegisterAPI:
             mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -257,7 +257,7 @@ class TestRegisterAPI:
             }
 
             response = api_client.post(
-                "/register/",
+                "/v1/register/",
                 register_payload,
                 format="json",
             )
@@ -279,7 +279,7 @@ class TestRegisterAPI:
             mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -299,7 +299,7 @@ class TestRegisterAPI:
             }
 
             response = api_client.post(
-                "/register/",
+                "/v1/register/",
                 register_payload,
                 format="json",
             )
@@ -324,7 +324,7 @@ class TestRegisterAPI:
             mock_captcha.response = mocked_captcha_value.lower()
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -344,7 +344,7 @@ class TestRegisterAPI:
             }
 
             response = api_client.post(
-                "/register/",
+                "/v1/register/",
                 register_payload,
                 format="json",
             )
@@ -361,7 +361,7 @@ class TestRegisterAPI:
         with patch("captcha.models.CaptchaStore.objects.get") as mock_get:
             mock_get.side_effect = CaptchaStore.DoesNotExist
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -382,7 +382,7 @@ class TestRegisterAPI:
             }
 
             response = api_client.post(
-                "/register/",
+                "/v1/register/",
                 register_payload,
                 format="json",
             )
@@ -405,7 +405,7 @@ class TestRegisterAPI:
             mock_captcha.challenge = mocked_captcha_value
             mock_get.return_value = mock_captcha
 
-            captcha_response = api_client.post("/generate-captcha/")
+            captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
             assert "captcha_key" in captcha_response.data
             assert "captcha_url" in captcha_response.data
@@ -425,7 +425,7 @@ class TestRegisterAPI:
             }
 
             response = api_client.post(
-                "/register/",
+                "/v1/register/",
                 register_payload,
                 format="json",
             )
@@ -451,7 +451,7 @@ class TestRegisterAPI:
         }
 
         response = api_client.post(
-            "/register/",
+            "/v1/register/",
             register_payload,
             format="json",
         )
@@ -487,7 +487,7 @@ class TestRegisterAPI:
         }
 
         response = api_client.post(
-            "/register/",
+            "/v1/register/",
             register_payload,
             format="json",
         )
@@ -521,7 +521,7 @@ class TestRegisterAPI:
         }
 
         response = api_client.post(
-            "/register/",
+            "/v1/register/",
             register_payload,
             format="json",
         )

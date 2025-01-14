@@ -22,7 +22,7 @@ class TestUserInfoAPI:
         headers = {"Authorization": f"Bearer {all_perm_token}"}
 
         response = api_client.post(
-            "/user-info/",
+            "/v1/user-info/",
             format="json",
             headers=headers,
         )
@@ -41,7 +41,7 @@ class TestUserInfoAPI:
         headers = {"Authorization": f"Bearer {inactive_user_token}"}
 
         response = api_client.post(
-            "/user-info/",
+            "/v1/user-info/",
             format="json",
             headers=headers,
         )
@@ -55,7 +55,7 @@ class TestUserInfoAPI:
     def test_user_null_header(self, api_client):
 
         response = api_client.post(
-            "/user-info/",
+            "/v1/user-info/",
             format="json",
         )
 
@@ -79,7 +79,7 @@ class TestUserInfoAPI:
         headers = {"Authorization": f"Bearer {all_perm_token}"}
 
         response = api_client.post(
-            "/user-info/",
+            "/v1/user-info/",
             format="json",
             headers=headers,
         )
@@ -105,7 +105,7 @@ class TestUserInfoAPI:
         headers = {"Authorization": f"Bearer {all_perm_token}"}
 
         response = api_client.post(
-            "/user-info/",
+            "/v1/user-info/",
             format="json",
             headers=headers,
         )

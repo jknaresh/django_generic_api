@@ -29,7 +29,7 @@ class TestUserInfoUpdateAPI:
         }
 
         response = api_client.put(
-            "/user-info/",
+            "/v1/user-info/",
             user_info_update_payload,
             format="json",
             headers=headers,
@@ -59,7 +59,7 @@ class TestUserInfoUpdateAPI:
         }
 
         response = api_client.put(
-            "/user-info/",
+            "/v1/user-info/",
             user_info_update_payload,
             format="json",
         )
@@ -89,7 +89,7 @@ class TestUserInfoUpdateAPI:
         }
 
         response = api_client.put(
-            "/user-info/",
+            "/v1/user-info/",
             user_info_update_payload,
             format="json",
             headers=headers,
@@ -122,7 +122,7 @@ class TestUserInfoUpdateAPI:
         }
 
         response = api_client.put(
-            "/user-info/",
+            "/v1/user-info/",
             user_info_update_payload,
             format="json",
             headers=headers,
@@ -152,7 +152,7 @@ class TestUserInfoUpdateAPI:
         }
 
         response = api_client.put(
-            "/user-info/",
+            "/v1/user-info/",
             user_info_update_payload,
             format="json",
             headers=headers,
@@ -186,7 +186,7 @@ class TestUserInfoUpdateAPI:
         }
 
         response = api_client.put(
-            "/user-info/",
+            "/v1/user-info/",
             user_info_update_payload,
             format="json",
             headers=headers,
@@ -222,7 +222,7 @@ class TestUserInfoUpdateAPI:
         }
 
         response = api_client.put(
-            "/user-info/",
+            "/v1/user-info/",
             user_info_update_payload,
             format="json",
             headers=headers,
