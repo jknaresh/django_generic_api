@@ -32,6 +32,7 @@ from .services import (
     fetch_data,
     generate_token,
     handle_user_info_update,
+    read_user_info,
 )
 from .utils import (
     make_permission_str,
@@ -722,18 +723,14 @@ class UserInfoAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        return Response(
-            {
-                "data": [
-                    {
-                        "email": self.request.user.email,
-                        "first_name": self.request.user.first_name,
-                        "last_name": self.request.user.last_name,
-                    }
-                ]
-            },
-            status=status.HTTP_200_OK,
-        )
+        try:
+            user_info = read_user_info(user=self.request.user)
+            return Response(user_info, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e), "code": "DGA-V031"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     def put(self, *args, **kwargs):
 

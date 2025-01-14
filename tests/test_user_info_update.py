@@ -167,7 +167,9 @@ class TestUserInfoUpdateAPI:
         )
         assert response_data["code"] == "DGA-V033"
 
-    def test_save_default_true_is_set_false(self, api_client, all_perm_token):
+    def test_user_update_default_true_is_set_false(
+        self, api_client, all_perm_token
+    ):
 
         headers = {"Authorization": f"Bearer {all_perm_token}"}
 
@@ -199,3 +201,38 @@ class TestUserInfoUpdateAPI:
 
         inserted_data = User.objects.get(id=1)
         assert inserted_data.is_active == False
+
+    def test_unknown_field_in_settings_variable(
+        self, api_client, all_perm_token, monkeypatch
+    ):
+
+        monkeypatch.setattr(
+            "django.conf.settings.USER_INFO_FIELDS",
+            ("first_name", "last_name", "not_yet_field"),
+        )
+
+        headers = {"Authorization": f"Bearer {all_perm_token}"}
+
+        user_info_update_payload = {
+            "payload": {
+                "variables": {
+                    "saveInput": {"first_name": "Fname", "last_name": "Lname"}
+                }
+            }
+        }
+
+        response = api_client.put(
+            "/user-info/",
+            user_info_update_payload,
+            format="json",
+            headers=headers,
+        )
+
+        response_data = json.loads(response.content.decode("utf-8"))
+
+        assert response.status_code == 400
+        assert (
+            response_data["error"]
+            == "'not_yet_field' not found in the auth.User model."
+        )
+        assert response_data["code"] == "DGA-V033"

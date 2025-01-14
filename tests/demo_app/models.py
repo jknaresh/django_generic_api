@@ -24,7 +24,9 @@ class BaseClass(models.Model):
 
 
 class Customer(BaseClass):
-    name = models.CharField(max_length=63, null=False)
+    name = models.CharField(
+        max_length=63, null=False, verbose_name="customer_name"
+    )
     dob = models.DateField(null=False)  # Date of birth
     email = models.EmailField(null=False)
     phone_no = models.CharField(max_length=15, null=False)

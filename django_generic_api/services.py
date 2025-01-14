@@ -17,7 +17,7 @@ from .utils import (
     get_model_fields_with_properties,
     is_fields_exist,
     DJANGO_TO_PYDANTIC_TYPE_MAP,
-    user_info_to_pydantic_model,
+    field_str_to_field_obj,
 )
 
 DEFAULT_APPS = {
@@ -71,7 +71,7 @@ def generate_token(user):
     ]
 
 
-def get_model_config_schema(model):
+def get_model_config_schema(model, fields=None):
     """
     Converts a Django ORM model into a Pydantic model object.
 
@@ -86,7 +86,13 @@ def get_model_config_schema(model):
     # info: validates nested fields(foreign key fields for time being "__")
     model_meta = getattr(model, "_meta", None)
 
-    for field1 in model_meta.fields:
+    if fields:
+        fields = field_str_to_field_obj(model, fields)
+
+    if not fields:
+        fields = model_meta.fields
+
+    for field1 in fields:
         if field1.name == "id":
             continue
 
@@ -389,8 +395,8 @@ def handle_user_info_update(save_input, user_id):
             }
         )
 
-    user_info_pydantic_model = user_info_to_pydantic_model(
-        fields=settings.USER_INFO_FIELDS
+    user_info_pydantic_model = get_model_config_schema(
+        User, fields=settings.USER_INFO_FIELDS
     )
 
     try:
@@ -418,7 +424,7 @@ def handle_user_info_update(save_input, user_id):
         try:
             model_field.get_prep_value(value)
         except Exception as e:
-            raise ValueError({"error": e, "code": "DGA-S010"})
+            raise ValueError({"error": e, "code": "DGA-S014"})
 
     user_model = get_user_model()
     user = user_model.objects.get(id=user_id)
@@ -429,3 +435,26 @@ def handle_user_info_update(save_input, user_id):
     message = f"{user.username}'s info is updated"
 
     return message
+
+
+def read_user_info(user):
+
+    if not hasattr(settings, "USER_INFO_FIELDS"):
+        raise AttributeError(
+            {
+                "error": "Configure 'USER_INFO_FIELDS' to update user information.",
+                "code": "DGA-S015",
+            }
+        )
+
+    user_info_fields = settings.USER_INFO_FIELDS
+    user_model = get_user_model()
+
+    fields = field_str_to_field_obj(model=user_model, fields=user_info_fields)
+
+    user_info = {}
+
+    for field in fields:
+        user_info[field.name] = getattr(user, field.name, None)
+
+    return dict(id=user.id, data=user_info)

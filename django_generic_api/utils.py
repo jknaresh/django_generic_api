@@ -343,56 +343,41 @@ def mixed_digit_uppercase_challenge():
     return ret, ret
 
 
-def user_info_to_pydantic_model(fields):
+def field_str_to_field_obj(model, fields):
     """
-    Converts specified fields from the Django User model into a Pydantic model.
+    Retrieved field object from model based on field string
 
-    :param fields: Tuple of field names from the User model to include in the Pydantic model.
-    :return: A dynamically created Pydantic model.
+    param : model object, field (list)
+    return : list of field objects
     """
-    model_fields: Dict[str, tuple] = {}
-    model_meta = getattr(User, "_meta", None)
+    model_meta = getattr(model, "_meta", None)
 
-    for field_name in fields:
-        field = next(
-            (f for f in model_meta.fields if f.name == field_name), None
-        )
-        if not field:
-            raise ValueError(f"'{field_name}' not found in the User model.")
-
-        field_constraints = {}
-
-        is_optional = field.null or field.blank or field.has_default()
-        default_value = field.get_default() if field.has_default() else None
-
-        django_field_type = field.get_internal_type()
-
-        # Map Django field type to Pydantic type
-        mapped_type = DJANGO_TO_PYDANTIC_TYPE_MAP.get(django_field_type)
-
-        field_type = Optional[mapped_type] if is_optional else mapped_type
-
-        # Assign max_length constraint if applicable
-        if hasattr(field, "max_length"):
-            field_constraints["max_length"] = field.max_length
-
-        # Add the field to model_fields with its type and constraints
-        model_fields[field.name] = (
-            field_type,
-            Field(default=default_value, **field_constraints),
+    fld_set = set()
+    fld = []
+    c1, c2 = 0, len(fields)
+    for field in model_meta.fields:
+        field_name = field.name
+        field_verbose_name = field.verbose_name
+        try:
+            if fields.__contains__(field_name):
+                fld_set.add(field_name)
+                fld.append(field)
+                c1 += 1
+            elif fields.__contains__(field_verbose_name):
+                fld_set.add(field_verbose_name)
+                fld.append(field)
+                c1 += 1
+        except:
+            continue
+        if c1 == c2:
+            break
+    fld_diff = set(fields) - fld_set
+    if len(fld_diff) > 0:
+        fld_diff = ",".join(fld_diff)
+        raise ValueError(
+            f"'{fld_diff}' not found in the {model_meta.label} model."
         )
 
-    config_dict = ConfigDict(
-        title="UserInfo",
-        extra="forbid",  # Forbid extra fields
-        str_strip_whitespace=True,  # Remove white spaces from strings
-    )
+    fields = fld
 
-    # Dynamically create a Pydantic model with the specified fields
-    pydantic_model = create_model(
-        "UserInfoPydantic",  # Name of the Pydantic model
-        **model_fields,  # Field definitions passed as keyword arguments
-        __config__=config_dict,
-    )
-
-    return pydantic_model
+    return fields
