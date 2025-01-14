@@ -161,7 +161,8 @@ class TestForgotPasswordAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "Value error, Captcha key and value are required when `CAPTCHA_REQUIRED` is True."
+            == "Value error, Captcha key and value are required when "
+            "`CAPTCHA_REQUIRED` is True."
         )
         assert response_data["code"] == "DGA-V017"
 
@@ -306,7 +307,8 @@ class TestForgotPasswordAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "Value error, Captcha key and value are required when `CAPTCHA_REQUIRED` is True."
+            == "Value error, Captcha key and value are required when "
+            "`CAPTCHA_REQUIRED` is True."
         )
         assert response_data["code"] == "DGA-V017"
 
@@ -341,7 +343,8 @@ class TestForgotPasswordAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "Value error, Captcha key and value should not be provided when `CAPTCHA_REQUIRED` is False."
+            == "Value error, Captcha key and value should not be "
+            "provided when `CAPTCHA_REQUIRED` is False."
         )
         assert response_data["code"] == "DGA-V017"
 

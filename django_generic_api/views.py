@@ -711,7 +711,8 @@ class NewPasswordAPIView(APIView):
 class UserInfoAPIView(APIView):
     """
     User Info API.
-    -  This API is used to get details of user in case of non session authentication methods
+    -  This API is used to get details of user in case of non session
+    authentication methods
     """
 
     def post(self, *args, **kwargs):

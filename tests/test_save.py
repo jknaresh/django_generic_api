@@ -546,7 +546,8 @@ class TestGenericSaveAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': \"Extra inputs are not permitted. ('ABC',)\", 'code': 'DGA-S006'}"
+            == "{'error': \"Extra inputs are not permitted. ('ABC',)\", "
+            "'code': 'DGA-S006'}"
         )
         assert response_data["code"] == "DGA-V005"
 
@@ -588,7 +589,8 @@ class TestGenericSaveAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': \"Input should be a valid date or datetime, input is too short. ('dob',)\", 'code': 'DGA-S006'}"
+            == "{'error': \"Input should be a valid date or datetime, "
+            "input is too short. ('dob',)\", 'code': 'DGA-S006'}"
         )
         assert response_data["code"] == "DGA-V005"
 

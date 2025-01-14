@@ -10,6 +10,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any, List
 from uuid import UUID
+
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
 from pydantic import (

@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Optional, Any, List, Union
 
+from django.conf import settings
 from pydantic import (
     BaseModel,
     field_validator,
@@ -12,7 +13,6 @@ from pydantic import (
 )
 
 from .utils import PydanticConfigV1
-from django.conf import settings
 
 
 class SavePayload(BaseModel, PydanticConfigV1):
@@ -92,17 +92,21 @@ class GenericLoginPayload(BaseModel, PydanticConfigV1):
         captchaKey = values.get("captcha_key")
         captchaValue = values.get("captcha_value")
 
-        # If CAPTCHA_REQUIRED is True, ensure captcha_key and captcha_value are provided
+        # If CAPTCHA_REQUIRED is True, ensure captcha_key and captcha_value
+        # are provided
         if captcha_required:
             if not captchaKey or not captchaValue:
                 raise ValueError(
-                    "Captcha key and value are required when `CAPTCHA_REQUIRED` is True."
+                    "Captcha key and value are required when "
+                    "`CAPTCHA_REQUIRED` is True."
                 )
         else:
-            # If CAPTCHA_REQUIRED is False, ensure captcha_key and captcha_value are NOT provided
+            # If CAPTCHA_REQUIRED is False, ensure captcha_key and
+            # captcha_value are NOT provided
             if captchaKey or captchaValue:
                 raise ValueError(
-                    "Captcha key and value should not be provided when `CAPTCHA_REQUIRED` is False."
+                    "Captcha key and value should not be provided when "
+                    "`CAPTCHA_REQUIRED` is False."
                 )
 
         return values
@@ -121,17 +125,21 @@ class GenericRegisterPayload(BaseModel, PydanticConfigV1):
         captchaKey = values.get("captcha_key")
         captchaValue = values.get("captcha_value")
 
-        # If CAPTCHA_REQUIRED is True, ensure captcha_key and captcha_value are provided
+        # If CAPTCHA_REQUIRED is True, ensure captcha_key and captcha_value
+        # are provided
         if captcha_required:
             if not captchaKey or not captchaValue:
                 raise ValueError(
-                    "Captcha key and value are required when `CAPTCHA_REQUIRED` is True."
+                    "Captcha key and value are required when "
+                    "`CAPTCHA_REQUIRED` is True."
                 )
         else:
-            # If CAPTCHA_REQUIRED is False, ensure captcha_key and captcha_value are NOT provided
+            # If CAPTCHA_REQUIRED is False, ensure captcha_key and
+            # captcha_value are NOT provided
             if captchaKey or captchaValue:
                 raise ValueError(
-                    "Captcha key and value should not be provided when `CAPTCHA_REQUIRED` is False."
+                    "Captcha key and value should not be provided when "
+                    "`CAPTCHA_REQUIRED` is False."
                 )
 
         return values
@@ -148,17 +156,21 @@ class GenericForgotPasswordPayload(BaseModel, PydanticConfigV1):
         captchaKey = values.get("captcha_key")
         captchaValue = values.get("captcha_value")
 
-        # If CAPTCHA_REQUIRED is True, ensure captcha_key and captcha_value are provided
+        # If CAPTCHA_REQUIRED is True, ensure captcha_key and captcha_value
+        # are provided
         if captcha_required:
             if not captchaKey or not captchaValue:
                 raise ValueError(
-                    "Captcha key and value are required when `CAPTCHA_REQUIRED` is True."
+                    "Captcha key and value are required when "
+                    "`CAPTCHA_REQUIRED` is True."
                 )
         else:
-            # If CAPTCHA_REQUIRED is False, ensure captcha_key and captcha_value are NOT provided
+            # If CAPTCHA_REQUIRED is False, ensure captcha_key and
+            # captcha_value are NOT provided
             if captchaKey or captchaValue:
                 raise ValueError(
-                    "Captcha key and value should not be provided when `CAPTCHA_REQUIRED` is False."
+                    "Captcha key and value should not be provided when "
+                    "`CAPTCHA_REQUIRED` is False."
                 )
 
         return values

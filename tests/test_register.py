@@ -4,6 +4,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 from captcha.models import CaptchaStore
 from django.conf import settings
+
 from fixtures.api import api_client, login_user
 
 
@@ -460,7 +461,8 @@ class TestRegisterAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "Value error, Captcha key and value are required when `CAPTCHA_REQUIRED` is True."
+            == "Value error, Captcha key and value are required when "
+            "`CAPTCHA_REQUIRED` is True."
         )
         assert response_data["code"] == "DGA-V013"
 
@@ -496,7 +498,8 @@ class TestRegisterAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "Value error, Captcha key and value should not be provided when `CAPTCHA_REQUIRED` is False."
+            == "Value error, Captcha key and value should not be "
+            "provided when `CAPTCHA_REQUIRED` is False."
         )
         assert response_data["code"] == "DGA-V013"
 

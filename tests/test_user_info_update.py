@@ -1,14 +1,13 @@
 import json
 
 import pytest
+from django.contrib.auth.models import User
 
 from fixtures.api import (
     api_client,
     all_perm_token,
     all_perm_user,
 )
-
-from django.contrib.auth.models import User
 
 usage = all_perm_user
 
@@ -17,7 +16,6 @@ usage = all_perm_user
 class TestUserInfoUpdateAPI:
 
     def test_user_info_update_success(self, api_client, all_perm_token):
-
         headers = {"Authorization": f"Bearer {all_perm_token}"}
 
         user_info_update_payload = {
@@ -49,7 +47,6 @@ class TestUserInfoUpdateAPI:
         assert inserted_data.last_name == "Lname"
 
     def test_user_info_update_no_header(self, api_client):
-
         user_info_update_payload = {
             "payload": {
                 "variables": {
@@ -73,7 +70,6 @@ class TestUserInfoUpdateAPI:
     def test_user_updates_unregistered_fields(
         self, api_client, all_perm_token
     ):
-
         headers = {"Authorization": f"Bearer {all_perm_token}"}
 
         user_info_update_payload = {
@@ -100,12 +96,12 @@ class TestUserInfoUpdateAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': \"Extra inputs are not permitted. ('extra_field',)\", 'code': 'DGA-S013'}"
+            == "{'error': \"Extra inputs are not permitted. ("
+            "'extra_field',)\", 'code': 'DGA-S013'}"
         )
         assert response_data["code"] == "DGA-V033"
 
     def test_user_update_invalid_payload(self, api_client, all_perm_token):
-
         headers = {"Authorization": f"Bearer {all_perm_token}"}
 
         user_info_update_payload = {
@@ -137,7 +133,6 @@ class TestUserInfoUpdateAPI:
     def test_user_update_invalid_element_datatype(
         self, api_client, all_perm_token
     ):
-
         headers = {"Authorization": f"Bearer {all_perm_token}"}
 
         user_info_update_payload = {
@@ -163,14 +158,14 @@ class TestUserInfoUpdateAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': \"Input should be a valid string. ('last_name',)\", 'code': 'DGA-S013'}"
+            == "{'error': \"Input should be a valid string. ("
+            "'last_name',)\", 'code': 'DGA-S013'}"
         )
         assert response_data["code"] == "DGA-V033"
 
     def test_user_active_boolean_field_set_false_update(
         self, api_client, all_perm_token
     ):
-
         headers = {"Authorization": f"Bearer {all_perm_token}"}
 
         user_info_update_payload = {
@@ -205,7 +200,6 @@ class TestUserInfoUpdateAPI:
     def test_unknown_field_in_settings_variable(
         self, api_client, all_perm_token, monkeypatch
     ):
-
         monkeypatch.setattr(
             "django.conf.settings.USER_INFO_FIELDS",
             ("first_name", "last_name", "not_yet_field"),

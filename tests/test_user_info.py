@@ -18,7 +18,6 @@ usage1 = inactive_user
 class TestUserInfoAPI:
 
     def test_user_info_success(self, api_client, all_perm_token):
-
         headers = {"Authorization": f"Bearer {all_perm_token}"}
 
         response = api_client.post(
@@ -37,7 +36,6 @@ class TestUserInfoAPI:
         }
 
     def test_inactive_user_info(self, api_client, inactive_user_token):
-
         headers = {"Authorization": f"Bearer {inactive_user_token}"}
 
         response = api_client.post(
@@ -53,7 +51,6 @@ class TestUserInfoAPI:
         assert response_data["code"] == "DGA-U005"
 
     def test_user_null_header(self, api_client):
-
         response = api_client.post(
             "/v1/user-info/",
             format="json",

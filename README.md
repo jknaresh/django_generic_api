@@ -1,10 +1,11 @@
 # Django Generic API
 
 <!-- TOC -->
+
 * [Django Generic API](#django-generic-api)
-  * [Overview](#overview)
-  * [Features](#features)
-  * [Installation](#installation)
+    * [Overview](#overview)
+    * [Features](#features)
+    * [Installation](#installation)
 * [Integration](#integration)
     * [CORS Setup](#cors-setup)
     * [Token based authentication settings](#token-based-authentication-settings)
@@ -14,71 +15,72 @@
     * [URL Configuration](#url-configuration)
     * [Limiting User Requests](#limiting-user-requests)
 * [Parameters for requests](#parameters-for-requests)
-  * [Fetching and Saving Data](#fetching-and-saving-data)
+    * [Fetching and Saving Data](#fetching-and-saving-data)
 * [Model APIs](#model-apis)
-  * [Access Token API / Login API](#access-token-api) 
-    * [Method:](#method)
-    * [URL construction:](#url-construction)
-    * [Header:](#header)
-    * [<span style="color: orange;">Payload for Login:</span>](#span-stylecolor-redpayload-for-loginspan)
-    * [<span style="color: green;">Response for Login:</span>](#span-stylecolor-greenresponse-for-loginspan)
-  * [Refresh Token API](#refresh-token-api)
-    * [Method:](#method-1)
-    * [URL construction:](#url-construction-1)
-    * [Header](#header-1)
-    * [<span style="color: orange;">Payload for Logout:</span>](#span-stylecolor-redpayload-for-logoutspan)
-    * [<span style="color: green;">Response for Logout:</span>](#span-stylecolor-greenresponse-for-logoutspan)
-  * [Captcha API](#captcha-api)
-    * [Method:](#method-2)
-    * [URL construction:](#url-construction-2)
-    * [<span style="color: green;">Response for Captcha:</span>](#span-stylecolor-greenresponse-for-captchaspan)
-  * [Register API](#register-api)
-    * [Method:](#method-3)
-    * [URL construction:](#url-construction-3)
-    * [<span style="color: orange;">Payload for Register:</span>](#span-stylecolor-redpayload-for-registerspan)
-    * [<span style="color: green;">Response for Register:</span>](#span-stylecolor-greenresponse-for-registerspan)
-  * [Log Out](#log-out)
-    * [Method:](#method-4)
-    * [URL construction:](#url-construction-4)
-    * [Header](#header-2)
-    * [<span style="color: green;">Response for Logout:</span>](#span-stylecolor-greenresponse-for-logoutspan-1)
-  * [Save data](#save-data)
-    * [Method:](#method-5)
-    * [URL construction:](#url-construction-5)
-    * [Header:](#header-3)
-    * [<span style="color: orange;">Payload for single record:</span>](#span-stylecolor-redpayload-for-single-recordspan)
-    * [<span style="color: green;">Response for single record:</span>](#span-stylecolor-greenresponse-for-single-recordspan)
-    * [<span style="color: orange;">Payload for multiple record:</span>](#span-stylecolor-redpayload-for-multiple-recordspan)
-    * [<span style="color: green;">Response for multiple record:</span>](#span-stylecolor-greenresponse-for-multiple-recordspan)
-    * [Description for Fields](#description-for-fields)
-  * [Fetch data](#fetch-data)
-    * [Method:](#method-6)
-    * [URL construction:](#url-construction-6)
-    * [Header:](#header-4)
-    * [<span style="color: orange;">Payload for Fetch Data:</span>](#span-stylecolor-redpayload-for-fetch-dataspan)
-    * [<span style="color: green;">Response for Fetch Data:</span>](#span-stylecolor-greenresponse-for-fetch-dataspan)
-    * [Description of Fields](#description-of-fields)
-  * [Update data](#update-data)
-    * [Method:](#method-7)
-    * [URL construction:](#url-construction-7)
-    * [Header:](#header-5)
-    * [<span style="color: orange;">Payload for Update Record:</span>](#span-stylecolor-redpayload-for-update-recordspan)
-    * [<span style="color: green;">Response for Update Record:</span>](#span-stylecolor-greenresponse-for-update-recordspan)
-    * [Description for Fields](#description-for-fields-1)
-  * [Forgot Password API](#forgot-password-api)
-    * [Method:](#method-8)
-    * [URL construction:](#url-construction-8)
-    * [<span style="color: orange;">Payload for Forgot Password:</span>](#span-stylecolor-redpayload-for-forgot-passwordspan)
-    * [<span style="color: green;">Response for Forgot Password:</span>](#span-stylecolor-greenresponse-for-forgot-passwordspan)
-  * [New Password API](#new-password-api)
-    * [Method:](#method-9)
-    * [URL construction:](#url-construction-9)
-    * [<span style="color: orange;">Payload for New Password:</span>](#span-stylecolor-redpayload-for-new-passwordspan)
-    * [<span style="color: green;">Response for New Password:</span>](#span-stylecolor-greenresponse-for-new-passwordspan)
-  * [Fetch UserProfile API](#fetch-userprofile-api)
-    * [Method:](#method-10)
-    * [URL construction:](#url-construction-10)
-    * [<span style="color: green;">Response for New Password:</span>](#span-stylecolor-greenresponse-for-new-passwordspan-1)
+    * [Access Token API / Login API](#access-token-api)
+        * [Method:](#method)
+        * [URL construction:](#url-construction)
+        * [Header:](#header)
+        * [<span style="color: orange;">Payload for Login:</span>](#span-stylecolor-redpayload-for-loginspan)
+        * [<span style="color: green;">Response for Login:</span>](#span-stylecolor-greenresponse-for-loginspan)
+    * [Refresh Token API](#refresh-token-api)
+        * [Method:](#method-1)
+        * [URL construction:](#url-construction-1)
+        * [Header](#header-1)
+        * [<span style="color: orange;">Payload for Logout:</span>](#span-stylecolor-redpayload-for-logoutspan)
+        * [<span style="color: green;">Response for Logout:</span>](#span-stylecolor-greenresponse-for-logoutspan)
+    * [Captcha API](#captcha-api)
+        * [Method:](#method-2)
+        * [URL construction:](#url-construction-2)
+        * [<span style="color: green;">Response for Captcha:</span>](#span-stylecolor-greenresponse-for-captchaspan)
+    * [Register API](#register-api)
+        * [Method:](#method-3)
+        * [URL construction:](#url-construction-3)
+        * [<span style="color: orange;">Payload for Register:</span>](#span-stylecolor-redpayload-for-registerspan)
+        * [<span style="color: green;">Response for Register:</span>](#span-stylecolor-greenresponse-for-registerspan)
+    * [Log Out](#log-out)
+        * [Method:](#method-4)
+        * [URL construction:](#url-construction-4)
+        * [Header](#header-2)
+        * [<span style="color: green;">Response for Logout:</span>](#span-stylecolor-greenresponse-for-logoutspan-1)
+    * [Save data](#save-data)
+        * [Method:](#method-5)
+        * [URL construction:](#url-construction-5)
+        * [Header:](#header-3)
+        * [<span style="color: orange;">Payload for single record:</span>](#span-stylecolor-redpayload-for-single-recordspan)
+        * [<span style="color: green;">Response for single record:</span>](#span-stylecolor-greenresponse-for-single-recordspan)
+        * [<span style="color: orange;">Payload for multiple record:</span>](#span-stylecolor-redpayload-for-multiple-recordspan)
+        * [<span style="color: green;">Response for multiple record:</span>](#span-stylecolor-greenresponse-for-multiple-recordspan)
+        * [Description for Fields](#description-for-fields)
+    * [Fetch data](#fetch-data)
+        * [Method:](#method-6)
+        * [URL construction:](#url-construction-6)
+        * [Header:](#header-4)
+        * [<span style="color: orange;">Payload for Fetch Data:</span>](#span-stylecolor-redpayload-for-fetch-dataspan)
+        * [<span style="color: green;">Response for Fetch Data:</span>](#span-stylecolor-greenresponse-for-fetch-dataspan)
+        * [Description of Fields](#description-of-fields)
+    * [Update data](#update-data)
+        * [Method:](#method-7)
+        * [URL construction:](#url-construction-7)
+        * [Header:](#header-5)
+        * [<span style="color: orange;">Payload for Update Record:</span>](#span-stylecolor-redpayload-for-update-recordspan)
+        * [<span style="color: green;">Response for Update Record:</span>](#span-stylecolor-greenresponse-for-update-recordspan)
+        * [Description for Fields](#description-for-fields-1)
+    * [Forgot Password API](#forgot-password-api)
+        * [Method:](#method-8)
+        * [URL construction:](#url-construction-8)
+        * [<span style="color: orange;">Payload for Forgot Password:</span>](#span-stylecolor-redpayload-for-forgot-passwordspan)
+        * [<span style="color: green;">Response for Forgot Password:</span>](#span-stylecolor-greenresponse-for-forgot-passwordspan)
+    * [New Password API](#new-password-api)
+        * [Method:](#method-9)
+        * [URL construction:](#url-construction-9)
+        * [<span style="color: orange;">Payload for New Password:</span>](#span-stylecolor-redpayload-for-new-passwordspan)
+        * [<span style="color: green;">Response for New Password:</span>](#span-stylecolor-greenresponse-for-new-passwordspan)
+    * [Fetch UserProfile API](#fetch-userprofile-api)
+        * [Method:](#method-10)
+        * [URL construction:](#url-construction-10)
+        * [<span style="color: green;">Response for New Password:</span>](#span-stylecolor-greenresponse-for-new-passwordspan-1)
+
 <!-- TOC -->
 
 ## Overview
@@ -91,14 +93,20 @@
 ## Features
 
 - Perform dynamic fetch and save operations seamlessly.
-- Handle dynamic save operations, including creating or updating records, excluding Django internal models.
+- Handle dynamic save operations, including creating or updating records,
+  excluding Django internal models.
 - Integrated pagination and sorting features for efficient data handling.
-- Comprehensive user authentication and management, including Login, Registration, Logout, and Forgot Password.
-- Supports both session and token based authentication, supports custom authentication classes.
-- Provides optional CAPTCHA validation for login, registration and Forgot Password.
+- Comprehensive user authentication and management, including Login,
+  Registration, Logout, and Forgot Password.
+- Supports both session and token based authentication, supports custom
+  authentication classes.
+- Provides optional CAPTCHA validation for login, registration and Forgot
+  Password.
 - Includes APIs to retrieve user information.
-- Features rate limiting to manage access for both authenticated and anonymous users.
-- Versioning of URL, moving forward we will maintain versioning, as of now v1 is alive version. 
+- Features rate limiting to manage access for both authenticated and anonymous
+  users.
+- Versioning of URL, moving forward we will maintain versioning, as of now v1
+  is alive version.
 
 ## Installation
 
@@ -253,17 +261,24 @@ BASE_URL = "..."
 
 ### Captcha Configuration
 
-- Captcha validation can be optionally enabled for Login, Registration and Forgot Password APIs.
+- Captcha validation can be optionally enabled for Login, Registration and
+  Forgot Password APIs.
 
 **Enabling Captcha Validation**
+
 - To enable captcha validation, add this to settings.py .
+
 ```bash
 CAPTCHA_REQUIRED = True  # Defaults to False
 ```
-- If `CAPTCHA_REQUIRED` is set to True, both `captcha_key` and `captcha_value` must be included in the request payload for the Registration and Forgot Password APIs.
+
+- If `CAPTCHA_REQUIRED` is set to True, both `captcha_key` and `captcha_value`
+  must be included in the request payload for the Registration and Forgot
+  Password APIs.
 - If `CAPTCHA_REQUIRED` is set to False, these fields must not be provided.
 
 **Configuring Captcha Settings**
+
 - Include the `captcha` app in your `INSTALLED_APPS` list:
 
 ```bash
@@ -272,7 +287,10 @@ INSTALLED_APPS = [
   "captcha",
 ]
 ```
-- You can customize the captcha appearance and functionality using the following settings.
+
+- You can customize the captcha appearance and functionality using the
+  following settings.
+
 ```bash
 CAPTCHA_BACKGROUND_COLOR = hex code # Defaults to: '#ffffff'
 CAPTCHA_FOREGROUND_COLOR = hex code # Defaults to: '#001100'
@@ -280,7 +298,9 @@ CAPTCHA_IMAGE_SIZE = tuple (width, height) # Defaults to: None
 CAPTCHA_FONT_SIZE = int # Defaults to: 22
 CAPTCHA_LENGTH = int # Defaults to: 4
 ```
+
 **Customizing Captcha Content**
+
 - To customize the content of captcha, add this settings.
 - Chose any one of the following functions.
 - If not used, defaults to upper case characters only.
@@ -297,12 +317,17 @@ CAPTCHA_CHALLENGE_FUNCT = 'django_generic_api.utils.mixed_digit_lowercase_challe
 CAPTCHA_CHALLENGE_FUNCT = 'django_generic_api.utils.mixed_digit_uppercase_challenge'
 # example: A1B2
 ```
-- You can configure the content of captcha by [your own generator.](https://django-simple-captcha.readthedocs.io/en/latest/advanced.html#roll-your-own)
-- After configuring the generator, simply point your `CAPTCHA_CHALLENGE_FUNCT` to the function.
+
+- You can configure the content of captcha
+  by [your own generator.](https://django-simple-captcha.readthedocs.io/en/latest/advanced.html#roll-your-own)
+- After configuring the generator, simply point your `CAPTCHA_CHALLENGE_FUNCT`
+  to the function.
+
 ```bash
 CAPTCHA_CHALLENGE_FUNCT = '<your_path.to.generator>'
 # example = 'django_app.utils.generator_function'
 ```
+
 ---
 
 ### URL Configuration
@@ -957,11 +982,14 @@ url: "http://domain-name/api/v1/newpassword/<encoded_token>",
 ## Fetch User Info API
 
 - Users must be authenticated prior to accessing this API.
-- To select which attributes to fetch, use the variable in settings `USER_INFO_FIELDS`: tuple.
+- To select which attributes to fetch, use the variable in settings
+  `USER_INFO_FIELDS`: tuple.
+
 ```bash
 # ex: USER_INFO_FIELDS = (first_name, last_name)
 ```
-- The listed attributes are fetched. 
+
+- The listed attributes are fetched.
 
 ### Method:
 
@@ -1002,9 +1030,11 @@ header["Authorization"]="Bearer <access token>"
 
 - Users can update their user information.
 - For this, set the variable in settings `USER_INFO_FIELDS`: tuple.
+
 ```bash
 # ex: USER_INFO_FIELDS = (first_name, last_name)
 ```
+
 - The listed attributes can be updated.
 
 ### Method:

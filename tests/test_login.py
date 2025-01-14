@@ -1,10 +1,10 @@
 import json
+from unittest.mock import patch, MagicMock
 
 import pytest
+from django.conf import settings
 
 from fixtures.api import api_client, login_user
-from django.conf import settings
-from unittest.mock import patch, MagicMock
 
 
 @pytest.mark.django_db
@@ -213,7 +213,9 @@ class TestLoginAPI:
                 }
             }
 
-            response = api_client.post("/v1/login/", login_payload, format="json")
+            response = api_client.post(
+                "/v1/login/", login_payload, format="json"
+            )
 
             response_data = json.loads(response.content.decode("utf-8"))
             assert response.status_code == 200
@@ -241,7 +243,8 @@ class TestLoginAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "Value error, Captcha key and value are required when `CAPTCHA_REQUIRED` is True."
+            == "Value error, Captcha key and value are required when "
+            "`CAPTCHA_REQUIRED` is True."
         )
         assert response_data["code"] == "DGA-V010"
 
@@ -272,7 +275,8 @@ class TestLoginAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "Value error, Captcha key and value should not be provided when `CAPTCHA_REQUIRED` is False."
+            == "Value error, Captcha key and value should not be "
+            "provided when `CAPTCHA_REQUIRED` is False."
         )
         assert response_data["code"] == "DGA-V010"
 
@@ -349,7 +353,6 @@ def test_login(
     expected_code,
     monkeypatch,
 ):
-
     monkeypatch.setattr("django.conf.settings.CAPTCHA_REQUIRED", False)
 
     assert not settings.CAPTCHA_REQUIRED

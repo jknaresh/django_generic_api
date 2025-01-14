@@ -2,13 +2,13 @@ from typing import Dict, Optional
 
 from django.apps import apps
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from pydantic import (
     create_model,
     Field,
 )
-from django.contrib.auth import get_user_model
 from pydantic.config import ConfigDict
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -385,11 +385,11 @@ def handle_save_input(model, record_id, save_input):
 
 
 def handle_user_info_update(save_input, user_id):
-
     if not hasattr(settings, "USER_INFO_FIELDS"):
         raise AttributeError(
             {
-                "error": "Set setting for 'USER_INFO_FIELDS' to update information.",
+                "error": "Set setting for 'USER_INFO_FIELDS' to update "
+                "information.",
                 "code": "DGA-S012",
             }
         )
@@ -437,11 +437,11 @@ def handle_user_info_update(save_input, user_id):
 
 
 def read_user_info(user):
-
     if not hasattr(settings, "USER_INFO_FIELDS"):
         raise AttributeError(
             {
-                "error": "Set setting for 'USER_INFO_FIELDS' to read information.",
+                "error": "Set setting for 'USER_INFO_FIELDS' to read "
+                "information.",
                 "code": "DGA-S015",
             }
         )
