@@ -717,7 +717,7 @@ class UserInfoAPIView(APIView):
 
     def post(self, *args, **kwargs):
 
-        # checks if user has valid authorizarization header.
+        # checks if user has valid authorization header.
         if not self.request.user.is_authenticated:
             return Response(
                 {"error": "User not authenticated.", "code": "DGA-V030"},
@@ -735,7 +735,7 @@ class UserInfoAPIView(APIView):
 
     def put(self, *args, **kwargs):
 
-        # checks if user has valid authorizarization header.
+        # checks if user has valid authorization header.
         if not self.request.user.is_authenticated:
             return Response(
                 {"error": "User not authenticated.", "code": "DGA-V031"},
@@ -743,8 +743,6 @@ class UserInfoAPIView(APIView):
             )
 
         payload = self.request.data.get("payload", {}).get("variables", {})
-
-        saveInput = payload.get("saveInput", {})
 
         try:
             # Validate the payload using the Pydantic model
