@@ -984,7 +984,7 @@ url: "http://domain-name/api/v1/newpassword/<encoded_token>",
 - Users must be authenticated prior to accessing this API.
 - To select which attributes to fetch, use the variable in settings
   `USER_INFO_FIELDS`: tuple.
-
+- Define DB Table names only, donot define Django model names.
 ```bash
 # ex: USER_INFO_FIELDS = (first_name, last_name)
 ```
@@ -1030,6 +1030,7 @@ header["Authorization"]="Bearer <access token>"
 
 - Users can update their user information.
 - For this, set the variable in settings `USER_INFO_FIELDS`: tuple.
+- Define DB Table names only, donot define Django model names.
 
 ```bash
 # ex: USER_INFO_FIELDS = (first_name, last_name)
