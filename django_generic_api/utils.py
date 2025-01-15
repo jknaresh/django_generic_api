@@ -353,7 +353,7 @@ def str_field_to_model_field(model, fields):
     fld = []
     c1, c2 = 0, len(fields)
     for field in model_meta.fields:
-        field_name = field.column
+        field_name = field.attname
         field_verbose_name = field.verbose_name
         try:
             if fields.__contains__(field_name):
