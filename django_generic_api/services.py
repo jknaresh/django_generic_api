@@ -453,6 +453,6 @@ def read_user_info(user):
     user_info = {}
 
     for field in fields:
-        user_info[field.name] = getattr(user, field.name, None)
+        user_info[field.attname] = getattr(user, field.attname, None)
 
     return dict(data=user_info)

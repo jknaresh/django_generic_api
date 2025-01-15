@@ -981,9 +981,9 @@ url: "http://domain-name/api/v1/newpassword/<encoded_token>",
 
 ## Fetch User Info API
 
-- Users must be authenticated prior to accessing this API.
-- To select which attributes to fetch, use the variable in settings
-  `USER_INFO_FIELDS`: tuple.
+- Provide the ability to fetch or update fields in the `auth_user` table that are defined exclusively by the system.  
+- Use the system setting variable `USER_INFO_FIELDS` to define a tuple of database table fields.  
+- Authentication is required.
 
 ```bash
 # ex: USER_INFO_FIELDS = (first_name, last_name)
@@ -1028,8 +1028,9 @@ header["Authorization"]="Bearer <access token>"
 
 ## Update User Info API
 
-- Users can update their user information.
-- For this, set the variable in settings `USER_INFO_FIELDS`: tuple.
+- Provide the ability to fetch or update fields in the `auth_user` table that are defined exclusively by the system.  
+- Use the system setting variable `USER_INFO_FIELDS` to define a tuple of database table fields.  
+- Authentication is required.
 
 ```bash
 # ex: USER_INFO_FIELDS = (first_name, last_name)
