@@ -52,7 +52,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 201
         assert response_data["data"] == [{"id": [1]}]
         assert response_data["message"] == ["Record created successfully."]
@@ -87,7 +87,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 201
         assert response_data["data"] == [{"id": [1]}]
         assert response_data["message"] == ["Record created successfully."]
@@ -124,7 +124,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 201
         assert response_data["data"] == [{"id": [data_id]}]
@@ -165,7 +165,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
         assert response_data["code"] == "DGA-V003"
@@ -202,7 +202,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
         assert response_data["code"] == "DGA-V003"
@@ -239,7 +239,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Field required"
         assert response_data["code"] == "DGA-V002"
@@ -276,7 +276,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Input should be a valid string"
         assert response_data["code"] == "DGA-V002"
@@ -313,7 +313,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
         assert response_data["code"] == "DGA-V003"
@@ -452,7 +452,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Only 10 records at once."
         assert response_data["code"] == "DGA-V001"
@@ -500,7 +500,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Only 1 record to update at once"
         assert response_data["code"] == "DGA-S003"
@@ -538,7 +538,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
@@ -580,7 +580,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
@@ -623,7 +623,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
@@ -663,7 +663,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Record with (ID) 9000 does not exist"
         assert response_data["code"] == "DGA-S006"
@@ -700,7 +700,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
@@ -738,7 +738,7 @@ class TestGenericSaveAPI:
             save_payload,
             format="json",
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 404
         assert (
             response_data["error"]
@@ -777,7 +777,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 404
         assert (
             response_data["error"]
@@ -813,7 +813,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 404
         assert (
             response_data["error"]
@@ -852,7 +852,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 201
         assert response_data["data"] == [{"id": [1]}]
         assert response_data["message"] == ["Record created successfully."]
@@ -897,7 +897,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 401
         assert response_data["error"] == "Invalid Token."
@@ -983,7 +983,7 @@ def test_save_api(
         format="json",
         headers=headers,
     )
-    response_data = json.loads(response.content.decode("utf-8"))
+    response_data = response.data
 
     assert response.status_code == expected_status
 

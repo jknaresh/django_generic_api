@@ -33,7 +33,7 @@ class TestUserInfoUpdateAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 201
         assert response_data["data"] == [{"id": 1}]
@@ -61,7 +61,7 @@ class TestUserInfoUpdateAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
         assert response_data["error"] == "User not authenticated."
@@ -91,7 +91,7 @@ class TestUserInfoUpdateAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
         assert (
@@ -123,7 +123,7 @@ class TestUserInfoUpdateAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
         assert response_data["error"] == "Extra inputs are not permitted"
@@ -152,7 +152,7 @@ class TestUserInfoUpdateAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
         assert (
@@ -184,7 +184,7 @@ class TestUserInfoUpdateAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 201
         assert response_data["data"] == [{"id": 1}]
         assert (
@@ -220,7 +220,7 @@ class TestUserInfoUpdateAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
         assert response_data["error"] == "'[not_yet_field]'s not in the model."

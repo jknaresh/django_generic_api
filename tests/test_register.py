@@ -54,7 +54,7 @@ class TestRegisterAPI:
                 format="json",
             )
 
-            response_data = json.loads(response.content.decode("utf-8"))
+            response_data = response.data
             assert response.status_code == 200
             assert "message" in response_data
 
@@ -96,7 +96,7 @@ class TestRegisterAPI:
                 format="json",
             )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == [
             "1. Password must contain at least 8 characters.",
@@ -141,7 +141,7 @@ class TestRegisterAPI:
                 register_payload,
                 format="json",
             )
-            response_data = json.loads(response.content.decode("utf-8"))
+            response_data = response.data
             assert response.status_code == 400
             assert response_data["error"] == "Field required"
             assert response_data["code"] == "DGA-V014"
@@ -184,7 +184,7 @@ class TestRegisterAPI:
                 register_payload,
                 format="json",
             )
-            response_data = json.loads(response.content.decode("utf-8"))
+            response_data = response.data
             assert response.status_code == 400
             assert response_data["code"] == "DGA-V014"
             assert response_data["error"] == "Extra inputs are not permitted"
@@ -226,7 +226,7 @@ class TestRegisterAPI:
                 register_payload,
                 format="json",
             )
-            response_data = json.loads(response.content.decode("utf-8"))
+            response_data = response.data
             assert response.status_code == 400
             assert response_data["error"] == "passwords does not match"
             assert response_data["code"] == "DGA-V018"
@@ -269,7 +269,7 @@ class TestRegisterAPI:
                 format="json",
             )
 
-            response_data = json.loads(response.content.decode("utf-8"))
+            response_data = response.data
             assert response.status_code == 400
             assert response_data["error"] == "Invalid email domain"
             assert response_data["code"] == "DGA-V020"
@@ -312,7 +312,7 @@ class TestRegisterAPI:
                 format="json",
             )
 
-            response_data = json.loads(response.content.decode("utf-8"))
+            response_data = response.data
             assert response.status_code == 400
             assert (
                 response_data["error"]
@@ -358,7 +358,7 @@ class TestRegisterAPI:
                 format="json",
             )
 
-            response_data = json.loads(response.content.decode("utf-8"))
+            response_data = response.data
             assert response.status_code == 400
             assert response_data["error"] == "Invalid captcha response."
             assert response_data["code"] == "DGA-V015"
@@ -397,7 +397,7 @@ class TestRegisterAPI:
                 format="json",
             )
 
-            response_data = json.loads(response.content.decode("utf-8"))
+            response_data = response.data
             assert response.status_code == 400
             assert response_data["error"] == "Invalid or expired captcha key."
             assert response_data["code"] == "DGA-V016"
@@ -441,7 +441,7 @@ class TestRegisterAPI:
                 format="json",
             )
 
-            response_data = json.loads(response.content.decode("utf-8"))
+            response_data = response.data
             assert response.status_code == 200
             assert "message" in response_data
 
@@ -467,7 +467,7 @@ class TestRegisterAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
@@ -504,7 +504,7 @@ class TestRegisterAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
@@ -539,6 +539,6 @@ class TestRegisterAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
         assert "message" in response_data

@@ -51,7 +51,7 @@ class TestForgotPasswordAPI:
                 format="json",
             )
 
-            response_data = response.json()
+            response_data = response.data
 
             # Assertions
             assert response.status_code == 200
@@ -90,7 +90,7 @@ class TestForgotPasswordAPI:
                 format="json",
             )
 
-            response_data = response.json()
+            response_data = response.data
 
             # Assertions
             assert response.status_code == 400
@@ -133,7 +133,7 @@ class TestForgotPasswordAPI:
                 format="json",
             )
 
-            response_data = response.json()
+            response_data = response.data
 
             # Assertions
             assert response.status_code == 400
@@ -205,7 +205,7 @@ class TestForgotPasswordAPI:
                 format="json",
             )
 
-            response_data = response.json()
+            response_data = response.data
 
             assert response.status_code == 404
             assert response_data["error"] == "User not found"
@@ -233,7 +233,7 @@ class TestForgotPasswordAPI:
             format="json",
         )
 
-        response_data = response.json()
+        response_data = response.data
 
         assert response.status_code == 400
         assert response_data["error"] == "Extra inputs are not permitted"
@@ -280,7 +280,7 @@ class TestForgotPasswordAPI:
                 format="json",
             )
 
-            response_data = response.json()
+            response_data = response.data
 
             # Assertions
             assert response.status_code == 200
@@ -307,7 +307,7 @@ class TestForgotPasswordAPI:
             format="json",
         )
 
-        response_data = response.json()
+        response_data = response.data
 
         assert response.status_code == 400
         assert (
@@ -344,7 +344,7 @@ class TestForgotPasswordAPI:
             format="json",
         )
 
-        response_data = response.json()
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
@@ -377,7 +377,7 @@ class TestForgotPasswordAPI:
             format="json",
         )
 
-        response_data = response.json()
+        response_data = response.data
 
         # Assertions
         assert response.status_code == 200

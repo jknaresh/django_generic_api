@@ -26,7 +26,7 @@ class TestLoginAPI:
 
         # Sending POST request to login endpoint
         response = api_client.post("/v1/login/", login_payload, format="json")
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         # Assertions
         assert response.status_code == 200
@@ -55,7 +55,7 @@ class TestLoginAPI:
             login_payload,
             format="json",
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Field required"
         assert response_data["code"] == "DGA-V008"
@@ -83,7 +83,7 @@ class TestLoginAPI:
             login_payload,
             format="json",
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Extra inputs are not permitted"
         assert response_data["code"] == "DGA-V008"
@@ -107,7 +107,7 @@ class TestLoginAPI:
             login_payload,
             format="json",
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 404
         assert response_data["error"] == "Username not found"
         assert response_data["code"] == "DGA-V011"
@@ -131,7 +131,7 @@ class TestLoginAPI:
             login_payload,
             format="json",
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 401
         assert response_data["error"] == "Invalid password"
         assert response_data["code"] == "DGA-V012"
@@ -154,7 +154,7 @@ class TestLoginAPI:
         response = api_client.post(
             "/v1/login/", login_payload, format="json", headers=headers
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Token generation not allowed."
         assert response_data["code"] == "DGA-V013"
@@ -175,7 +175,7 @@ class TestLoginAPI:
             login_payload,
             format="json",
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Input should be a valid string"
         assert response_data["code"] == "DGA-V008"
@@ -218,7 +218,7 @@ class TestLoginAPI:
                 "/v1/login/", login_payload, format="json"
             )
 
-            response_data = json.loads(response.content.decode("utf-8"))
+            response_data = response.data
             assert response.status_code == 200
             assert "refresh" in response_data["data"][0]
             assert "access" in response_data["data"][0]
@@ -240,7 +240,7 @@ class TestLoginAPI:
 
         response = api_client.post("/v1/login/", login_payload, format="json")
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
@@ -272,7 +272,7 @@ class TestLoginAPI:
 
         response = api_client.post("/v1/login/", login_payload, format="json")
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
@@ -302,7 +302,7 @@ class TestLoginAPI:
 
         response = api_client.post("/v1/login/", login_payload, format="json")
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
         assert "refresh" in response_data["data"][0]
         assert "access" in response_data["data"][0]
@@ -359,7 +359,7 @@ def test_login(
     assert not settings.CAPTCHA_REQUIRED
 
     response = api_client.post("/v1/login/", login_payload, format="json")
-    response_data = json.loads(response.content.decode("utf-8"))
+    response_data = response.data
 
     assert response.status_code == expected_status
 

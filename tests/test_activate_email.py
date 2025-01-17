@@ -31,7 +31,7 @@ class TestAccountActivateAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
         assert response_data["error"] == "The activation link has expired."
@@ -55,7 +55,7 @@ class TestAccountActivateAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
         assert response_data["message"] == "Account is already active."
 
@@ -75,7 +75,7 @@ class TestAccountActivateAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "User not found."
         assert response_data["code"] == "DGA-V029"
@@ -93,7 +93,7 @@ class TestAccountActivateAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 201
         assert (
             response_data["message"]
@@ -140,7 +140,7 @@ def test_activate_user(
     encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
 
     response = api_client.get(f"/v1/activate/{encoded_token}/", format="json")
-    response_data = json.loads(response.content.decode("utf-8"))
+    response_data = response.data
 
     assert response.status_code == expected_status
 

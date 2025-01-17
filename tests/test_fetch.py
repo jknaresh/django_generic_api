@@ -60,7 +60,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
         assert response_data["data"]["total"] == 1
         assert response_data["data"]["data"] == [
@@ -101,7 +101,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
         assert response_data["data"]["total"] == 1
         assert response_data["data"]["data"] == [
@@ -143,7 +143,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
         assert response_data["data"]["total"] == 2
         assert response_data["data"]["data"] == [
@@ -186,7 +186,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
         assert response_data["data"]["total"] == 1
         assert response_data["data"]["data"] == [
@@ -228,7 +228,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
         assert response_data["data"]["total"] == 2
         assert response_data["data"]["data"] == [
@@ -271,7 +271,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
         assert response_data["data"]["total"] == 0
         assert response_data["data"]["data"] == []
@@ -307,7 +307,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
         assert response_data["data"]["total"] == 2
         assert response_data["data"]["data"] == [
@@ -357,7 +357,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
         assert response_data["data"]["total"] == 1
         assert response_data["data"]["data"] == [
@@ -398,7 +398,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
         assert response_data["code"] == "DGA-V006"
@@ -436,7 +436,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
         assert response_data["code"] == "DGA-V006"
@@ -473,7 +473,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Field required('fields',)"
         assert response_data["code"] == "DGA-V005"
@@ -503,7 +503,7 @@ class TestGenericFetchAPI:
 
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post("/v1/fetch/", fetch_payload, format="json")
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 404
         assert (
             response_data["error"]
@@ -542,7 +542,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 404
         assert (
             response_data["error"]
@@ -584,7 +584,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
@@ -622,7 +622,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
         assert response_data["code"] == "DGA-V006"
@@ -657,7 +657,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 404
         assert (
             response_data["error"]
@@ -698,7 +698,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
@@ -739,7 +739,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"] == "Input should be a valid list('fields',)"
@@ -780,7 +780,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["code"] == "DGA-U002"
         assert response_data["error"] == "Extra field {'ABC'}"
@@ -812,7 +812,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V005"
         assert (
@@ -854,7 +854,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V005"
 
@@ -899,7 +899,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V005"
         assert (
@@ -936,7 +936,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["code"] == "DGA-S002"
         assert response_data["error"] == "Invalid data: ['456789'] for dob"
@@ -974,7 +974,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V005"
         assert (
@@ -1017,7 +1017,7 @@ class TestGenericFetchAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V005"
@@ -1057,7 +1057,7 @@ class TestGenericFetchAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V005"
@@ -1099,7 +1099,7 @@ class TestGenericFetchAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V005"
@@ -1136,7 +1136,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V005"
         assert (
@@ -1171,7 +1171,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V005"
         assert (
@@ -1205,7 +1205,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["code"] == "DGA-U002"
         assert response_data["error"] == "Extra field {'ABCD'}"
@@ -1238,7 +1238,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V005"
         assert (
@@ -1275,7 +1275,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V005"
         assert (
@@ -1321,7 +1321,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 401
         assert response_data["error"] == "Invalid Token."
@@ -1409,7 +1409,7 @@ class TestFetchScenarios:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == expected_status
         assert response_data == expected_response

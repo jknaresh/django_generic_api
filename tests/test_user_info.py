@@ -26,7 +26,7 @@ class TestUserInfoAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 200
         assert response_data["data"] == {
@@ -47,7 +47,7 @@ class TestUserInfoAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
         assert response_data["error"] == "User is inactive"
@@ -59,7 +59,7 @@ class TestUserInfoAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
         assert response_data["error"] == "User not authenticated."
@@ -84,7 +84,7 @@ class TestUserInfoAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
         assert response_data["data"] == {
             "data": {"email": "all_perm@test.com", "first_name": "test1"}
@@ -110,7 +110,7 @@ class TestUserInfoAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
         assert response_data["error"] == "'[ABCD]'s not in the model."

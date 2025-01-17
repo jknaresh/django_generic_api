@@ -35,7 +35,7 @@ class TestNewPasswordAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
         assert response_data["message"] == "Your password has been reset."
 
@@ -63,7 +63,7 @@ class TestNewPasswordAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Field required"
         assert response_data["code"] == "DGA-V034"
@@ -93,7 +93,7 @@ class TestNewPasswordAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Extra inputs are not permitted"
         assert response_data["code"] == "DGA-V034"
@@ -122,7 +122,7 @@ class TestNewPasswordAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "passwords does not match"
         assert response_data["code"] == "DGA-V035"
@@ -151,7 +151,7 @@ class TestNewPasswordAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V036"
         assert response_data["error"] == [
@@ -181,7 +181,7 @@ class TestNewPasswordAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["code"] == "DGA-V032"
         assert response_data["error"] == "Invalid token format."

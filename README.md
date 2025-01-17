@@ -694,11 +694,6 @@ HTTP Method: "POST"
 url: "http://domain-name/api/v1/login/",
 ```
 
-### Header:
-
-```header
-header["X-CSRFToken"]=csrfvalue
-```
 
 ### <span style="color: orange;">Payload for Login:</span>
 
