@@ -35,7 +35,7 @@ class TestAccountActivateAPI:
 
         assert response.status_code == 400
         assert response_data["error"] == "The activation link has expired."
-        assert response_data["code"] == "DGA-V018"
+        assert response_data["code"] == "DGA-V028"
 
     def test_email_is_already_active(self, api_client, inactive_user_id):
         """
@@ -78,7 +78,7 @@ class TestAccountActivateAPI:
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
         assert response_data["error"] == "User not found."
-        assert response_data["code"] == "DGA-V019"
+        assert response_data["code"] == "DGA-V029"
 
     def test_user_activated_success(self, api_client, inactive_user_id):
         """
@@ -120,7 +120,7 @@ class TestAccountActivateAPI:
             400,
             None,
             "User not found.",
-            "DGA-V019",
+            "DGA-V029",
         ),
     ],
 )

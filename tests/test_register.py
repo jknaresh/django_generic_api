@@ -30,10 +30,11 @@ class TestRegisterAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
 
             register_payload = {
                 "payload": {
@@ -71,10 +72,11 @@ class TestRegisterAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
 
             register_payload = {
                 "payload": {
@@ -101,7 +103,7 @@ class TestRegisterAPI:
             "2. Password must not be too common.",
             "3. Password must not be entirely numeric.",
         ]
-        assert response_data["code"] == "DGA-V024"
+        assert response_data["code"] == "DGA-V019"
 
     def test_invalid_payload_format(self, api_client):
         """
@@ -117,10 +119,11 @@ class TestRegisterAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
 
             register_payload = {
                 "payload": {
@@ -141,7 +144,7 @@ class TestRegisterAPI:
             response_data = json.loads(response.content.decode("utf-8"))
             assert response.status_code == 400
             assert response_data["error"] == "Field required"
-            assert response_data["code"] == "DGA-V013"
+            assert response_data["code"] == "DGA-V014"
 
     def test_extra_field_in_payload(self, api_client):
         """
@@ -157,10 +160,11 @@ class TestRegisterAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
 
             register_payload = {
                 "payload": {
@@ -182,7 +186,7 @@ class TestRegisterAPI:
             )
             response_data = json.loads(response.content.decode("utf-8"))
             assert response.status_code == 400
-            assert response_data["code"] == "DGA-V013"
+            assert response_data["code"] == "DGA-V014"
             assert response_data["error"] == "Extra inputs are not permitted"
 
     def test_passwords_dont_match(self, api_client):
@@ -199,10 +203,11 @@ class TestRegisterAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
 
             register_payload = {
                 "payload": {
@@ -224,7 +229,7 @@ class TestRegisterAPI:
             response_data = json.loads(response.content.decode("utf-8"))
             assert response.status_code == 400
             assert response_data["error"] == "passwords does not match"
-            assert response_data["code"] == "DGA-V014"
+            assert response_data["code"] == "DGA-V018"
 
     def test_invalid_domain(self, api_client):
         """
@@ -240,10 +245,11 @@ class TestRegisterAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
 
             register_payload = {
                 "payload": {
@@ -266,7 +272,7 @@ class TestRegisterAPI:
             response_data = json.loads(response.content.decode("utf-8"))
             assert response.status_code == 400
             assert response_data["error"] == "Invalid email domain"
-            assert response_data["code"] == "DGA-V022"
+            assert response_data["code"] == "DGA-V020"
 
     def test_email_already_exist(self, api_client, login_user):
         """
@@ -282,10 +288,11 @@ class TestRegisterAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
 
             register_payload = {
                 "payload": {
@@ -311,7 +318,7 @@ class TestRegisterAPI:
                 response_data["error"]
                 == "Account already exists with this email."
             )
-            assert response_data["code"] == "DGA-V015"
+            assert response_data["code"] == "DGA-V017"
 
     def test_invalid_captcha_value(self, api_client):
         """
@@ -327,10 +334,11 @@ class TestRegisterAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
 
             register_payload = {
                 "payload": {
@@ -353,7 +361,7 @@ class TestRegisterAPI:
             response_data = json.loads(response.content.decode("utf-8"))
             assert response.status_code == 400
             assert response_data["error"] == "Invalid captcha response."
-            assert response_data["code"] == "DGA-V025"
+            assert response_data["code"] == "DGA-V015"
 
     def test_invalid_captcha_id(self, api_client):
         """
@@ -364,11 +372,12 @@ class TestRegisterAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
             # Use the mocked behavior for invalid captcha key
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
 
             register_payload = {
                 "payload": {
@@ -391,7 +400,7 @@ class TestRegisterAPI:
             response_data = json.loads(response.content.decode("utf-8"))
             assert response.status_code == 400
             assert response_data["error"] == "Invalid or expired captcha key."
-            assert response_data["code"] == "DGA-V027"
+            assert response_data["code"] == "DGA-V016"
 
     def test_captcha_attributes_sent_captcha_required_true(self, api_client):
         """
@@ -408,10 +417,11 @@ class TestRegisterAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
 
             register_payload = {
                 "payload": {
@@ -464,7 +474,7 @@ class TestRegisterAPI:
             == "Value error, Captcha key and value are required when "
             "`CAPTCHA_REQUIRED` is True."
         )
-        assert response_data["code"] == "DGA-V013"
+        assert response_data["code"] == "DGA-V014"
 
     def test_captcha_attributes_sent_captcha_required_false(
         self, api_client, monkeypatch
@@ -501,7 +511,7 @@ class TestRegisterAPI:
             == "Value error, Captcha key and value should not be "
             "provided when `CAPTCHA_REQUIRED` is False."
         )
-        assert response_data["code"] == "DGA-V013"
+        assert response_data["code"] == "DGA-V014"
 
     def test_captcha_attributes_not_sent_captcha_required_false(
         self, api_client, monkeypatch

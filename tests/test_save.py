@@ -502,12 +502,8 @@ class TestGenericSaveAPI:
         )
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
-        assert (
-            response_data["error"]
-            == "{'error': 'Only 1 record to update at once', 'code': "
-            "'DGA-S005'}"
-        )
-        assert response_data["code"] == "DGA-V005"
+        assert response_data["error"] == "Only 1 record to update at once"
+        assert response_data["code"] == "DGA-S003"
 
     def test_unknown_save_input_field(self, api_client, add_perm_token):
         """
@@ -546,10 +542,9 @@ class TestGenericSaveAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': \"Extra inputs are not permitted. ('ABC',)\", "
-            "'code': 'DGA-S006'}"
+            == "Extra inputs are not permitted. ('ABC',)"
         )
-        assert response_data["code"] == "DGA-V005"
+        assert response_data["code"] == "DGA-S004"
 
     def test_invalid_save_input_element_datatype(
         self, api_client, add_perm_token
@@ -589,10 +584,9 @@ class TestGenericSaveAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': \"Input should be a valid date or datetime, "
-            "input is too short. ('dob',)\", 'code': 'DGA-S006'}"
+            == "Input should be a valid date or datetime, input is too short. ('dob',)"
         )
-        assert response_data["code"] == "DGA-V005"
+        assert response_data["code"] == "DGA-S004"
 
     def test_missing_required_field_save_input(
         self, api_client, add_perm_token
@@ -631,10 +625,10 @@ class TestGenericSaveAPI:
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
         assert (
-            response_data["error"] == "{'error': 'NOT NULL constraint failed: "
-            "demo_app_customer.dob', 'code': 'DGA-S008'}"
+            response_data["error"]
+            == "NOT NULL constraint failed: demo_app_customer.dob"
         )
-        assert response_data["code"] == "DGA-V005"
+        assert response_data["code"] == "DGA-S007"
 
     def test_update_unknown_record(self, api_client, add_perm_token):
         """
@@ -670,12 +664,8 @@ class TestGenericSaveAPI:
         )
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
-        assert (
-            response_data["error"]
-            == "{'error': 'Record with (ID) 9000 does not exist', "
-            "'code': 'DGA-S007'}"
-        )
-        assert response_data["code"] == "DGA-V005"
+        assert response_data["error"] == "Record with (ID) 9000 does not exist"
+        assert response_data["code"] == "DGA-S006"
 
     def test_invalid_id_element_datatype(self, api_client, add_perm_token):
         """
@@ -713,10 +703,9 @@ class TestGenericSaveAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': \"Field 'id' expected a number but got "
-            "'abc'.\", 'code': 'DGA-S008'}"
+            == "Field 'id' expected a number but got 'abc'."
         )
-        assert response_data["code"] == "DGA-V005"
+        assert response_data["code"] == "DGA-S007"
 
     def test_save_access_denied(self, api_client, add_perm_token):
         """

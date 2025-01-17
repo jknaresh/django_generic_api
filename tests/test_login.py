@@ -58,7 +58,7 @@ class TestLoginAPI:
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
         assert response_data["error"] == "Field required"
-        assert response_data["code"] == "DGA-V010"
+        assert response_data["code"] == "DGA-V008"
 
     def test_invalid_payload_format(self, api_client, login_user, monkeypatch):
         """
@@ -86,7 +86,7 @@ class TestLoginAPI:
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
         assert response_data["error"] == "Extra inputs are not permitted"
-        assert response_data["code"] == "DGA-V010"
+        assert response_data["code"] == "DGA-V008"
 
     def test_user_does_not_exist(self, api_client, login_user, monkeypatch):
         """
@@ -157,7 +157,7 @@ class TestLoginAPI:
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
         assert response_data["error"] == "Token generation not allowed."
-        assert response_data["code"] == "DGA-V021"
+        assert response_data["code"] == "DGA-V013"
 
     def test_email_invalid_datatype(self, api_client, monkeypatch):
         """
@@ -178,7 +178,7 @@ class TestLoginAPI:
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 400
         assert response_data["error"] == "Input should be a valid string"
-        assert response_data["code"] == "DGA-V010"
+        assert response_data["code"] == "DGA-V008"
 
     def test_captcha_attributes_sent_captcha_required_true(
         self, api_client, login_user
@@ -197,10 +197,11 @@ class TestLoginAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
 
             login_payload = {
                 "payload": {
@@ -246,7 +247,7 @@ class TestLoginAPI:
             == "Value error, Captcha key and value are required when "
             "`CAPTCHA_REQUIRED` is True."
         )
-        assert response_data["code"] == "DGA-V010"
+        assert response_data["code"] == "DGA-V008"
 
     def test_captcha_attributes_sent_captcha_required_false(
         self, api_client, monkeypatch
@@ -278,7 +279,7 @@ class TestLoginAPI:
             == "Value error, Captcha key and value should not be "
             "provided when `CAPTCHA_REQUIRED` is False."
         )
-        assert response_data["code"] == "DGA-V010"
+        assert response_data["code"] == "DGA-V008"
 
     def test_captcha_attributes_not_sent_captcha_required_false(
         self, api_client, monkeypatch, login_user
@@ -339,7 +340,7 @@ class TestLoginAPI:
             400,
             [],
             "Field required",
-            "DGA-V010",
+            "DGA-V008",
         ),
     ],
 )

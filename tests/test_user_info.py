@@ -30,10 +30,13 @@ class TestUserInfoAPI:
 
         assert response.status_code == 200
         assert response_data["data"] == {
-            "first_name": "test1",
-            "last_name": "test2",
-            "is_active": True,
+            "data": {
+                "first_name": "test1",
+                "last_name": "test2",
+                "is_active": True,
+            }
         }
+        assert response_data["message"] == "Completed."
 
     def test_inactive_user_info(self, api_client, inactive_user_token):
         headers = {"Authorization": f"Bearer {inactive_user_token}"}
@@ -60,7 +63,7 @@ class TestUserInfoAPI:
 
         assert response.status_code == 400
         assert response_data["error"] == "User not authenticated."
-        assert response_data["code"] == "DGA-V030"
+        assert response_data["code"] == "DGA-V037"
 
     def test_user_info_verbose_name(
         self, api_client, all_perm_token, monkeypatch
@@ -84,9 +87,9 @@ class TestUserInfoAPI:
         response_data = json.loads(response.content.decode("utf-8"))
         assert response.status_code == 200
         assert response_data["data"] == {
-            "email": "all_perm@test.com",
-            "first_name": "test1",
+            "data": {"email": "all_perm@test.com", "first_name": "test1"}
         }
+        assert response_data["message"] == "Completed."
 
     def test_user_sends_unknown_field(
         self, api_client, all_perm_token, monkeypatch
@@ -111,4 +114,4 @@ class TestUserInfoAPI:
 
         assert response.status_code == 400
         assert response_data["error"] == "'[ABCD]'s not in the model."
-        assert response_data["code"] == "DGA-V031"
+        assert response_data["code"] == "DGA-U006"

@@ -391,10 +391,16 @@ REST_FRAMEWORK = {
 
 # Model APIs
 
-## Access Token API
+## Access Token / Login API
 
-- To log a user in , post data on url '/< prefix >/login/' and set the
-  header as well and prepare payload as following.
+- User can login by using a token.
+- This API uses captcha verification by default.
+- Send a request to Captcha API to get "captcha_key" and "captcha_url" in "data".
+- The captcha_url is an image containing a value. Extract this value and send
+  it as captcha_value in the login API.
+- To turn off the capctha service, set the `CAPTCHA_REQUIRED` as `False` in settings.
+- To log in a user, post the data on url '/< prefix >/v1/login/'.
+
 
 ### Method:
 
@@ -445,7 +451,7 @@ header["X-CSRFToken"]=csrfvalue
 
 ## Refresh Token API
 
-- To get a efresh token, post data on url '/< prefix >/refresh/' .
+- To get a refresh token, post data on url '/< prefix >/v1/refresh/' .
 - As the access token expires after given time, use refresh token to get
   new access token.
 
@@ -489,13 +495,13 @@ header["Content-Type"]="application/json"
 
 - This API allows users to obtain a CAPTCHA image and its id for verification
   purposes.
-- This API supports both GET and POST methods.
-- To get a captcha, perform the request as
+- Login, Register and Forgot password API use captcha verification.
+- To obtain a captcha, post the data on url '/< prefix >/v1/captcha/'.
 
 ### Method:
 
 ```bash
-HTTP Method: "GET" / "POST"
+HTTP Method: "POST"
 ```
 
 ### URL construction:
@@ -508,9 +514,11 @@ url: "http://domain-name/api/v1/generate-captcha/",
 
 ```bash
 {
-    "captcha_key" : <captcha_key>,
-    "captcha_url" : <image_url>
-    # example for image url = "http://127.0.0.1:8050/api/v1/captcha/image/c3efb9d994299a54312e2bb864f93c7aff600c4c/"
+    "data": {
+        "captcha_key": <captcha_key>,
+        "captcha_url": <image_url>
+    },
+    "message": "Captcha Generated."
 }
 ```
 
@@ -518,10 +526,10 @@ url: "http://domain-name/api/v1/generate-captcha/",
 
 ## Register API
 
-- Send a request to Captcha API to get "captcha_key" and "captcha_url".
+- Send a request to Captcha API to get "captcha_key" and "captcha_url" in "data".
 - The captcha_url is an image containing a value. Extract this value and send
   it as captcha_value in the register API.
-- To register a user, post the data on url '/< prefix >/register/'.
+- To register a user, post the data on url '/< prefix >/v1/register/'.
 - As user sends registration request, a user activation link is sent to their
   email, as user clicks on
   that link user is activated.
@@ -566,7 +574,7 @@ url: "http://domain-name/api/v1/register/",
 
 ## Log Out
 
-- To log out a user, post data on the url '/< url prefix >/logout/'.
+- To log out a user, post data on the url '/< url prefix >/v1/logout/'.
 
 ### Method:
 
@@ -590,7 +598,8 @@ header["X-CSRFToken"]=csrfvalue
 
 ```json
 {
-    "message": "Successfully logged out."
+    "message": "Successfully logged out.",
+    "data" :"Bye."
 }
 ```
 
@@ -599,7 +608,7 @@ header["X-CSRFToken"]=csrfvalue
 ## Save data
 
 - This api supports saving 1 to 10 records at once.
-- To save data, post data on the url '/< url prefix >/save/' and set header as
+- To save data, post data on the url '/< url prefix >/v1/save/' and set header as
   well prepare payload as following.
 
 ### Method:
@@ -729,7 +738,7 @@ header["Authorization"]="Bearer <access token>"
 
 ## Fetch data
 
-- To fetch the data, post on the url '/< url prefix >/fetch/' and set
+- To fetch the data, post on the url '/< url prefix >/v1/fetch/' and set
   header as well prepare payload as following.
 
 ### Method:
@@ -815,7 +824,7 @@ header["Authorization"]="Bearer <access token>"
 
 ## Update data
 
-- To update data, post data on the url '/< url prefix >/save/' and set
+- To update data, post data on the url '/< url prefix >v1//save/' and set
   header as well prepare payload as following.
 
 ### Method:
@@ -892,7 +901,7 @@ header["Authorization"]="Bearer <access token>"
 
 ## Forgot Password API
 
-- Send a request to Captcha API to get "captcha_key" and "captcha_url".
+- Send a request to Captcha API to get "captcha_key" and "captcha_url" in "data".
 - The captcha_url is an image containing a value. Extract this value and send
   it as captcha_value in the forgot password API.
 - This API enables users to initiate the password recovery process.

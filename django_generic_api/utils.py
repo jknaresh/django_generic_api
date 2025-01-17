@@ -152,18 +152,15 @@ def is_fields_exist(model, fields):
                 related_model_meta = getattr(fk.related_model, "_meta")
                 related_model_meta.get_field(related_field)
             except FieldDoesNotExist:
-                raise ValueError(
-                    {
-                        "error": f"Invalid foreign field {field}",
-                        "code": "DGA-U001",
-                    }
+                return custom_error_handler(
+                    error=f"Invalid foreign field {field}", code="DGA-U001"
                 )
 
     model_fields = get_model_fields_with_properties(model)
     result = set(valid_fields) - set(model_fields.keys())
     if len(result) > 0:
-        raise ValueError(
-            {"error": f"Extra field {result}", "code": "DGA-U002"}
+        return custom_error_handler(
+            error=f"Extra field {result}", code="DGA-U002"
         )
     return True
 
@@ -371,8 +368,56 @@ def str_field_to_model_field(model, fields):
     fld_diff = set(fields) - fld_set
     if len(fld_diff) > 0:
         fld_diff = ",".join(fld_diff)
-        raise ValueError(f"'[{fld_diff}]'s not in the model.")
+        return custom_error_handler(
+            error=f"'[{fld_diff}]'s not in the model.", code="DGA-U006"
+        )
 
     fields = fld
 
     return fields
+
+
+def error_response(
+    error=None, code=None, status_code=status.HTTP_400_BAD_REQUEST
+):
+    """
+    Returns a structured error response.
+
+    Returns:
+        dict: The JSON-like dictionary for an error response.
+    """
+    response_data = {
+        "error": error,
+        "code": code,
+    }
+    return Response(response_data, status=status_code)
+
+
+def success_response(data=None, message=None, status_code=status.HTTP_200_OK):
+    """
+    Returns a structured success response.
+
+    Returns:
+        dict: The JSON-like dictionary for a success response.
+    """
+    response_data = {
+        "data": data,
+        "message": message,
+    }
+    return Response(response_data, status=status_code)
+
+
+def custom_error_handler(error=None, code=None):
+    """
+    Returns a structured error response.
+
+    Returns:
+        dict: The JSON-like dictionary for an error response.
+    """
+
+    response_data = {
+        "error": error,
+        "code": code,
+    }
+
+    raise Exception(response_data)

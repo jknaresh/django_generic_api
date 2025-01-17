@@ -17,6 +17,8 @@ from .utils import (
     is_fields_exist,
     DJANGO_TO_PYDANTIC_TYPE_MAP,
     str_field_to_model_field,
+    error_response,
+    custom_error_handler,
 )
 
 DEFAULT_APPS = {
@@ -104,12 +106,9 @@ def get_model_config_schema(model, fields=None):
 
         # Retrieve the Pydantic type from the mapping
         if not DJANGO_TO_PYDANTIC_TYPE_MAP.get(django_field_type):
-            raise ValueError(
-                {
-                    "error": f"Field type mapping not found for: "
-                    f"{field1.name}",
-                    "code": "DGA-S011",
-                }
+            return error_response(
+                error=f"Field type mapping not found for: " f"{field1.name}",
+                code="DGA-S001",
             )
 
         mapped_type = DJANGO_TO_PYDANTIC_TYPE_MAP.get(django_field_type)
@@ -128,7 +127,7 @@ def get_model_config_schema(model, fields=None):
         if hasattr(field1, "max_length"):
             field_constraints["max_length"] = field1.max_length
 
-        model_fields[field1.column] = (
+        model_fields[field1.name] = (
             field_type,
             Field(default=default_value, **field_constraints),
         )
@@ -260,11 +259,9 @@ def apply_filters(model, filters):
         operation = filter_item.operation
 
         if not check_field_value(model, field_name, value):
-            raise ValueError(
-                {
-                    "error": f"Invalid data: {value} for {field_name}",
-                    "code": "DGA-S004",
-                }
+            return custom_error_handler(
+                error=f"Invalid data: {value} for {field_name}",
+                code="DGA-S002",
             )
 
         condition1 = None
@@ -312,15 +309,13 @@ def handle_save_input(model, record_id, save_input):
     """
 
     model_schema_pydantic_model = get_model_config_schema(model)
-    model_schema = model_schema_pydantic_model.model_json_schema()
-    model_fields = set(model_schema["properties"].keys())
 
     instances = []
     messages = []
 
     if record_id and len(save_input) > 1:
         raise ValueError(
-            {"error": "Only 1 record to update at once", "code": "DGA-S005"}
+            {"error": "Only 1 record to update at once", "code": "DGA-S003"}
         )
 
     for saveInput in save_input:
@@ -333,8 +328,8 @@ def handle_save_input(model, record_id, save_input):
             error_msg = e.errors()[0].get("msg")
             error_loc = e.errors()[0].get("loc")
 
-            raise ValueError(
-                {"error": f"{error_msg}. {error_loc}", "code": "DGA-S006"}
+            return custom_error_handler(
+                error=f"{error_msg}. {error_loc}", code="DGA-S004"
             )
 
         for field_name, value in list(saveInput.items()):
@@ -352,7 +347,7 @@ def handle_save_input(model, record_id, save_input):
             try:
                 model_field.get_prep_value(value)
             except Exception as e:
-                raise ValueError({"error": e, "code": "DGA-S010"})
+                return custom_error_handler(error=e, code="DGA-S005")
 
         try:
             if record_id:
@@ -371,27 +366,22 @@ def handle_save_input(model, record_id, save_input):
             instances.append(instance)
             messages.append(message)
         except model.DoesNotExist:
-            raise ValueError(
-                {
-                    "error": f"Record with (ID) {record_id} does not exist",
-                    "code": "DGA-S007",
-                }
+            return custom_error_handler(
+                error=f"Record with (ID) {record_id} does not exist",
+                code="DGA-S006",
             )
         except Exception as e:
-            raise ValueError({"error": e.args[0], "code": "DGA-S008"})
-
+            return custom_error_handler(error=e.args[0], code="DGA-S007")
     message = list(set(messages))
     return instances, message
 
 
 def handle_user_info_update(save_input, user_id):
     if not hasattr(settings, "USER_INFO_FIELDS"):
-        raise AttributeError(
-            {
-                "error": "Set setting for 'USER_INFO_FIELDS' to update "
-                "information.",
-                "code": "DGA-S012",
-            }
+        return custom_error_handler(
+            error="Set setting for 'USER_INFO_FIELDS' to update "
+            "information.",
+            code="DGA-S008",
         )
 
     user_info_pydantic_model = get_model_config_schema(
@@ -404,8 +394,8 @@ def handle_user_info_update(save_input, user_id):
         error_msg = e.errors()[0].get("msg")
         error_loc = e.errors()[0].get("loc")
 
-        raise ValueError(
-            {"error": f"{error_msg}. {error_loc}", "code": "DGA-S013"}
+        return custom_error_handler(
+            error=f"{error_msg}. {error_loc}", code="DGA-S009"
         )
 
     for key, value in list(save_input.items()):
@@ -423,7 +413,7 @@ def handle_user_info_update(save_input, user_id):
         try:
             model_field.get_prep_value(value)
         except Exception as e:
-            raise ValueError({"error": e, "code": "DGA-S014"})
+            return custom_error_handler(error=e, code="DGA-S010")
 
     user_model = get_user_model()
     user = user_model.objects.get(id=user_id)
@@ -438,12 +428,10 @@ def handle_user_info_update(save_input, user_id):
 
 def read_user_info(user):
     if not hasattr(settings, "USER_INFO_FIELDS"):
-        raise AttributeError(
-            {
-                "error": "Set setting for 'USER_INFO_FIELDS' to read "
-                "information.",
-                "code": "DGA-S015",
-            }
+        return custom_error_handler(
+            error="Set setting for 'USER_INFO_FIELDS' to update "
+            "information.",
+            code="DGA-S011",
         )
 
     fields = str_field_to_model_field(

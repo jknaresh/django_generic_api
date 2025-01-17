@@ -12,8 +12,6 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from pydantic import ValidationError
-from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .config import create_batch_size, expiry_hours
@@ -39,6 +37,8 @@ from .utils import (
     registration_token,
     store_user_ip,
     is_valid_email_domain,
+    error_response,
+    success_response,
 )
 
 
@@ -57,26 +57,23 @@ class GenericSaveAPIView(APIView):
 
         payload = self.request.data.get("payload", {}).get("variables", {})
 
-        saveInput = payload.get("saveInput", {})
+        save_input_len = payload.get("saveInput", {})
 
         # Does not allow saving more than the customized number of records
         # at once.
-        if len(saveInput) > create_batch_size:
-            return Response(
-                {
-                    "error": f"Only {create_batch_size} records at once.",
-                    "code": "DGA-V001",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+        if len(save_input_len) > create_batch_size:
+            return error_response(
+                error=f"Only {create_batch_size} records at once.",
+                code="DGA-V001",
             )
 
         try:
             # Validate the payload using the Pydantic model
             validated_payload_data = SavePayload(**payload)
         except ValidationError as e:
-            return Response(
-                {"error": e.errors()[0].get("msg"), "code": "DGA-V002"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error=e.errors()[0].get("msg"),
+                code="DGA-V002",
             )
 
         # Proceed with saving the data using validated_payload_data
@@ -86,22 +83,20 @@ class GenericSaveAPIView(APIView):
 
         try:
             model = get_model_by_name(model_name)
-        except (ValueError, LookupError) as e:
-            return Response(
-                {"error": "Model not found", "code": "DGA-V003"},
-                status=status.HTTP_400_BAD_REQUEST,
+        except (ValueError, LookupError):
+            return error_response(
+                error="Model not found",
+                code="DGA-V003",
             )
 
         action = "save" if not record_id else "edit"
         # checks if user has permission to add or change the data
         if not self.request.user.has_perm(make_permission_str(model, action)):
-            return Response(
-                {
-                    "error": "Something went wrong!!! Please contact the "
-                    "administrator.",
-                    "code": "DGA-V004",
-                },
-                status=status.HTTP_404_NOT_FOUND,
+            return error_response(
+                error="Something went wrong!!! Please contact the "
+                "administrator.",
+                code="DGA-V004",
+                status_code=404,
             )
 
         try:
@@ -109,14 +104,12 @@ class GenericSaveAPIView(APIView):
                 model, record_id, save_input
             )
             instance_ids = [instance.id for instance in instances]
-            return Response(
-                {"data": [{"id": instance_ids}], "message": message},
-                status=status.HTTP_201_CREATED,
+            return success_response(
+                data=[{"id": instance_ids}], message=message, status_code=201
             )
         except Exception as e:
-            return Response(
-                {"error": str(e), "code": "DGA-V005"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error=e.args[0]["error"], code=e.args[0]["code"]
             )
 
 
@@ -126,7 +119,7 @@ class GenericFetchAPIView(APIView):
     - Strict typing is enabled for payload.
     - Checks if model exists or not.
     - Checks if user has 'view' permission.
-    - Fetch fuctionality.
+    - Fetch functionality.
     """
 
     def post(self, *args, **kwargs):
@@ -140,10 +133,7 @@ class GenericFetchAPIView(APIView):
             error_loc = e.errors()[0].get("loc")
             error = f"{error_msg}{error_loc}"
 
-            return Response(
-                {"error": error, "code": "DGA-V006"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return error_response(error=error, code="DGA-V005")
 
         model_name = validated_payload_data.modelName
         fields = validated_payload_data.fields
@@ -158,20 +148,15 @@ class GenericFetchAPIView(APIView):
         # check if user has permission to view the data.
         try:
             model = get_model_by_name(model_name)
-        except (ValueError, LookupError) as e:
-            return Response(
-                {"error": "Model not found", "code": "DGA-V007"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        except (ValueError, LookupError):
+            return error_response(error="Model not found", code="DGA-V006")
 
         if not self.request.user.has_perm(make_permission_str(model, "fetch")):
-            return Response(
-                {
-                    "error": "Something went wrong!!! Please contact the "
-                    "administrator.",
-                    "code": "DGA-V008",
-                },
-                status=status.HTTP_404_NOT_FOUND,
+            return error_response(
+                error="Something went wrong!!! Please contact the "
+                "administrator.",
+                code="DGA-V007",
+                status_code=404,
             )
         try:
             data = fetch_data(
@@ -183,11 +168,13 @@ class GenericFetchAPIView(APIView):
                 sort,
                 distinct,
             )
-            return Response(data, status=status.HTTP_200_OK)
+            return success_response(
+                data=data,
+                message="Completed.",
+            )
         except Exception as e:
-            return Response(
-                {"error": str(e), "code": "DGA-V009"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error=e.args[0]["error"], code=e.args[0]["code"]
             )
 
 
@@ -205,9 +192,8 @@ class GenericLoginAPIView(APIView):
         try:
             validated_userdata = GenericLoginPayload(**payload)
         except ValidationError as e:
-            return Response(
-                {"error": e.errors()[0].get("msg"), "code": "DGA-V010"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error=e.errors()[0].get("msg"), code="DGA-V008"
             )
 
         captcha_required = getattr(settings, "CAPTCHA_REQUIRED", False)
@@ -223,20 +209,13 @@ class GenericLoginAPIView(APIView):
                 if captcha.challenge == captcha_value:
                     captcha.delete()  # Clean up after successful validation
                 else:
-                    return Response(
-                        {
-                            "error": "Invalid captcha response.",
-                            "code": "DGA-V025",
-                        },
-                        status=status.HTTP_400_BAD_REQUEST,
+                    return error_response(
+                        error="Invalid captcha response.",
+                        code="DGA-V009",
                     )
             except CaptchaStore.DoesNotExist:
-                return Response(
-                    {
-                        "error": "Invalid or expired captcha key.",
-                        "code": "DGA-V027",
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
+                return error_response(
+                    error="Invalid or expired captcha key.", code="DGA-V010"
                 )
 
         username = validated_userdata.email
@@ -246,16 +225,14 @@ class GenericLoginAPIView(APIView):
         try:
             user = user_model.objects.get(username=username)
         except user_model.DoesNotExist:
-            return Response(
-                {"error": "Username not found", "code": "DGA-V011"},
-                status=status.HTTP_404_NOT_FOUND,
+            return error_response(
+                error="Username not found", code="DGA-V011", status_code=404
             )
 
         auth_user = user.check_password(password)
         if not auth_user:
-            return Response(
-                {"error": "Invalid password", "code": "DGA-V012"},
-                status=status.HTTP_401_UNAUTHORIZED,
+            return error_response(
+                error="Invalid password", code="DGA-V012", status_code=401
             )
 
         if auth_user:
@@ -264,17 +241,12 @@ class GenericLoginAPIView(APIView):
                 == "XMLHttpRequest"
             ):
                 token = generate_token(user)
-                return Response(
-                    {"data": token},
-                    status=status.HTTP_200_OK,
+                return success_response(
+                    data=token, message="Tokens are generated."
                 )
             else:
-                return Response(
-                    {
-                        "error": "Token generation not allowed.",
-                        "code": "DGA-V021",
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
+                return error_response(
+                    error="Token generation not allowed.", code="DGA-V013"
                 )
 
 
@@ -295,9 +267,8 @@ class GenericRegisterAPIView(APIView):
         try:
             validate_register_data = GenericRegisterPayload(**payload)
         except ValidationError as e:
-            return Response(
-                {"error": e.errors()[0].get("msg"), "code": "DGA-V013"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error=e.errors()[0].get("msg"), code="DGA-V014"
             )
 
         captcha_required = getattr(settings, "CAPTCHA_REQUIRED", False)
@@ -313,41 +284,29 @@ class GenericRegisterAPIView(APIView):
                 if captcha.challenge == captcha_value:
                     captcha.delete()  # Clean up after successful validation
                 else:
-                    return Response(
-                        {
-                            "error": "Invalid captcha response.",
-                            "code": "DGA-V025",
-                        },
-                        status=status.HTTP_400_BAD_REQUEST,
+                    return error_response(
+                        error="Invalid captcha response.", code="DGA-V015"
                     )
             except CaptchaStore.DoesNotExist:
-                return Response(
-                    {
-                        "error": "Invalid or expired captcha key.",
-                        "code": "DGA-V027",
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
+                return error_response(
+                    error="Invalid or expired captcha key.", code="DGA-V016"
                 )
 
         email = validate_register_data.email
 
         user = User.objects.filter(username=email).exists()
         if user:
-            return Response(
-                {
-                    "error": "Account already exists with this email.",
-                    "code": "DGA-V015",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error="Account already exists with this email.",
+                code="DGA-V017",
             )
 
         password = validate_register_data.password.get_secret_value()
         password1 = validate_register_data.password1.get_secret_value()
 
         if not password == password1:
-            return Response(
-                {"error": "passwords does not match", "code": "DGA-V014"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error="passwords does not match", code="DGA-V018"
             )
 
         # info: Checks password strength if password validators are
@@ -356,32 +315,25 @@ class GenericRegisterAPIView(APIView):
             try:
                 password_validation.validate_password(password)
             except DjangoValidationError:
-                return Response(
-                    {
-                        "error": [
-                            "1. Password must contain at least 8 characters.",
-                            "2. Password must not be too common.",
-                            "3. Password must not be entirely numeric.",
-                        ],
-                        "code": "DGA-V024",
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
+                return error_response(
+                    error=[
+                        "1. Password must contain at least 8 characters.",
+                        "2. Password must not be too common.",
+                        "3. Password must not be entirely numeric.",
+                    ],
+                    code="DGA-V019",
                 )
 
         email_domain = email.split("@")[-1]
         if not is_valid_email_domain(email_domain):
-            return Response(
-                {"error": "Invalid email domain", "code": "DGA-V022"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error="Invalid email domain", code="DGA-V020"
             )
 
         if not getattr(settings, "BASE_URL", None):
-            return Response(
-                {
-                    "error": "Configure BASE_URL before registration.",
-                    "code": "DGA-V023",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error="Configure BASE_URL before registration.",
+                code="DGA-V021",
             )
 
         new_user = User(
@@ -415,15 +367,12 @@ class GenericRegisterAPIView(APIView):
             )
             # todo: Remove "email_verify' variable after whole process,
             #  only for dev, remove in prod.
-            return Response(
-                {"message": f"Email sent successfully. {email_verify}"},
-                status=status.HTTP_200_OK,
+            return success_response(
+                message=f"Email sent successfully. {email_verify}",
+                data="Registration initiated.",
             )
         except Exception as e:
-            return Response(
-                {"error": str(e), "code": "DGA-V016"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return error_response(error=str(e), code="DGA-V022")
 
 
 class GenericForgotPasswordAPIView(APIView):
@@ -440,9 +389,8 @@ class GenericForgotPasswordAPIView(APIView):
         try:
             validated_userdata = GenericForgotPasswordPayload(**payload)
         except ValidationError as e:
-            return Response(
-                {"error": e.errors()[0].get("msg"), "code": "DGA-V017"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error=e.errors()[0].get("msg"), code="DGA-V023"
             )
 
         captcha_required = getattr(settings, "CAPTCHA_REQUIRED", False)
@@ -458,20 +406,12 @@ class GenericForgotPasswordAPIView(APIView):
                 if captcha.challenge == captcha_value:
                     captcha.delete()  # Clean up after successful validation
                 else:
-                    return Response(
-                        {
-                            "error": "Invalid captcha response.",
-                            "code": "DGA-V026",
-                        },
-                        status=status.HTTP_400_BAD_REQUEST,
+                    return error_response(
+                        error="Invalid captcha response.", code="DGA-V024"
                     )
             except CaptchaStore.DoesNotExist:
-                return Response(
-                    {
-                        "error": "Invalid or expired captcha key.",
-                        "code": "DGA-V036",
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
+                return error_response(
+                    error="Invalid or expired captcha key.", code="DGA-V025"
                 )
 
         username = validated_userdata.email
@@ -480,9 +420,8 @@ class GenericForgotPasswordAPIView(APIView):
         try:
             user = user_model.objects.get(username=username)
         except user_model.DoesNotExist:
-            return Response(
-                {"error": "User not found", "code": "DGA-V037"},
-                status=status.HTTP_404_NOT_FOUND,
+            return error_response(
+                error="User not found", code="DGA-V026", status_code=404
             )
 
         token = registration_token(user.id)
@@ -511,15 +450,12 @@ class GenericForgotPasswordAPIView(APIView):
             )
             # todo: Remove "new_password_link' variable after whole process,
             #  only for dev, remove in prod.
-            return Response(
-                {"message": f"Email sent successfully. {new_password_link}"},
-                status=status.HTTP_200_OK,
+            return success_response(
+                message=f"Email sent successfully. {new_password_link}",
+                data="Password reset initiated.",
             )
         except Exception as e:
-            return Response(
-                {"error": str(e), "code": "DGA-V028"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return error_response(error=str(e), code="DGA-V027")
 
 
 class LogoutAPIView(APIView):
@@ -529,8 +465,8 @@ class LogoutAPIView(APIView):
 
     def post(self, *args, **kwargs):
         logout(self.request)
-        return Response(
-            {"message": "Successfully logged out."}, status=status.HTTP_200_OK
+        return success_response(
+            message="Successfully logged out.", data="Bye."
         )
 
 
@@ -551,20 +487,15 @@ class AccountActivateAPIView(APIView):
 
             # info: set as user customizable time
             if int(time.time()) - int(timestamp) > expiry_hours * 3600:
-                return Response(
-                    {
-                        "error": "The activation link has expired.",
-                        "code": "DGA-V018",
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
+                return error_response(
+                    error="The activation link has expired.", code="DGA-V028"
                 )
 
             # Fetch user by ID
             user = User.objects.get(id=user_id)
             if user.is_active:
-                return Response(
-                    {"message": "Account is already active."},
-                    status=status.HTTP_200_OK,
+                return success_response(
+                    message="Account is already active.", data="User exists."
                 )
 
             # Activate user account
@@ -575,20 +506,15 @@ class AccountActivateAPIView(APIView):
             user_ip = request.META.get("REMOTE_ADDR")
             store_user_ip(user_id, user_ip)
 
-            return Response(
-                {"message": "Your account has been activated successfully."},
-                status=status.HTTP_201_CREATED,
+            return success_response(
+                message="Your account has been activated successfully.",
+                data="Registration completed.",
+                status_code=201,
             )
         except User.DoesNotExist:
-            return Response(
-                {"error": "User not found.", "code": "DGA-V019"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return error_response(error="User not found.", code="DGA-V029")
         except Exception as e:
-            return Response(
-                {"error": str(e), "code": "DGA-V020"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return error_response(error=str(e), code="DGA-V030")
 
 
 class CaptchaServiceAPIView(APIView):
@@ -615,17 +541,15 @@ class CaptchaServiceAPIView(APIView):
             # Generate the image URL
             image_url = captcha_image_url(captcha_key)
 
-            return Response(
-                {
+            return success_response(
+                data={
                     "captcha_key": captcha_key,
                     "captcha_url": request.build_absolute_uri(image_url),
-                }
+                },
+                message="Captcha Generated.",
             )
         except Exception as e:
-            return Response(
-                {"error": str(e), "code": "DGA-V029"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return error_response(error=str(e), code="DGA-V031")
 
 
 class NewPasswordAPIView(APIView):
@@ -647,28 +571,22 @@ class NewPasswordAPIView(APIView):
             decoded_token = base64.urlsafe_b64decode(token.encode()).decode()
             user_id, timestamp = decoded_token.split(":")
         except (ValueError, base64.binascii.Error):
-            return Response(
-                {"error": "Invalid token format.", "code": "DGA-V035"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error="Invalid token format.", code="DGA-V032"
             )
 
         # todo: set as user customizable time
         if int(time.time()) - int(timestamp) > 24 * 3600:
-            return Response(
-                {
-                    "error": "The password reset link has expired.",
-                    "code": "DGA-V031",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error="The password reset link has expired.", code="DGA-V033"
             )
 
         payload = self.request.data.get("payload", {}).get("variables", {})
         try:
             validated_userdata = GenericNewPasswordPayload(**payload)
         except ValidationError as e:
-            return Response(
-                {"error": e.errors()[0].get("msg"), "code": "DGA-V032"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error=e.errors()[0].get("msg"), code="DGA-V034"
             )
 
         user = get_object_or_404(User, id=user_id)
@@ -677,34 +595,30 @@ class NewPasswordAPIView(APIView):
         password1 = validated_userdata.password1.get_secret_value()
 
         if not password == password1:
-            return Response(
-                {"error": "passwords does not match", "code": "DGA-V033"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error="passwords does not match", code="DGA-V035"
             )
 
         if getattr(settings, "AUTH_PASSWORD_VALIDATORS"):
             try:
                 password_validation.validate_password(password)
             except DjangoValidationError:
-                return Response(
-                    {
-                        "error": [
-                            "1. Password must contain at least 8 characters.",
-                            "2. Password must not be too common.",
-                            "3. Password must not be entirely numeric.",
-                        ],
-                        "code": "DGA-V034",
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
+                return error_response(
+                    error=[
+                        "1. Password must contain at least 8 characters.",
+                        "2. Password must not be too common.",
+                        "3. Password must not be entirely numeric.",
+                    ],
+                    code="DGA-V036",
                 )
 
         user.set_password(password)
         user.is_active = True
         user.save()
 
-        return Response(
-            {"message": "Your password has been reset."},
-            status=status.HTTP_200_OK,
+        return success_response(
+            message="Your password has been reset.",
+            data="Password reset success",
         )
 
 
@@ -719,27 +633,24 @@ class UserInfoAPIView(APIView):
 
         # checks if user has valid authorization header.
         if not self.request.user.is_authenticated:
-            return Response(
-                {"error": "User not authenticated.", "code": "DGA-V030"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error="User not authenticated.", code="DGA-V037"
             )
 
         try:
             user_info = read_user_info(user=self.request.user)
-            return Response(user_info, status=status.HTTP_200_OK)
+            return success_response(data=user_info, message="Completed.")
         except Exception as e:
-            return Response(
-                {"error": str(e), "code": "DGA-V031"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error=e.args[0]["error"], code=e.args[0]["code"]
             )
 
     def put(self, *args, **kwargs):
 
         # checks if user has valid authorization header.
         if not self.request.user.is_authenticated:
-            return Response(
-                {"error": "User not authenticated.", "code": "DGA-V031"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error="User not authenticated.", code="DGA-V038"
             )
 
         payload = self.request.data.get("payload", {}).get("variables", {})
@@ -748,9 +659,8 @@ class UserInfoAPIView(APIView):
             # Validate the payload using the Pydantic model
             validated_payload_data = GenericUserUpdatePayload(**payload)
         except ValidationError as e:
-            return Response(
-                {"error": e.errors()[0].get("msg"), "code": "DGA-V032"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error=e.errors()[0].get("msg"), code="DGA-V039"
             )
 
         save_input = validated_payload_data.saveInput
@@ -758,12 +668,10 @@ class UserInfoAPIView(APIView):
         user_id = self.request.user.id
         try:
             message = handle_user_info_update(save_input, user_id)
-            return Response(
-                {"data": [{"id": user_id}], "message": message},
-                status=status.HTTP_201_CREATED,
+            return success_response(
+                data=[{"id": user_id}], message=message, status_code=201
             )
         except Exception as e:
-            return Response(
-                {"error": str(e), "code": "DGA-V033"},
-                status=status.HTTP_400_BAD_REQUEST,
+            return error_response(
+                error=e.args[0]["error"], code=e.args[0]["code"]
             )
