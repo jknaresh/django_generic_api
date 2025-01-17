@@ -57,10 +57,18 @@
     * [Header](#header-1)
     * [<span style="color: orange;">Payload for Refresh:</span>](#span-stylecolor-orangepayload-for-refreshspan)
     * [<span style="color: green;">Success response for Refresh:</span>](#span-stylecolor-greensuccess-response-for-refreshspan)
-  * [Save data](#save-data)
+  * [Fetch data](#fetch-data)
     * [Method:](#method-7)
     * [URL construction:](#url-construction-7)
     * [Header:](#header-2)
+    * [<span style="color: orange;">Payload for Fetch Data:</span>](#span-stylecolor-orangepayload-for-fetch-dataspan)
+    * [<span style="color: green;">Success response for Fetch Data:</span>](#span-stylecolor-greensuccess-response-for-fetch-dataspan)
+    * [<span style="color: red;">Error response for Fetch Data:</span>](#span-stylecolor-rederror-response-for-fetch-dataspan)
+    * [Description of Fields](#description-of-fields)
+  * [Save data](#save-data)
+    * [Method:](#method-8)
+    * [URL construction:](#url-construction-8)
+    * [Header:](#header-3)
     * [<span style="color: orange;">Payload for single record:</span>](#span-stylecolor-orangepayload-for-single-recordspan)
     * [<span style="color: green;">Success response for single record:</span>](#span-stylecolor-greensuccess-response-for-single-recordspan)
     * [<span style="color: red;">Error response for single record:</span>](#span-stylecolor-rederror-response-for-single-recordspan)
@@ -68,14 +76,6 @@
     * [<span style="color: green;">Success response for multiple record:</span>](#span-stylecolor-greensuccess-response-for-multiple-recordspan)
     * [<span style="color: red;">Error response for multiple record:</span>](#span-stylecolor-rederror-response-for-multiple-recordspan)
     * [Description for Fields](#description-for-fields)
-  * [Fetch data](#fetch-data)
-    * [Method:](#method-8)
-    * [URL construction:](#url-construction-8)
-    * [Header:](#header-3)
-    * [<span style="color: orange;">Payload for Fetch Data:</span>](#span-stylecolor-orangepayload-for-fetch-dataspan)
-    * [<span style="color: green;">Success response for Fetch Data:</span>](#span-stylecolor-greensuccess-response-for-fetch-dataspan)
-    * [<span style="color: red;">Error response for Fetch Data:</span>](#span-stylecolor-rederror-response-for-fetch-dataspan)
-    * [Description of Fields](#description-of-fields)
   * [Update data](#update-data)
     * [Method:](#method-9)
     * [URL construction:](#url-construction-9)
@@ -409,10 +409,14 @@ REST_FRAMEWORK = {
 
 ## Captcha API
 
-- This API allows users to obtain a CAPTCHA image and its id for verification
-  purposes.
-- Login, Register and Forgot password API use captcha verification.
-- To obtain a captcha, post the data on url '/< prefix >/v1/captcha/'.
+- This API provides users with a CAPTCHA image and its associated ID for verification purposes.  
+- The CAPTCHA verification is optional and can be used with the Login, Registration, and Forgot Password APIs.  
+- To generate a CAPTCHA, send a POST request to the URL `/<prefix>/v1/captcha/`.  
+- To use the CAPTCHA in the mentioned APIs:
+  - Include the CAPTCHA ID as `captcha_key` in the API payload.  
+  - Include the CAPTCHA value as `captcha_value`, extracted from the CAPTCHA image URL.
+- This service is optional. To disable CAPTCHA verification, set the `CAPTCHA_REQUIRED` 
+  variable to `False` in the settings.  
 
 ### Method:
 
@@ -454,13 +458,12 @@ url: "http://domain-name/api/v1/generate-captcha/",
 
 ## Register API
 
-- Send a request to Captcha API to get `captcha_key` and `captcha_url` in `data`.
-- The `captcha_url` is an image containing a value. Extract this value and send
-  it as `captcha_value` in the register API.
-- To register a user, post the data on url '/< prefix >/v1/register/'.
-- As user sends registration request, a user activation link is sent to their
-  email, as user clicks on
-  that link user is activated.
+- To register a user, submit the data to the URL `/<prefix>/v1/register/`.  
+- When a user sends a registration request, an activation link is sent to their email. 
+- Once the user clicks the activation link, their account is activated.  
+- For security purposes, this API includes an optional CAPTCHA service. 
+- To disable CAPTCHA, set `CAPTCHA_REQUIRED` to `False` in the settings.  
+
 
 ### Method:
 
@@ -510,10 +513,10 @@ url: "http://domain-name/api/v1/register/",
 ```
 ---
 
-## Account activation API
+## Account Activation API
 
-- As registration is done, user recieves a link in their email.
-- To activate the account, click on the link to activate the user.
+- After completing the registration, the user receives an activation link via email.  
+- To activate the account, the user must click on the link, which will finalize the activation process.  
 
 ### Method:
 ```bash
@@ -543,12 +546,10 @@ url : "<BASE_URL>/api/activate/<encoded_token>/"
 ---
 ## Forgot Password API
 
-- Send a request to Captcha API to get `captcha_key` and `captcha_url` in `data`.
-- The `captcha_url` is an image containing a value. Extract this value and send
-  it as `captcha_value` in the forgot password API.
-- This API enables users to initiate the password recovery process.
-- When a user forgets their password, they can submit a request to receive a
-  password reset link via email.
+- This API allows users to initiate the password recovery process.  
+- If a user forgets their password, they can submit a request to receive a password reset link via email.  
+- For security purposes, an optional CAPTCHA verification is included.  
+- To disable CAPTCHA, set `CAPTCHA_REQUIRED` to `False` in the settings.  
 
 ### Method:
 
@@ -598,12 +599,10 @@ url: "http://domain-name/api/v1/forgotPassword/",
 
 ## New Password API
 
-- This API enables users to reset their password securely.
-- Users must first initiate the password reset process by sending a POST
-  request to the Forgot Password API.
-- A password reset link will be sent to their registered email address.
-- Once the link is received, users can use it to update their password by
-  making a POST request as outlined below.
+- This API allows users to securely reset their password.  
+- To begin the process, users must initiate a password reset request through the Forgot Password API.  
+- A password reset link will be sent to the user's registered email address.  
+- After receiving the link, users can update their password by sending a POST request as detailed below.  
 
 ### Method:
 
@@ -653,14 +652,10 @@ url: "http://domain-name/api/v1/newpassword/<encoded_token>",
 ---
 ## Login API
 
-- This API generates a pair of access and refresh token.
-- For this API, captcha verification is set true by default.
-- Send a request to Captcha API to get `captcha_key` and `captcha_url` in `data`.
-- The `captcha_url` is an image containing a value. Extract this value and send
-  it as `captcha_value` in the login API.
-- To turn off the capctha service, set the `CAPTCHA_REQUIRED` as `False` in settings.
-- To log in a user, post the data on url '/< prefix >/v1/login/'.
-
+- This API generates a pair of access and refresh tokens for user authentication.  
+- To log in, send a POST request to the URL `/ <prefix> /v1/login/`.  
+- For enhanced security, optional CAPTCHA verification is included.  
+- To disable CAPTCHA, set `CAPTCHA_REQUIRED` to `False` in the settings.  
 
 ### Method:
 
@@ -724,9 +719,8 @@ header["X-CSRFToken"]=csrfvalue
 
 ## Refresh Token API
 
-- To get a refresh token, post data on url '/< prefix >/v1/refresh/' .
-- As the access token expires after given time, use refresh token to get
-  new access token.
+- To obtain a new access token, send a POST request to the URL `/ <prefix> /v1/refresh/`.  
+- As the access token expires after a certain time, use the refresh token to get a new access token.  
 
 ### Method:
 
@@ -765,11 +759,118 @@ header["Content-Type"]="application/json"
 
 ---
 
-## Save data
+## Fetch data
 
-- This api supports saving 1 to 10 records at once.
-- To save data, post data on the url '/< url prefix >/v1/save/' and set header as
-  well prepare payload as following.
+- To fetch the data, post on the url '/< url prefix >/v1/fetch/' and set
+  header as well prepare payload as following.
+
+### Method:
+
+```bash
+HTTP Method: "POST"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/v1/fetch/",
+```
+
+### Header:
+
+```bash
+header["Content-Type"]="application/json"
+header["Authorization"]="Bearer <access token>"
+```
+
+### <span style="color: orange;">Payload for Fetch Data:</span>
+
+```bash
+{
+  "payload": {
+    "variables": {
+      "modelName": "Model name",
+      "fields": ["field1", "field2", "field3"],
+      "filters": [
+        {
+          "operator": "eq / in / gt / like / ilike",
+          "name": "field",
+          "value": ["field-value"]  ,
+          "operation": "or / and"
+        }
+      ],
+      "pageNumber":1,
+      "pageSize":10,
+      "sort":
+        {
+        "field":"field1",
+        "order_by":"asc/desc"
+        }
+    }
+  }
+}
+```
+
+### <span style="color: green;">Success response for Fetch Data:</span>
+
+```bash
+{
+    "data": {
+        "total": 10,
+        "data": [
+            {
+                "field1": "abc",
+                "field1": "def",
+                "field3": "ghi"
+            },
+            .
+            .
+            .
+            .
+        ]
+    },
+    "message": "Completed."
+}
+```
+### <span style="color: red;">Error response for Fetch Data:</span>
+```bash
+{
+    "error":<error_message>,
+    "code": <error_code>
+}
+
+```
+
+### Description of Fields
+
+| Field Name    | Datatype   | Description                                                                                                 | Required | Default Value                                              | Example                                              |
+|---------------|------------|-------------------------------------------------------------------------------------------------------------|----------|------------------------------------------------------------|------------------------------------------------------|
+| modelName     | String     | Name of Django model to fetch                                                                               | True     | "model name"                                               | Employees                                            |
+| fields        | List       | List of database field names, ex: field1,field2,                                                            | True     | ["field1","field2","field3 "]                              | ["name","age","emp_id"]                              |
+| filters       | List[Dict] | Consists 3 filter properties (operator, name,value)                                                         | True     | [{"operator": "in", "name": "field1","value": ["value1"]}] | [{ "operator": "eq","name": "age","value": ["25"] }] |
+| operator      | Enum       | Specifies the comparison operation to be applied, Only considers one of ('eq', 'in', 'gt', 'like', 'ilike') | True     | "eq"                                                       | eq                                                   |
+| name          | String     | Name of the field on which the filter is to be applied                                                      | True     | "field1"                                                   | age                                                  |
+| value         | List[Any]  | Values against which the field will be compared                                                             | True     | "value1"                                                   | ["25"]                                               |
+| operation     | Enum       | Logical operation to chain filters. Options include 'and' or 'or'.                                          | --       | "or"                                                       | or                                                   |
+| pageNumber    | Int        | Page number for paginated results                                                                           | --       | 1                                                          | 4                                                    |  
+| pageSize      | Int        | Number of records displayed in a page after pagination                                                      | True     | 10                                                         | 10                                                   |
+| Sort          | Dict       | Consists of 2 sort options (field, order_by)                                                                | True     | { "field":"field1","order_by":"asc" }                      | { "field":"id","order_by":"asc" }                    |
+| Sort.Field    | String     | Field name by which the results should be sorted                                                            | True     | "field1"                                                   | id                                                   |
+| Sort.order_by | Enum       | Sorting order ('asc' for ascending, 'desc' for descending)                                                  | True     | "asc"                                                      | asc                                                  |
+
+---
+## Save Data API
+
+- This API supports saving records, from 1 up to a customizable limit.
+- The maximum number of records is defined by the `CREATE_BATCH_SIZE` setting.
+- By default, `CREATE_BATCH_SIZE` is set to 10 if not specified.
+- To customize, set `CREATE_BATCH_SIZE` in the `django-generic-api.ini` file in the `manage.py` directory:
+  ```
+  [SAVE_SETTINGS]
+  CREATE_BATCH_SIZE = 10
+  ```
+- Send a POST request to `/ <url prefix> /v1/save/` with the appropriate headers.
+- Prepare the payload as required.
 
 ### Method:
 
@@ -918,105 +1019,6 @@ header["Authorization"]="Bearer <access token>"
 
 ---
 
-## Fetch data
-
-- To fetch the data, post on the url '/< url prefix >/v1/fetch/' and set
-  header as well prepare payload as following.
-
-### Method:
-
-```bash
-HTTP Method: "POST"
-```
-
-### URL construction:
-
-```bash
-url: "http://domain-name/api/v1/fetch/",
-```
-
-### Header:
-
-```bash
-header["Content-Type"]="application/json"
-header["Authorization"]="Bearer <access token>"
-```
-
-### <span style="color: orange;">Payload for Fetch Data:</span>
-
-```bash
-{
-  "payload": {
-    "variables": {
-      "modelName": "Model name",
-      "fields": ["field1", "field2", "field3"],
-      "filters": [
-        {
-          "operator": "eq / in / gt",
-          "name": "field",
-          "value": ["field-value"]  ,
-          "operation": "or / and"
-        }
-      ],
-      "pageNumber":1,
-      "pageSize":10,
-      "sort":
-        {
-        "field":"field1",
-        "order_by":"asc/desc"
-        }
-    }
-  }
-}
-```
-
-### <span style="color: green;">Success response for Fetch Data:</span>
-
-```bash
-{
-    "data": {
-        "total": 10,
-        "data": [
-            {
-                "field1": "abc",
-                "field1": "def",
-                "field3": "ghi"
-            },
-            .
-            .
-            .
-            .
-        ]
-    },
-    "message": "Completed."
-}
-```
-### <span style="color: red;">Error response for Fetch Data:</span>
-```bash
-{
-    "error":<error_message>,
-    "code": <error_code>
-}
-
-```
-
-### Description of Fields
-
-| Field Name    | Datatype   | Description                                                                                                 | Required | Default Value                                              | Example                                              |
-|---------------|------------|-------------------------------------------------------------------------------------------------------------|----------|------------------------------------------------------------|------------------------------------------------------|
-| modelName     | String     | Name of Django model to fetch                                                                               | True     | "model name"                                               | Employees                                            |
-| fields        | List       | List of database field names, ex: field1,field2,                                                            | True     | ["field1","field2","field3 "]                              | ["name","age","emp_id"]                              |
-| filters       | List[Dict] | Consists 3 filter properties (operator, name,value)                                                         | True     | [{"operator": "in", "name": "field1","value": ["value1"]}] | [{ "operator": "eq","name": "age","value": ["25"] }] |
-| operator      | Enum       | Specifies the comparison operation to be applied, Only considers one of ('eq', 'in', 'gt', 'like', 'ilike') | True     | "eq"                                                       | eq                                                   |
-| name          | String     | Name of the field on which the filter is to be applied                                                      | True     | "field1"                                                   | age                                                  |
-| value         | List[Any]  | Values against which the field will be compared                                                             | True     | "value1"                                                   | ["25"]                                               |
-| operation     | Enum       | Logical operation to chain filters. Options include 'and' or 'or'.                                          | --       | "or"                                                       | or                                                   |
-| pageNumber    | Int        | Page number for paginated results                                                                           | --       | 1                                                          | 4                                                    |  
-| pageSize      | Int        | Number of records displayed in a page after pagination                                                      | True     | 10                                                         | 10                                                   |
-| Sort          | Dict       | Consists of 2 sort options (field, order_by)                                                                | True     | { "field":"field1","order_by":"asc" }                      | { "field":"id","order_by":"asc" }                    |
-| Sort.Field    | String     | Field name by which the results should be sorted                                                            | True     | "field1"                                                   | id                                                   |
-| Sort.order_by | Enum       | Sorting order ('asc' for ascending, 'desc' for descending)                                                  | True     | "asc"                                                      | asc                                                  |
-
 ---
 
 ## Update data
@@ -1108,8 +1110,8 @@ header["Authorization"]="Bearer <access token>"
 
 ## Fetch User Info API
 
-- Provide the ability to fetch or update fields in the `auth_user` table that are defined exclusively by the system.  
-- Use the system setting variable `USER_INFO_FIELDS` to define a tuple of database table fields.  
+- Fetch or update fields in the `auth_user` table defined by the system.
+- Use the `USER_INFO_FIELDS` setting to define a tuple of database table fields.
 - Authentication is required.
 
 ```bash
@@ -1166,15 +1168,15 @@ header["Authorization"]="Bearer <access token>"
 
 ## Update User Info API
 
-- Provide the ability to fetch or update fields in the `auth_user` table that are defined exclusively by the system.  
-- Use the system setting variable `USER_INFO_FIELDS` to define a tuple of database table fields.  
+- Fetch or update fields in the `auth_user` table defined by the system.
+- Use the `USER_INFO_FIELDS` setting to define a tuple of database table fields.
 - Authentication is required.
 
 ```bash
-# ex: USER_INFO_FIELDS = (first_name, last_name)
+# Example: USER_INFO_FIELDS = ('first_name', 'last_name')
 ```
 
-- The listed attributes can be updated.
+- Only the listed attributes can be updated.
 
 ### Method:
 
