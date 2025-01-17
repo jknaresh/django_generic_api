@@ -584,7 +584,8 @@ class TestGenericSaveAPI:
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "Input should be a valid date or datetime, input is too short. ('dob',)"
+            == "Input should be a valid date or datetime, input is too "
+            "short. ('dob',)"
         )
         assert response_data["code"] == "DGA-S004"
 

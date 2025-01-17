@@ -1,10 +1,11 @@
 # Django Generic API
 
 <!-- TOC -->
+
 * [Django Generic API](#django-generic-api)
-  * [Overview](#overview)
-  * [Features](#features)
-  * [Installation](#installation)
+    * [Overview](#overview)
+    * [Features](#features)
+    * [Installation](#installation)
 * [Integration](#integration)
     * [CORS Setup](#cors-setup)
     * [Token based authentication settings](#token-based-authentication-settings)
@@ -14,89 +15,90 @@
     * [URL Configuration](#url-configuration)
     * [Limiting User Requests](#limiting-user-requests)
 * [Parameters for requests](#parameters-for-requests)
-  * [Fetching and Saving Data](#fetching-and-saving-data)
+    * [Fetching and Saving Data](#fetching-and-saving-data)
 * [Model APIs](#model-apis)
-  * [Captcha API](#captcha-api)
-    * [Method:](#method)
-    * [URL construction:](#url-construction)
-    * [<span style="color: green;">Success response for Captcha:</span>](#span-stylecolor-greensuccess-response-for-captchaspan)
-    * [<span style="color: red;">Error response for Captcha:</span>](#span-stylecolor-rederror-response-for-captchaspan)
-  * [Register API](#register-api)
-    * [Method:](#method-1)
-    * [URL construction:](#url-construction-1)
-    * [<span style="color: orange;">Payload for Register:</span>](#span-stylecolor-orangepayload-for-registerspan)
-    * [<span style="color: green;">Success response for Register:</span>](#span-stylecolor-greensuccess-response-for-registerspan)
-    * [<span style="color: red;">Error response for Register:</span>](#span-stylecolor-rederror-response-for-registerspan)
-  * [Account activation API](#account-activation-api)
-    * [Method:](#method-2)
-    * [URL construction:](#url-construction-2)
-    * [<span style="color: green;">Success response for account activation:</span>](#span-stylecolor-greensuccess-response-for-account-activationspan)
-    * [<span style="color: red;">Error response for account activation:</span>](#span-stylecolor-rederror-response-for-account-activationspan)
-  * [Forgot Password API](#forgot-password-api)
-    * [Method:](#method-3)
-    * [URL construction:](#url-construction-3)
-    * [<span style="color: orange;">Payload for Forgot Password:</span>](#span-stylecolor-orangepayload-for-forgot-passwordspan)
-    * [<span style="color: green;">Success response for Forgot Password:</span>](#span-stylecolor-greensuccess-response-for-forgot-passwordspan)
-    * [<span style="color: red;">Error response for Forgot Password:</span>](#span-stylecolor-rederror-response-for-forgot-passwordspan)
-  * [New Password API](#new-password-api)
-    * [Method:](#method-4)
-    * [URL construction:](#url-construction-4)
-    * [<span style="color: orange;">Payload for New Password:</span>](#span-stylecolor-orangepayload-for-new-passwordspan)
-    * [<span style="color: green;">Success response for New Password:</span>](#span-stylecolor-greensuccess-response-for-new-passwordspan)
-    * [<span style="color: red;">Error response for New Password:</span>](#span-stylecolor-rederror-response-for-new-passwordspan)
-  * [Login API](#login-api)
-    * [Method:](#method-5)
-    * [URL construction:](#url-construction-5)
-    * [Header:](#header)
-    * [<span style="color: orange;">Payload for Login:</span>](#span-stylecolor-orangepayload-for-loginspan)
-    * [<span style="color: green;">Success response for Login:</span>](#span-stylecolor-greensuccess-response-for-loginspan)
-    * [<span style="color: red;">Error response for Login:</span>](#span-stylecolor-rederror-response-for-loginspan)
-  * [Refresh Token API](#refresh-token-api)
-    * [Method:](#method-6)
-    * [URL construction:](#url-construction-6)
-    * [Header](#header-1)
-    * [<span style="color: orange;">Payload for Refresh:</span>](#span-stylecolor-orangepayload-for-refreshspan)
-    * [<span style="color: green;">Success response for Refresh:</span>](#span-stylecolor-greensuccess-response-for-refreshspan)
-  * [Fetch data](#fetch-data)
-    * [Method:](#method-7)
-    * [URL construction:](#url-construction-7)
-    * [Header:](#header-2)
-    * [<span style="color: orange;">Payload for Fetch Data:</span>](#span-stylecolor-orangepayload-for-fetch-dataspan)
-    * [<span style="color: green;">Success response for Fetch Data:</span>](#span-stylecolor-greensuccess-response-for-fetch-dataspan)
-    * [<span style="color: red;">Error response for Fetch Data:</span>](#span-stylecolor-rederror-response-for-fetch-dataspan)
-    * [Description of Fields](#description-of-fields)
-  * [Save data](#save-data)
-    * [Method:](#method-8)
-    * [URL construction:](#url-construction-8)
-    * [Header:](#header-3)
-    * [<span style="color: orange;">Payload for single record:</span>](#span-stylecolor-orangepayload-for-single-recordspan)
-    * [<span style="color: green;">Success response for single record:</span>](#span-stylecolor-greensuccess-response-for-single-recordspan)
-    * [<span style="color: red;">Error response for single record:</span>](#span-stylecolor-rederror-response-for-single-recordspan)
-    * [<span style="color: orange;">Payload for multiple record:</span>](#span-stylecolor-orangepayload-for-multiple-recordspan)
-    * [<span style="color: green;">Success response for multiple record:</span>](#span-stylecolor-greensuccess-response-for-multiple-recordspan)
-    * [<span style="color: red;">Error response for multiple record:</span>](#span-stylecolor-rederror-response-for-multiple-recordspan)
-    * [Description for Fields](#description-for-fields)
-  * [Update data](#update-data)
-    * [Method:](#method-9)
-    * [URL construction:](#url-construction-9)
-    * [Header:](#header-4)
-    * [<span style="color: orange;">Payload for Update Record:</span>](#span-stylecolor-orangepayload-for-update-recordspan)
-    * [<span style="color: green;">Success response for Update Record:</span>](#span-stylecolor-greensuccess-response-for-update-recordspan)
-    * [<span style="color: red;">Error response for Update Record:</span>](#span-stylecolor-rederror-response-for-update-recordspan)
-    * [Description for Fields](#description-for-fields-1)
-  * [Fetch User Info API](#fetch-user-info-api)
-    * [Method:](#method-10)
-    * [URL construction:](#url-construction-10)
-    * [Header:](#header-5)
-    * [<span style="color: green;">Success response for User Info:</span>](#span-stylecolor-greensuccess-response-for-user-infospan)
-    * [<span style="color: red;">Error response for User Info:</span>](#span-stylecolor-rederror-response-for-user-infospan)
-  * [Update User Info API](#update-user-info-api)
-    * [Method:](#method-11)
-    * [URL construction:](#url-construction-11)
-    * [Header:](#header-6)
-    * [<span style="color: orange;">Payload for User Info Update:</span>](#span-stylecolor-orangepayload-for-user-info-updatespan)
-    * [<span style="color: green;">Success response for User Info Update:</span>](#span-stylecolor-greensuccess-response-for-user-info-updatespan)
-    * [<span style="color: red;">Error response for User Info Update:</span>](#span-stylecolor-rederror-response-for-user-info-updatespan)
+    * [Captcha API](#captcha-api)
+        * [Method:](#method)
+        * [URL construction:](#url-construction)
+        * [<span style="color: green;">Success response for Captcha:</span>](#span-stylecolor-greensuccess-response-for-captchaspan)
+        * [<span style="color: red;">Error response for Captcha:</span>](#span-stylecolor-rederror-response-for-captchaspan)
+    * [Register API](#register-api)
+        * [Method:](#method-1)
+        * [URL construction:](#url-construction-1)
+        * [<span style="color: orange;">Payload for Register:</span>](#span-stylecolor-orangepayload-for-registerspan)
+        * [<span style="color: green;">Success response for Register:</span>](#span-stylecolor-greensuccess-response-for-registerspan)
+        * [<span style="color: red;">Error response for Register:</span>](#span-stylecolor-rederror-response-for-registerspan)
+    * [Account activation API](#account-activation-api)
+        * [Method:](#method-2)
+        * [URL construction:](#url-construction-2)
+        * [<span style="color: green;">Success response for account activation:</span>](#span-stylecolor-greensuccess-response-for-account-activationspan)
+        * [<span style="color: red;">Error response for account activation:</span>](#span-stylecolor-rederror-response-for-account-activationspan)
+    * [Forgot Password API](#forgot-password-api)
+        * [Method:](#method-3)
+        * [URL construction:](#url-construction-3)
+        * [<span style="color: orange;">Payload for Forgot Password:</span>](#span-stylecolor-orangepayload-for-forgot-passwordspan)
+        * [<span style="color: green;">Success response for Forgot Password:</span>](#span-stylecolor-greensuccess-response-for-forgot-passwordspan)
+        * [<span style="color: red;">Error response for Forgot Password:</span>](#span-stylecolor-rederror-response-for-forgot-passwordspan)
+    * [New Password API](#new-password-api)
+        * [Method:](#method-4)
+        * [URL construction:](#url-construction-4)
+        * [<span style="color: orange;">Payload for New Password:</span>](#span-stylecolor-orangepayload-for-new-passwordspan)
+        * [<span style="color: green;">Success response for New Password:</span>](#span-stylecolor-greensuccess-response-for-new-passwordspan)
+        * [<span style="color: red;">Error response for New Password:</span>](#span-stylecolor-rederror-response-for-new-passwordspan)
+    * [Login API](#login-api)
+        * [Method:](#method-5)
+        * [URL construction:](#url-construction-5)
+        * [Header:](#header)
+        * [<span style="color: orange;">Payload for Login:</span>](#span-stylecolor-orangepayload-for-loginspan)
+        * [<span style="color: green;">Success response for Login:</span>](#span-stylecolor-greensuccess-response-for-loginspan)
+        * [<span style="color: red;">Error response for Login:</span>](#span-stylecolor-rederror-response-for-loginspan)
+    * [Refresh Token API](#refresh-token-api)
+        * [Method:](#method-6)
+        * [URL construction:](#url-construction-6)
+        * [Header](#header-1)
+        * [<span style="color: orange;">Payload for Refresh:</span>](#span-stylecolor-orangepayload-for-refreshspan)
+        * [<span style="color: green;">Success response for Refresh:</span>](#span-stylecolor-greensuccess-response-for-refreshspan)
+    * [Fetch data](#fetch-data)
+        * [Method:](#method-7)
+        * [URL construction:](#url-construction-7)
+        * [Header:](#header-2)
+        * [<span style="color: orange;">Payload for Fetch Data:</span>](#span-stylecolor-orangepayload-for-fetch-dataspan)
+        * [<span style="color: green;">Success response for Fetch Data:</span>](#span-stylecolor-greensuccess-response-for-fetch-dataspan)
+        * [<span style="color: red;">Error response for Fetch Data:</span>](#span-stylecolor-rederror-response-for-fetch-dataspan)
+        * [Description of Fields](#description-of-fields)
+    * [Save data](#save-data)
+        * [Method:](#method-8)
+        * [URL construction:](#url-construction-8)
+        * [Header:](#header-3)
+        * [<span style="color: orange;">Payload for single record:</span>](#span-stylecolor-orangepayload-for-single-recordspan)
+        * [<span style="color: green;">Success response for single record:</span>](#span-stylecolor-greensuccess-response-for-single-recordspan)
+        * [<span style="color: red;">Error response for single record:</span>](#span-stylecolor-rederror-response-for-single-recordspan)
+        * [<span style="color: orange;">Payload for multiple record:</span>](#span-stylecolor-orangepayload-for-multiple-recordspan)
+        * [<span style="color: green;">Success response for multiple record:</span>](#span-stylecolor-greensuccess-response-for-multiple-recordspan)
+        * [<span style="color: red;">Error response for multiple record:</span>](#span-stylecolor-rederror-response-for-multiple-recordspan)
+        * [Description for Fields](#description-for-fields)
+    * [Update data](#update-data)
+        * [Method:](#method-9)
+        * [URL construction:](#url-construction-9)
+        * [Header:](#header-4)
+        * [<span style="color: orange;">Payload for Update Record:</span>](#span-stylecolor-orangepayload-for-update-recordspan)
+        * [<span style="color: green;">Success response for Update Record:</span>](#span-stylecolor-greensuccess-response-for-update-recordspan)
+        * [<span style="color: red;">Error response for Update Record:</span>](#span-stylecolor-rederror-response-for-update-recordspan)
+        * [Description for Fields](#description-for-fields-1)
+    * [Fetch User Info API](#fetch-user-info-api)
+        * [Method:](#method-10)
+        * [URL construction:](#url-construction-10)
+        * [Header:](#header-5)
+        * [<span style="color: green;">Success response for User Info:</span>](#span-stylecolor-greensuccess-response-for-user-infospan)
+        * [<span style="color: red;">Error response for User Info:</span>](#span-stylecolor-rederror-response-for-user-infospan)
+    * [Update User Info API](#update-user-info-api)
+        * [Method:](#method-11)
+        * [URL construction:](#url-construction-11)
+        * [Header:](#header-6)
+        * [<span style="color: orange;">Payload for User Info Update:</span>](#span-stylecolor-orangepayload-for-user-info-updatespan)
+        * [<span style="color: green;">Success response for User Info Update:</span>](#span-stylecolor-greensuccess-response-for-user-info-updatespan)
+        * [<span style="color: red;">Error response for User Info Update:</span>](#span-stylecolor-rederror-response-for-user-info-updatespan)
+
 <!-- TOC -->
 
 ## Overview
@@ -409,14 +411,19 @@ REST_FRAMEWORK = {
 
 ## Captcha API
 
-- This API provides users with a CAPTCHA image and its associated ID for verification purposes.  
-- The CAPTCHA verification is optional and can be used with the Login, Registration, and Forgot Password APIs.  
-- To generate a CAPTCHA, send a POST request to the URL `/<prefix>/v1/captcha/`.  
+- This API provides users with a CAPTCHA image and its associated ID for
+  verification purposes.
+- The CAPTCHA verification is optional and can be used with the Login,
+  Registration, and Forgot Password APIs.
+- To generate a CAPTCHA, send a POST request to the URL
+  `/<prefix>/v1/captcha/`.
 - To use the CAPTCHA in the mentioned APIs:
-  - Include the CAPTCHA ID as `captcha_key` in the API payload.  
-  - Include the CAPTCHA value as `captcha_value`, extracted from the CAPTCHA image URL.
-- This service is optional. To disable CAPTCHA verification, set the `CAPTCHA_REQUIRED` 
-  variable to `False` in the settings.  
+    - Include the CAPTCHA ID as `captcha_key` in the API payload.
+    - Include the CAPTCHA value as `captcha_value`, extracted from the CAPTCHA
+      image URL.
+- This service is optional. To disable CAPTCHA verification, set the
+  `CAPTCHA_REQUIRED`
+  variable to `False` in the settings.
 
 ### Method:
 
@@ -455,15 +462,14 @@ url: "http://domain-name/api/v1/generate-captcha/",
 
 ---
 
-
 ## Register API
 
-- To register a user, submit the data to the URL `/<prefix>/v1/register/`.  
-- When a user sends a registration request, an activation link is sent to their email. 
-- Once the user clicks the activation link, their account is activated.  
-- For security purposes, this API includes an optional CAPTCHA service. 
-- To disable CAPTCHA, set `CAPTCHA_REQUIRED` to `False` in the settings.  
-
+- To register a user, submit the data to the URL `/<prefix>/v1/register/`.
+- When a user sends a registration request, an activation link is sent to their
+  email.
+- Once the user clicks the activation link, their account is activated.
+- For security purposes, this API includes an optional CAPTCHA service.
+- To disable CAPTCHA, set `CAPTCHA_REQUIRED` to `False` in the settings.
 
 ### Method:
 
@@ -504,6 +510,7 @@ url: "http://domain-name/api/v1/register/",
 ```
 
 ### <span style="color: red;">Error response for Register:</span>
+
 ```bash
 # HTTP STATUS CODE = 400
 {
@@ -511,23 +518,30 @@ url: "http://domain-name/api/v1/register/",
     "code": "DGA-V018"
 }
 ```
+
 ---
 
 ## Account Activation API
 
-- After completing the registration, the user receives an activation link via email.  
-- To activate the account, the user must click on the link, which will finalize the activation process.  
+- After completing the registration, the user receives an activation link via
+  email.
+- To activate the account, the user must click on the link, which will finalize
+  the activation process.
 
 ### Method:
+
 ```bash
 HTTP METHOD: "GET"
 ```
 
 ### URL construction:
+
 ```bash
 url : "<BASE_URL>/api/activate/<encoded_token>/"
 ```
+
 ### <span style="color: green;">Success response for account activation:</span>
+
 ```bash
 # HTTP STATUS CODE = 201
 {
@@ -535,7 +549,9 @@ url : "<BASE_URL>/api/activate/<encoded_token>/"
     "message": "Your account has been activated successfully."
 }
 ```
+
 ### <span style="color: red;">Error response for account activation:</span>
+
 ```bash
 # HTTP STATUS CODE = 400
 {
@@ -543,13 +559,16 @@ url : "<BASE_URL>/api/activate/<encoded_token>/"
     "code": "<error_code>"
 }
 ```
+
 ---
+
 ## Forgot Password API
 
-- This API allows users to initiate the password recovery process.  
-- If a user forgets their password, they can submit a request to receive a password reset link via email.  
-- For security purposes, an optional CAPTCHA verification is included.  
-- To disable CAPTCHA, set `CAPTCHA_REQUIRED` to `False` in the settings.  
+- This API allows users to initiate the password recovery process.
+- If a user forgets their password, they can submit a request to receive a
+  password reset link via email.
+- For security purposes, an optional CAPTCHA verification is included.
+- To disable CAPTCHA, set `CAPTCHA_REQUIRED` to `False` in the settings.
 
 ### Method:
 
@@ -586,6 +605,7 @@ url: "http://domain-name/api/v1/forgotPassword/",
     "message": "Email sent successfully."
 }
 ```
+
 ### <span style="color: red;">Error response for Forgot Password:</span>
 
 ```bash
@@ -595,14 +615,17 @@ url: "http://domain-name/api/v1/forgotPassword/",
     "code": "DGA-V026"
 }
 ```
+
 ---
 
 ## New Password API
 
-- This API allows users to securely reset their password.  
-- To begin the process, users must initiate a password reset request through the Forgot Password API.  
-- A password reset link will be sent to the user's registered email address.  
-- After receiving the link, users can update their password by sending a POST request as detailed below.  
+- This API allows users to securely reset their password.
+- To begin the process, users must initiate a password reset request through
+  the Forgot Password API.
+- A password reset link will be sent to the user's registered email address.
+- After receiving the link, users can update their password by sending a POST
+  request as detailed below.
 
 ### Method:
 
@@ -639,7 +662,6 @@ url: "http://domain-name/api/v1/newpassword/<encoded_token>",
 }
 ```
 
-
 ### <span style="color: red;">Error response for New Password:</span>
 
 ```bash
@@ -649,13 +671,16 @@ url: "http://domain-name/api/v1/newpassword/<encoded_token>",
     "code": <error_code>
 }
 ```
+
 ---
+
 ## Login API
 
-- This API generates a pair of access and refresh tokens for user authentication.  
-- To log in, send a POST request to the URL `/ <prefix> /v1/login/`.  
-- For enhanced security, optional CAPTCHA verification is included.  
-- To disable CAPTCHA, set `CAPTCHA_REQUIRED` to `False` in the settings.  
+- This API generates a pair of access and refresh tokens for user
+  authentication.
+- To log in, send a POST request to the URL `/ <prefix> /v1/login/`.
+- For enhanced security, optional CAPTCHA verification is included.
+- To disable CAPTCHA, set `CAPTCHA_REQUIRED` to `False` in the settings.
 
 ### Method:
 
@@ -715,12 +740,15 @@ header["X-CSRFToken"]=csrfvalue
     "code": <error code>
 }
 ```
+
 ---
 
 ## Refresh Token API
 
-- To obtain a new access token, send a POST request to the URL `/ <prefix> /v1/refresh/`.  
-- As the access token expires after a certain time, use the refresh token to get a new access token.  
+- To obtain a new access token, send a POST request to the URL
+  `/ <prefix> /v1/refresh/`.
+- As the access token expires after a certain time, use the refresh token to
+  get a new access token.
 
 ### Method:
 
@@ -832,7 +860,9 @@ header["Authorization"]="Bearer <access token>"
     "message": "Completed."
 }
 ```
+
 ### <span style="color: red;">Error response for Fetch Data:</span>
+
 ```bash
 {
     "error":<error_message>,
@@ -859,17 +889,20 @@ header["Authorization"]="Bearer <access token>"
 | Sort.order_by | Enum       | Sorting order ('asc' for ascending, 'desc' for descending)                                                  | True     | "asc"                                                      | asc                                                  |
 
 ---
+
 ## Save Data API
 
 - This API supports saving records, from 1 up to a customizable limit.
 - The maximum number of records is defined by the `CREATE_BATCH_SIZE` setting.
 - By default, `CREATE_BATCH_SIZE` is set to 10 if not specified.
-- To customize, set `CREATE_BATCH_SIZE` in the `django-generic-api.ini` file in the `manage.py` directory:
+- To customize, set `CREATE_BATCH_SIZE` in the `django-generic-api.ini` file in
+  the `manage.py` directory:
   ```
   [SAVE_SETTINGS]
   CREATE_BATCH_SIZE = 10
   ```
-- Send a POST request to `/ <url prefix> /v1/save/` with the appropriate headers.
+- Send a POST request to `/ <url prefix> /v1/save/` with the appropriate
+  headers.
 - Prepare the payload as required.
 
 ### Method:
@@ -934,6 +967,7 @@ header["Authorization"]="Bearer <access token>"
 ```
 
 ### <span style="color: red;">Error response for single record:</span>
+
 ```bash
 # HTTP SUCCESS CODE = 400
 {
@@ -941,7 +975,6 @@ header["Authorization"]="Bearer <access token>"
     "code": <error_code>
 }
 ```
-
 
 ### <span style="color: orange;">Payload for multiple record:</span>
 
@@ -1086,6 +1119,7 @@ header["Authorization"]="Bearer <access token>"
     ]
 }
 ```
+
 ### <span style="color: red;">Error response for Update Record:</span>
 
 ```bash
@@ -1111,7 +1145,8 @@ header["Authorization"]="Bearer <access token>"
 ## Fetch User Info API
 
 - Fetch or update fields in the `auth_user` table defined by the system.
-- Use the `USER_INFO_FIELDS` setting to define a tuple of database table fields.
+- Use the `USER_INFO_FIELDS` setting to define a tuple of database table
+  fields.
 - Authentication is required.
 
 ```bash
@@ -1169,7 +1204,8 @@ header["Authorization"]="Bearer <access token>"
 ## Update User Info API
 
 - Fetch or update fields in the `auth_user` table defined by the system.
-- Use the `USER_INFO_FIELDS` setting to define a tuple of database table fields.
+- Use the `USER_INFO_FIELDS` setting to define a tuple of database table
+  fields.
 - Authentication is required.
 
 ```bash
@@ -1227,7 +1263,6 @@ header["Authorization"]="Bearer <access token>"
 }
 ```
 
-
 ### <span style="color: red;">Error response for User Info Update:</span>
 
 ```bash
@@ -1237,4 +1272,5 @@ header["Authorization"]="Bearer <access token>"
     "code": <error_code>
 }
 ```
+
 ---
