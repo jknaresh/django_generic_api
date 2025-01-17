@@ -6,11 +6,9 @@ from captcha.helpers import captcha_image_url
 from captcha.models import CaptchaStore
 from django.conf import settings
 from django.contrib.auth import get_user_model, logout, password_validation
-from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404
 from pydantic import ValidationError
 from rest_framework.views import APIView
 
@@ -294,7 +292,9 @@ class GenericRegisterAPIView(APIView):
 
         email = validate_register_data.email
 
-        user = User.objects.filter(username=email).exists()
+        user_model = get_user_model()
+
+        user = user_model.objects.filter(username=email).exists()
         if user:
             return error_response(
                 error="Account already exists with this email.",
@@ -336,7 +336,7 @@ class GenericRegisterAPIView(APIView):
                 code="DGA-V021",
             )
 
-        new_user = User(
+        new_user = user_model(
             username=email,
             email=email,
             is_active=False,
@@ -346,7 +346,7 @@ class GenericRegisterAPIView(APIView):
 
         token = registration_token(new_user.id)
         encoded_token = quote(token)
-        email_verify = f"{settings.BASE_URL}/api/activate/" f"{encoded_token}/"
+        email_verify = f"{settings.BASE_URL}/api/v1/activate/{encoded_token}/"
 
         # todo : throw error if email settings arent setup
         try:
@@ -427,7 +427,7 @@ class GenericForgotPasswordAPIView(APIView):
         token = registration_token(user.id)
         encoded_token = quote(token)
         new_password_link = (
-            f"{settings.BASE_URL}/api/newpassword/" f"{encoded_token}/"
+            f"{settings.BASE_URL}/api/v1/newpassword/{encoded_token}/"
         )
 
         try:
@@ -492,7 +492,9 @@ class AccountActivateAPIView(APIView):
                 )
 
             # Fetch user by ID
-            user = User.objects.get(id=user_id)
+            user_model = get_user_model()
+
+            user = user_model.objects.get(id=user_id)
             if user.is_active:
                 return success_response(
                     message="Account is already active.", data="User exists."
@@ -511,7 +513,7 @@ class AccountActivateAPIView(APIView):
                 data="Registration completed.",
                 status_code=201,
             )
-        except User.DoesNotExist:
+        except user_model.DoesNotExist:
             return error_response(error="User not found.", code="DGA-V029")
         except Exception as e:
             return error_response(error=str(e), code="DGA-V030")
@@ -589,37 +591,45 @@ class NewPasswordAPIView(APIView):
                 error=e.errors()[0].get("msg"), code="DGA-V034"
             )
 
-        user = get_object_or_404(User, id=user_id)
+        try:
+            user_model = get_user_model()
+            user = user_model.objects.get(id=user_id)
 
-        password = validated_userdata.password.get_secret_value()
-        password1 = validated_userdata.password1.get_secret_value()
+            password = validated_userdata.password.get_secret_value()
+            password1 = validated_userdata.password1.get_secret_value()
 
-        if not password == password1:
-            return error_response(
-                error="passwords does not match", code="DGA-V035"
-            )
-
-        if getattr(settings, "AUTH_PASSWORD_VALIDATORS"):
-            try:
-                password_validation.validate_password(password)
-            except DjangoValidationError:
+            if not password == password1:
                 return error_response(
-                    error=[
-                        "1. Password must contain at least 8 characters.",
-                        "2. Password must not be too common.",
-                        "3. Password must not be entirely numeric.",
-                    ],
-                    code="DGA-V036",
+                    error="passwords does not match", code="DGA-V035"
                 )
 
-        user.set_password(password)
-        user.is_active = True
-        user.save()
+            if getattr(settings, "AUTH_PASSWORD_VALIDATORS"):
+                try:
+                    password_validation.validate_password(password)
+                except DjangoValidationError:
+                    return error_response(
+                        error=[
+                            "1. Password must contain at least 8 characters.",
+                            "2. Password must not be too common.",
+                            "3. Password must not be entirely numeric.",
+                        ],
+                        code="DGA-V036",
+                    )
 
-        return success_response(
-            message="Your password has been reset.",
-            data="Password reset success",
-        )
+            user.set_password(password)
+            user.is_active = True
+            user.save()
+
+            return success_response(
+                message="Your password has been reset.",
+                data="Password reset success",
+            )
+        except user_model.DoesNotExist:
+            return error_response(
+                error="User not found.", code="DGA-040", status_code=404
+            )
+        except Exception as e:
+            return error_response(error=str(e), code="DGA-V041")
 
 
 class UserInfoAPIView(APIView):

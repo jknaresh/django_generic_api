@@ -1,11 +1,10 @@
 # Django Generic API
 
 <!-- TOC -->
-
 * [Django Generic API](#django-generic-api)
-    * [Overview](#overview)
-    * [Features](#features)
-    * [Installation](#installation)
+  * [Overview](#overview)
+  * [Features](#features)
+  * [Installation](#installation)
 * [Integration](#integration)
     * [CORS Setup](#cors-setup)
     * [Token based authentication settings](#token-based-authentication-settings)
@@ -15,72 +14,89 @@
     * [URL Configuration](#url-configuration)
     * [Limiting User Requests](#limiting-user-requests)
 * [Parameters for requests](#parameters-for-requests)
-    * [Fetching and Saving Data](#fetching-and-saving-data)
+  * [Fetching and Saving Data](#fetching-and-saving-data)
 * [Model APIs](#model-apis)
-    * [Access Token API / Login API](#access-token-api)
-        * [Method:](#method)
-        * [URL construction:](#url-construction)
-        * [Header:](#header)
-        * [<span style="color: orange;">Payload for Login:</span>](#span-stylecolor-redpayload-for-loginspan)
-        * [<span style="color: green;">Response for Login:</span>](#span-stylecolor-greenresponse-for-loginspan)
-    * [Refresh Token API](#refresh-token-api)
-        * [Method:](#method-1)
-        * [URL construction:](#url-construction-1)
-        * [Header](#header-1)
-        * [<span style="color: orange;">Payload for Logout:</span>](#span-stylecolor-redpayload-for-logoutspan)
-        * [<span style="color: green;">Response for Logout:</span>](#span-stylecolor-greenresponse-for-logoutspan)
-    * [Captcha API](#captcha-api)
-        * [Method:](#method-2)
-        * [URL construction:](#url-construction-2)
-        * [<span style="color: green;">Response for Captcha:</span>](#span-stylecolor-greenresponse-for-captchaspan)
-    * [Register API](#register-api)
-        * [Method:](#method-3)
-        * [URL construction:](#url-construction-3)
-        * [<span style="color: orange;">Payload for Register:</span>](#span-stylecolor-redpayload-for-registerspan)
-        * [<span style="color: green;">Response for Register:</span>](#span-stylecolor-greenresponse-for-registerspan)
-    * [Log Out](#log-out)
-        * [Method:](#method-4)
-        * [URL construction:](#url-construction-4)
-        * [Header](#header-2)
-        * [<span style="color: green;">Response for Logout:</span>](#span-stylecolor-greenresponse-for-logoutspan-1)
-    * [Save data](#save-data)
-        * [Method:](#method-5)
-        * [URL construction:](#url-construction-5)
-        * [Header:](#header-3)
-        * [<span style="color: orange;">Payload for single record:</span>](#span-stylecolor-redpayload-for-single-recordspan)
-        * [<span style="color: green;">Response for single record:</span>](#span-stylecolor-greenresponse-for-single-recordspan)
-        * [<span style="color: orange;">Payload for multiple record:</span>](#span-stylecolor-redpayload-for-multiple-recordspan)
-        * [<span style="color: green;">Response for multiple record:</span>](#span-stylecolor-greenresponse-for-multiple-recordspan)
-        * [Description for Fields](#description-for-fields)
-    * [Fetch data](#fetch-data)
-        * [Method:](#method-6)
-        * [URL construction:](#url-construction-6)
-        * [Header:](#header-4)
-        * [<span style="color: orange;">Payload for Fetch Data:</span>](#span-stylecolor-redpayload-for-fetch-dataspan)
-        * [<span style="color: green;">Response for Fetch Data:</span>](#span-stylecolor-greenresponse-for-fetch-dataspan)
-        * [Description of Fields](#description-of-fields)
-    * [Update data](#update-data)
-        * [Method:](#method-7)
-        * [URL construction:](#url-construction-7)
-        * [Header:](#header-5)
-        * [<span style="color: orange;">Payload for Update Record:</span>](#span-stylecolor-redpayload-for-update-recordspan)
-        * [<span style="color: green;">Response for Update Record:</span>](#span-stylecolor-greenresponse-for-update-recordspan)
-        * [Description for Fields](#description-for-fields-1)
-    * [Forgot Password API](#forgot-password-api)
-        * [Method:](#method-8)
-        * [URL construction:](#url-construction-8)
-        * [<span style="color: orange;">Payload for Forgot Password:</span>](#span-stylecolor-redpayload-for-forgot-passwordspan)
-        * [<span style="color: green;">Response for Forgot Password:</span>](#span-stylecolor-greenresponse-for-forgot-passwordspan)
-    * [New Password API](#new-password-api)
-        * [Method:](#method-9)
-        * [URL construction:](#url-construction-9)
-        * [<span style="color: orange;">Payload for New Password:</span>](#span-stylecolor-redpayload-for-new-passwordspan)
-        * [<span style="color: green;">Response for New Password:</span>](#span-stylecolor-greenresponse-for-new-passwordspan)
-    * [Fetch UserProfile API](#fetch-userprofile-api)
-        * [Method:](#method-10)
-        * [URL construction:](#url-construction-10)
-        * [<span style="color: green;">Response for New Password:</span>](#span-stylecolor-greenresponse-for-new-passwordspan-1)
-
+  * [Captcha API](#captcha-api)
+    * [Method:](#method)
+    * [URL construction:](#url-construction)
+    * [<span style="color: green;">Success response for Captcha:</span>](#span-stylecolor-greensuccess-response-for-captchaspan)
+    * [<span style="color: red;">Error response for Captcha:</span>](#span-stylecolor-rederror-response-for-captchaspan)
+  * [Register API](#register-api)
+    * [Method:](#method-1)
+    * [URL construction:](#url-construction-1)
+    * [<span style="color: orange;">Payload for Register:</span>](#span-stylecolor-orangepayload-for-registerspan)
+    * [<span style="color: green;">Success response for Register:</span>](#span-stylecolor-greensuccess-response-for-registerspan)
+    * [<span style="color: red;">Error response for Register:</span>](#span-stylecolor-rederror-response-for-registerspan)
+  * [Account activation API](#account-activation-api)
+    * [Method:](#method-2)
+    * [URL construction:](#url-construction-2)
+    * [<span style="color: green;">Success response for account activation:</span>](#span-stylecolor-greensuccess-response-for-account-activationspan)
+    * [<span style="color: red;">Error response for account activation:</span>](#span-stylecolor-rederror-response-for-account-activationspan)
+  * [Forgot Password API](#forgot-password-api)
+    * [Method:](#method-3)
+    * [URL construction:](#url-construction-3)
+    * [<span style="color: orange;">Payload for Forgot Password:</span>](#span-stylecolor-orangepayload-for-forgot-passwordspan)
+    * [<span style="color: green;">Success response for Forgot Password:</span>](#span-stylecolor-greensuccess-response-for-forgot-passwordspan)
+    * [<span style="color: red;">Error response for Forgot Password:</span>](#span-stylecolor-rederror-response-for-forgot-passwordspan)
+  * [New Password API](#new-password-api)
+    * [Method:](#method-4)
+    * [URL construction:](#url-construction-4)
+    * [<span style="color: orange;">Payload for New Password:</span>](#span-stylecolor-orangepayload-for-new-passwordspan)
+    * [<span style="color: green;">Success response for New Password:</span>](#span-stylecolor-greensuccess-response-for-new-passwordspan)
+    * [<span style="color: red;">Error response for New Password:</span>](#span-stylecolor-rederror-response-for-new-passwordspan)
+  * [Login API](#login-api)
+    * [Method:](#method-5)
+    * [URL construction:](#url-construction-5)
+    * [Header:](#header)
+    * [<span style="color: orange;">Payload for Login:</span>](#span-stylecolor-orangepayload-for-loginspan)
+    * [<span style="color: green;">Success response for Login:</span>](#span-stylecolor-greensuccess-response-for-loginspan)
+    * [<span style="color: red;">Error response for Login:</span>](#span-stylecolor-rederror-response-for-loginspan)
+  * [Refresh Token API](#refresh-token-api)
+    * [Method:](#method-6)
+    * [URL construction:](#url-construction-6)
+    * [Header](#header-1)
+    * [<span style="color: orange;">Payload for Refresh:</span>](#span-stylecolor-orangepayload-for-refreshspan)
+    * [<span style="color: green;">Success response for Refresh:</span>](#span-stylecolor-greensuccess-response-for-refreshspan)
+  * [Save data](#save-data)
+    * [Method:](#method-7)
+    * [URL construction:](#url-construction-7)
+    * [Header:](#header-2)
+    * [<span style="color: orange;">Payload for single record:</span>](#span-stylecolor-orangepayload-for-single-recordspan)
+    * [<span style="color: green;">Success response for single record:</span>](#span-stylecolor-greensuccess-response-for-single-recordspan)
+    * [<span style="color: red;">Error response for single record:</span>](#span-stylecolor-rederror-response-for-single-recordspan)
+    * [<span style="color: orange;">Payload for multiple record:</span>](#span-stylecolor-orangepayload-for-multiple-recordspan)
+    * [<span style="color: green;">Success response for multiple record:</span>](#span-stylecolor-greensuccess-response-for-multiple-recordspan)
+    * [<span style="color: red;">Error response for multiple record:</span>](#span-stylecolor-rederror-response-for-multiple-recordspan)
+    * [Description for Fields](#description-for-fields)
+  * [Fetch data](#fetch-data)
+    * [Method:](#method-8)
+    * [URL construction:](#url-construction-8)
+    * [Header:](#header-3)
+    * [<span style="color: orange;">Payload for Fetch Data:</span>](#span-stylecolor-orangepayload-for-fetch-dataspan)
+    * [<span style="color: green;">Success response for Fetch Data:</span>](#span-stylecolor-greensuccess-response-for-fetch-dataspan)
+    * [<span style="color: red;">Error response for Fetch Data:</span>](#span-stylecolor-rederror-response-for-fetch-dataspan)
+    * [Description of Fields](#description-of-fields)
+  * [Update data](#update-data)
+    * [Method:](#method-9)
+    * [URL construction:](#url-construction-9)
+    * [Header:](#header-4)
+    * [<span style="color: orange;">Payload for Update Record:</span>](#span-stylecolor-orangepayload-for-update-recordspan)
+    * [<span style="color: green;">Success response for Update Record:</span>](#span-stylecolor-greensuccess-response-for-update-recordspan)
+    * [<span style="color: red;">Error response for Update Record:</span>](#span-stylecolor-rederror-response-for-update-recordspan)
+    * [Description for Fields](#description-for-fields-1)
+  * [Fetch User Info API](#fetch-user-info-api)
+    * [Method:](#method-10)
+    * [URL construction:](#url-construction-10)
+    * [Header:](#header-5)
+    * [<span style="color: green;">Success response for User Info:</span>](#span-stylecolor-greensuccess-response-for-user-infospan)
+    * [<span style="color: red;">Error response for User Info:</span>](#span-stylecolor-rederror-response-for-user-infospan)
+  * [Update User Info API](#update-user-info-api)
+    * [Method:](#method-11)
+    * [URL construction:](#url-construction-11)
+    * [Header:](#header-6)
+    * [<span style="color: orange;">Payload for User Info Update:</span>](#span-stylecolor-orangepayload-for-user-info-updatespan)
+    * [<span style="color: green;">Success response for User Info Update:</span>](#span-stylecolor-greensuccess-response-for-user-info-updatespan)
+    * [<span style="color: red;">Error response for User Info Update:</span>](#span-stylecolor-rederror-response-for-user-info-updatespan)
 <!-- TOC -->
 
 ## Overview
@@ -391,13 +407,257 @@ REST_FRAMEWORK = {
 
 # Model APIs
 
-## Access Token / Login API
+## Captcha API
 
-- User can login by using a token.
-- This API uses captcha verification by default.
-- Send a request to Captcha API to get "captcha_key" and "captcha_url" in "data".
-- The captcha_url is an image containing a value. Extract this value and send
-  it as captcha_value in the login API.
+- This API allows users to obtain a CAPTCHA image and its id for verification
+  purposes.
+- Login, Register and Forgot password API use captcha verification.
+- To obtain a captcha, post the data on url '/< prefix >/v1/captcha/'.
+
+### Method:
+
+```bash
+HTTP Method: "POST"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/v1/generate-captcha/",
+```
+
+### <span style="color: green;">Success response for Captcha:</span>
+
+```bash
+# HTTP STATUS CODE = 200
+{
+    "data": {
+        "captcha_key": <captcha_key>,
+        "captcha_url": <image_url>
+    },
+    "message": "Captcha Generated."
+}
+```
+
+### <span style="color: red;">Error response for Captcha:</span>
+
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": <errro_message>,
+    "code": <error_code>
+}
+```
+
+---
+
+
+## Register API
+
+- Send a request to Captcha API to get `captcha_key` and `captcha_url` in `data`.
+- The `captcha_url` is an image containing a value. Extract this value and send
+  it as `captcha_value` in the register API.
+- To register a user, post the data on url '/< prefix >/v1/register/'.
+- As user sends registration request, a user activation link is sent to their
+  email, as user clicks on
+  that link user is activated.
+
+### Method:
+
+```bash
+HTTP Method: "POST"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/v1/register/",
+```
+
+### <span style="color: orange;">Payload for Register:</span>
+
+```bash
+{
+    "payload":{
+        "variables":{
+            "email":"user@example.com",
+            "password":"123456",
+            "password1":"123456",
+            "captcha_key": "<captcha_key>", # If CAPTCHA_REQUIRED is set True in settings.py
+            "captcha_value": "<captcha_value>" # If CAPTCHA_REQUIRED is set True in settings.py
+        }
+    }
+}
+```
+
+### <span style="color: green;">Success response for Register:</span>
+
+```bash
+# HTTP STATUS CODE = 200
+{ 
+    "data": "Registration initiated.",
+    "message": "Email sent successfully."
+}
+```
+
+### <span style="color: red;">Error response for Register:</span>
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": "passwords does not match",
+    "code": "DGA-V018"
+}
+```
+---
+
+## Account activation API
+
+- As registration is done, user recieves a link in their email.
+- To activate the account, click on the link to activate the user.
+
+### Method:
+```bash
+HTTP METHOD: "GET"
+```
+
+### URL construction:
+```bash
+url : "<BASE_URL>/api/activate/<encoded_token>/"
+```
+### <span style="color: green;">Success response for account activation:</span>
+```bash
+# HTTP STATUS CODE = 201
+{
+    "data": "Registration completed.",
+    "message": "Your account has been activated successfully."
+}
+```
+### <span style="color: red;">Error response for account activation:</span>
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": "<error_message>", 
+    "code": "<error_code>"
+}
+```
+---
+## Forgot Password API
+
+- Send a request to Captcha API to get `captcha_key` and `captcha_url` in `data`.
+- The `captcha_url` is an image containing a value. Extract this value and send
+  it as `captcha_value` in the forgot password API.
+- This API enables users to initiate the password recovery process.
+- When a user forgets their password, they can submit a request to receive a
+  password reset link via email.
+
+### Method:
+
+```bash
+HTTP Method: "POST"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/v1/forgotPassword/",
+```
+
+### <span style="color: orange;">Payload for Forgot Password:</span>
+
+```bash
+{
+    "payload":{
+        "variables":{
+            "email":"user@example.com",
+            "captcha_key": "<captcha_key>", # If CAPTCHA_REQUIRED is set True in settings.py
+            "captcha_value": "<captcha_value>"  # If CAPTCHA_REQUIRED is set True in settings.py
+        }
+    }
+}
+```
+
+### <span style="color: green;">Success response for Forgot Password:</span>
+
+```bash
+# HTTP STATUS CODE = 200
+{
+    "data": "Password reset initiated.",
+    "message": "Email sent successfully."
+}
+```
+### <span style="color: red;">Error response for Forgot Password:</span>
+
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": "User not found",
+    "code": "DGA-V026"
+}
+```
+---
+
+## New Password API
+
+- This API enables users to reset their password securely.
+- Users must first initiate the password reset process by sending a POST
+  request to the Forgot Password API.
+- A password reset link will be sent to their registered email address.
+- Once the link is received, users can use it to update their password by
+  making a POST request as outlined below.
+
+### Method:
+
+```bash
+HTTP Method: "POST"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/v1/newpassword/<encoded_token>",
+```
+
+### <span style="color: orange;">Payload for New Password:</span>
+
+```bash
+{
+    "payload":{
+        "variables":{
+            "password": "123456",
+            "password1" : "123456"
+        }
+    }
+}
+```
+
+### <span style="color: green;">Success response for New Password:</span>
+
+```bash
+# HTTP STATUS CODE = 200
+{
+    "data": "Password reset success",
+    "message": "Your password has been reset."
+}
+```
+
+
+### <span style="color: red;">Error response for New Password:</span>
+
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": <error_message>,
+    "code": <error_code>
+}
+```
+---
+## Login API
+
+- This API generates a pair of access and refresh token.
+- For this API, captcha verification is set true by default.
+- Send a request to Captcha API to get `captcha_key` and `captcha_url` in `data`.
+- The `captcha_url` is an image containing a value. Extract this value and send
+  it as `captcha_value` in the login API.
 - To turn off the capctha service, set the `CAPTCHA_REQUIRED` as `False` in settings.
 - To log in a user, post the data on url '/< prefix >/v1/login/'.
 
@@ -422,7 +682,7 @@ header["X-CSRFToken"]=csrfvalue
 
 ### <span style="color: orange;">Payload for Login:</span>
 
-```json
+```bash
 
 {
   "payload": {
@@ -436,17 +696,30 @@ header["X-CSRFToken"]=csrfvalue
 }
 ```
 
-### <span style="color: green;">Response for Login:</span>
+### <span style="color: green;">Success response for Login:</span>
 
-```json
+```bash
+# HTTP STATUS CODE = 200 OK
 {
-    "data": [{
-        "refresh": ".....",
-        "access": "......"
-    }]
+    "data": [
+        {
+            "refresh": <refresh_token> 
+            "access":  <access_token>
+        }
+    ],
+    "message": "Tokens are generated."
 }
 ```
 
+### <span style="color: red;">Error response for Login:</span>
+
+```bash
+# HTTP STATUS CODE = 400 / 401/ 404
+{
+    "error": <error message>,
+    "code": <error code>
+}
+```
 ---
 
 ## Refresh Token API
@@ -473,133 +746,20 @@ url: "http://domain-name/api/v1/refresh/",
 header["Content-Type"]="application/json"
 ```
 
-### <span style="color: orange;">Payload for Logout:</span>
+### <span style="color: orange;">Payload for Refresh:</span>
 
-```json
+```bash
 {
     "refresh":"..."
 } 
 ```
 
-### <span style="color: green;">Response for Logout:</span>
+### <span style="color: green;">Success response for Refresh:</span>
 
-```json
+```bash
+# HTTP STATUS CODE = 200
 {
     "access": "..."
-}
-```
-
----
-
-## Captcha API
-
-- This API allows users to obtain a CAPTCHA image and its id for verification
-  purposes.
-- Login, Register and Forgot password API use captcha verification.
-- To obtain a captcha, post the data on url '/< prefix >/v1/captcha/'.
-
-### Method:
-
-```bash
-HTTP Method: "POST"
-```
-
-### URL construction:
-
-```bash
-url: "http://domain-name/api/v1/generate-captcha/",
-```
-
-### <span style="color: green;">Response for Captcha:</span>
-
-```bash
-{
-    "data": {
-        "captcha_key": <captcha_key>,
-        "captcha_url": <image_url>
-    },
-    "message": "Captcha Generated."
-}
-```
-
----
-
-## Register API
-
-- Send a request to Captcha API to get "captcha_key" and "captcha_url" in "data".
-- The captcha_url is an image containing a value. Extract this value and send
-  it as captcha_value in the register API.
-- To register a user, post the data on url '/< prefix >/v1/register/'.
-- As user sends registration request, a user activation link is sent to their
-  email, as user clicks on
-  that link user is activated.
-
-### Method:
-
-```bash
-HTTP Method: "POST"
-```
-
-### URL construction:
-
-```bash
-url: "http://domain-name/api/v1/register/",
-```
-
-### <span style="color: orange;">Payload for Register:</span>
-
-```json
-{
-    "payload":{
-        "variables":{
-            "email":"user@example.com",
-            "password":"123456",
-            "password1":"123456",
-            "captcha_key": "<captcha_key>", // If CAPTCHA_REQUIRED is set True in settings.py
-            "captcha_value": "<captcha_value>" // If CAPTCHA_REQUIRED is set True in settings.py
-        }
-    }
-}
-```
-
-### <span style="color: green;">Response for Register:</span>
-
-```json
-{
-    "message": "Email sent successfully."
-}
-```
-
----
-
-## Log Out
-
-- To log out a user, post data on the url '/< url prefix >/v1/logout/'.
-
-### Method:
-
-```bash
-HTTP Method: "POST"
-```
-
-### URL construction:
-
-```bash
-url: "http://domain-name/api/v1/logout/",
-```
-
-### Header
-
-```header
-header["X-CSRFToken"]=csrfvalue
-```
-
-### <span style="color: green;">Response for Logout:</span>
-
-```json
-{
-    "message": "Successfully logged out.",
-    "data" :"Bye."
 }
 ```
 
@@ -632,7 +792,7 @@ header["Authorization"]="Bearer <access token>"
 
 ### <span style="color: orange;">Payload for single record:</span>
 
-```json
+```bash
 {
     "payload":{
         "variables":{
@@ -654,9 +814,10 @@ header["Authorization"]="Bearer <access token>"
 
 ```
 
-### <span style="color: green;">Response for single record:</span>
+### <span style="color: green;">Success response for single record:</span>
 
-```json
+```bash
+# HTTP SUCCESS CODE = 200
 {
     "data": [
         {
@@ -671,9 +832,19 @@ header["Authorization"]="Bearer <access token>"
 }
 ```
 
+### <span style="color: red;">Error response for single record:</span>
+```bash
+# HTTP SUCCESS CODE = 400
+{
+    "error": <error_message>,
+    "code": <error_code>
+}
+```
+
+
 ### <span style="color: orange;">Payload for multiple record:</span>
 
-```json
+```bash
 {
     "payload":{
         "variables":{
@@ -706,9 +877,10 @@ header["Authorization"]="Bearer <access token>"
 
 ```
 
-### <span style="color: green;">Response for multiple record:</span>
+### <span style="color: green;">Success response for multiple record:</span>
 
-```json
+```bash
+# HTTP SUCCESS CODE = 200
 {
     "data": [
         {
@@ -721,6 +893,16 @@ header["Authorization"]="Bearer <access token>"
     "message": [
         "Record created successfully."
     ]
+}
+```
+
+### <span style="color: red;">Error response for multiple record:</span>
+
+```bash
+# HTTP SUCCESS CODE = 400
+{
+    "error": <error_message>,
+    "code": <error_code>
 }
 ```
 
@@ -762,7 +944,7 @@ header["Authorization"]="Bearer <access token>"
 
 ### <span style="color: orange;">Payload for Fetch Data:</span>
 
-```json
+```bash
 {
   "payload": {
     "variables": {
@@ -788,19 +970,34 @@ header["Authorization"]="Bearer <access token>"
 }
 ```
 
-### <span style="color: green;">Response for Fetch Data:</span>
+### <span style="color: green;">Success response for Fetch Data:</span>
 
-```json
+```bash
 {
-    "total": 1,
-    "data": [
-        {
-            "field1": "abc",
-            "field2": "def",
-            "field3": "ghi"
-        }
-    ]
+    "data": {
+        "total": 10,
+        "data": [
+            {
+                "field1": "abc",
+                "field1": "def",
+                "field3": "ghi"
+            },
+            .
+            .
+            .
+            .
+        ]
+    },
+    "message": "Completed."
 }
+```
+### <span style="color: red;">Error response for Fetch Data:</span>
+```bash
+{
+    "error":<error_message>,
+    "code": <error_code>
+}
+
 ```
 
 ### Description of Fields
@@ -824,7 +1021,7 @@ header["Authorization"]="Bearer <access token>"
 
 ## Update data
 
-- To update data, post data on the url '/< url prefix >v1//save/' and set
+- To update data, post data on the url '/< url prefix >v1/save/' and set
   header as well prepare payload as following.
 
 ### Method:
@@ -848,7 +1045,7 @@ header["Authorization"]="Bearer <access token>"
 
 ### <span style="color: orange;">Payload for Update Record:</span>
 
-```json
+```bash
 {
     "payload":{
         "variables":{
@@ -870,9 +1067,10 @@ header["Authorization"]="Bearer <access token>"
 
 ```
 
-### <span style="color: green;">Response for Update Record:</span>
+### <span style="color: green;">Success response for Update Record:</span>
 
-```json
+```bash
+# HTTP STATUS CODE = 201
 {
     "data": [
         {
@@ -886,6 +1084,15 @@ header["Authorization"]="Bearer <access token>"
     ]
 }
 ```
+### <span style="color: red;">Error response for Update Record:</span>
+
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": <error_message>,
+    "code": <error_code>
+}
+```
 
 ### Description for Fields
 
@@ -896,95 +1103,6 @@ header["Authorization"]="Bearer <access token>"
 | SaveInput       | List[Dictionary] | Contains list of fields and their values            | True     | [{ "field1": "field1","field2": "value1" }] | [{ "field1": "emp_id","field2": "963" }] |
 | SaveInput.field | String           | Name of field in table in Database , ex:field1      | True     | "field1"                                    | emp_id                                   |
 | SaveInput.value | Any              | Value of corresponding column in table , ex: value1 | True     | "value1"                                    | 963                                      |
-
----
-
-## Forgot Password API
-
-- Send a request to Captcha API to get "captcha_key" and "captcha_url" in "data".
-- The captcha_url is an image containing a value. Extract this value and send
-  it as captcha_value in the forgot password API.
-- This API enables users to initiate the password recovery process.
-- When a user forgets their password, they can submit a request to receive a
-  password reset link via email.
-
-### Method:
-
-```bash
-HTTP Method: "POST"
-```
-
-### URL construction:
-
-```bash
-url: "http://domain-name/api/v1/forgotPassword/",
-```
-
-### <span style="color: orange;">Payload for Forgot Password:</span>
-
-```json
-{
-    "payload":{
-        "variables":{
-            "email":"user@example.com",
-            "captcha_key": "<captcha_key>", // If CAPTCHA_REQUIRED is set True in settings.py
-            "captcha_value": "<captcha_value>"  // If CAPTCHA_REQUIRED is set True in settings.py
-        }
-    }
-}
-```
-
-### <span style="color: green;">Response for Forgot Password:</span>
-
-```json
-{
-    "message": "Email sent successfully."
-}
-```
-
----
-
-## New Password API
-
-- This API enables users to reset their password securely.
-- Users must first initiate the password reset process by sending a POST
-  request to the Forgot Password API.
-- A password reset link will be sent to their registered email address.
-- Once the link is received, users can use it to update their password by
-  making a POST request as outlined below.
-
-### Method:
-
-```bash
-HTTP Method: "POST"
-```
-
-### URL construction:
-
-```bash
-url: "http://domain-name/api/v1/newpassword/<encoded_token>",
-```
-
-### <span style="color: orange;">Payload for New Password:</span>
-
-```json
-{
-    "payload":{
-        "variables":{
-            "password": "123456",
-            "password1" : "123456"
-        }
-    }
-}
-```
-
-### <span style="color: green;">Response for New Password:</span>
-
-```json
-{
-    "message": "Your password has been reset."
-}
-```
 
 ---
 
@@ -1019,9 +1137,10 @@ header["Content-Type"]="application/json"
 header["Authorization"]="Bearer <access token>"
 ```
 
-### <span style="color: green;">Response for User Info:</span>
+### <span style="color: green;">Success response for User Info:</span>
 
-```json
+```bash
+# HTTP STATUS CODE = 200
 {
     "data": [
         {
@@ -1030,6 +1149,16 @@ header["Authorization"]="Bearer <access token>"
             "field3": "value3"
         }
     ]
+}
+```
+
+### <span style="color: red;">Error response for User Info:</span>
+
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": <error_message>,
+    "code": <error_code>
 }
 ```
 
@@ -1068,7 +1197,7 @@ header["Authorization"]="Bearer <access token>"
 
 ### <span style="color: orange;">Payload for User Info Update:</span>
 
-```json
+```bash
 {
     "payload":{
         "variables":{
@@ -1082,9 +1211,10 @@ header["Authorization"]="Bearer <access token>"
 
 ```
 
-### <span style="color: green;">Response for User Info Update:</span>
+### <span style="color: green;">Success response for User Info Update:</span>
 
 ```bash
+# HTTP STATUS CODE = 200
 {
     "data": [
         {
@@ -1094,3 +1224,15 @@ header["Authorization"]="Bearer <access token>"
     "message": "<user.username>'s info is updated"
 }
 ```
+
+
+### <span style="color: red;">Error response for User Info Update:</span>
+
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": <error_message>,
+    "code": <error_code>
+}
+```
+---
