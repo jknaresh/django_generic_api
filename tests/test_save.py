@@ -1,4 +1,3 @@
-import json
 from unittest.mock import patch
 
 import pytest
@@ -52,7 +51,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 201
         assert response_data["data"] == [{"id": [1]}]
         assert response_data["message"] == ["Record created successfully."]
@@ -87,7 +86,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 201
         assert response_data["data"] == [{"id": [1]}]
         assert response_data["message"] == ["Record created successfully."]
@@ -124,9 +123,9 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
-        assert response.status_code == 201
+        assert response.status_code == 200
         assert response_data["data"] == [{"id": [data_id]}]
         assert response_data["message"] == ["Record updated successfully."]
 
@@ -165,12 +164,12 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-V003"
+        assert response_data["code"] == "DGA-S013"
 
-    def test_create_record_with_incorrect_model_name(
+    def test_create_record_with_incorrect_model_name_with_appname(
         self, api_client, add_perm_token
     ):
         """
@@ -202,10 +201,47 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-V003"
+        assert response_data["code"] == "DGA-S013"
+
+    def test_create_record_with_incorrect_model_name_without_appname(
+        self, api_client, add_perm_token
+    ):
+        """
+        User has sent correct payload format.
+        """
+        save_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "Customer1",
+                    "id": None,
+                    "saveInput": [
+                        {
+                            "name": "test_user1",
+                            "dob": "2020-01-21",
+                            "email": "ltest1@mail.com",
+                            "phone_no": "012345",
+                            "address": "HYD",
+                            "pin_code": "100",
+                            "status": "123",
+                        }
+                    ],
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
+        response = api_client.post(
+            "/v1/save/",
+            save_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = response.data
+        assert response.status_code == 400
+        assert response_data["error"] == "Model not found"
+        assert response_data["code"] == "DGA-S012"
 
     def test_invalid_payload_format(self, api_client, add_perm_token):
         """
@@ -239,7 +275,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Field required"
         assert response_data["code"] == "DGA-V002"
@@ -276,7 +312,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Input should be a valid string"
         assert response_data["code"] == "DGA-V002"
@@ -313,10 +349,10 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-V003"
+        assert response_data["code"] == "DGA-S013"
 
     def test_save_input_length_greater_than_10(
         self, api_client, add_perm_token
@@ -452,7 +488,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Only 10 records at once."
         assert response_data["code"] == "DGA-V001"
@@ -500,14 +536,10 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert (
-            response_data["error"]
-            == "{'error': 'Only 1 record to update at once', 'code': "
-            "'DGA-S005'}"
-        )
-        assert response_data["code"] == "DGA-V005"
+        assert response_data["error"] == "Only 1 record to update at once"
+        assert response_data["code"] == "DGA-S003"
 
     def test_unknown_save_input_field(self, api_client, add_perm_token):
         """
@@ -542,14 +574,13 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': \"Extra inputs are not permitted. ('ABC',)\", "
-            "'code': 'DGA-S006'}"
+            == "Extra inputs are not permitted. ('ABC',)"
         )
-        assert response_data["code"] == "DGA-V005"
+        assert response_data["code"] == "DGA-S004"
 
     def test_invalid_save_input_element_datatype(
         self, api_client, add_perm_token
@@ -585,14 +616,14 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': \"Input should be a valid date or datetime, "
-            "input is too short. ('dob',)\", 'code': 'DGA-S006'}"
+            == "Input should be a valid date or datetime, input is too "
+            "short. ('dob',)"
         )
-        assert response_data["code"] == "DGA-V005"
+        assert response_data["code"] == "DGA-S004"
 
     def test_missing_required_field_save_input(
         self, api_client, add_perm_token
@@ -628,13 +659,13 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
-            response_data["error"] == "{'error': 'NOT NULL constraint failed: "
-            "demo_app_customer.dob', 'code': 'DGA-S008'}"
+            response_data["error"]
+            == "NOT NULL constraint failed: demo_app_customer.dob"
         )
-        assert response_data["code"] == "DGA-V005"
+        assert response_data["code"] == "DGA-S007"
 
     def test_update_unknown_record(self, api_client, add_perm_token):
         """
@@ -668,14 +699,10 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert (
-            response_data["error"]
-            == "{'error': 'Record with (ID) 9000 does not exist', "
-            "'code': 'DGA-S007'}"
-        )
-        assert response_data["code"] == "DGA-V005"
+        assert response_data["error"] == "Record with (ID) 9000 does not exist"
+        assert response_data["code"] == "DGA-S006"
 
     def test_invalid_id_element_datatype(self, api_client, add_perm_token):
         """
@@ -709,14 +736,13 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
-            == "{'error': \"Field 'id' expected a number but got "
-            "'abc'.\", 'code': 'DGA-S008'}"
+            == "Field 'id' expected a number but got 'abc'."
         )
-        assert response_data["code"] == "DGA-V005"
+        assert response_data["code"] == "DGA-S007"
 
     def test_save_access_denied(self, api_client, add_perm_token):
         """
@@ -748,7 +774,7 @@ class TestGenericSaveAPI:
             save_payload,
             format="json",
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 404
         assert (
             response_data["error"]
@@ -787,7 +813,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 404
         assert (
             response_data["error"]
@@ -823,7 +849,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 404
         assert (
             response_data["error"]
@@ -862,7 +888,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 201
         assert response_data["data"] == [{"id": [1]}]
         assert response_data["message"] == ["Record created successfully."]
@@ -907,7 +933,7 @@ class TestGenericSaveAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 401
         assert response_data["error"] == "Invalid Token."
@@ -993,7 +1019,7 @@ def test_save_api(
         format="json",
         headers=headers,
     )
-    response_data = json.loads(response.content.decode("utf-8"))
+    response_data = response.data
 
     assert response.status_code == expected_status
 

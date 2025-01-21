@@ -18,8 +18,9 @@ class TestCaptchaAPI:
         # captcha is an image
         assert captcha_response["Content-Type"] == "application/json"
         assert captcha_response.status_code == 200
-        assert "captcha_key" in captcha_response.data
-        assert "captcha_url" in captcha_response.data
+        assert "captcha_key" in captcha_response.data["data"]
+        assert "captcha_url" in captcha_response.data["data"]
+        assert captcha_response.data["message"] == "Captcha Generated."
 
     def test_captcha_post_failure(self, api_client):
         """
@@ -42,5 +43,5 @@ class TestCaptchaAPI:
                 captcha_response.data["error"]
                 == "Failed to generate captcha key"
             )
-            assert captcha_response.data["code"] == "DGA-V029"
+            assert captcha_response.data["code"] == "DGA-V031"
             assert captcha_response.status_code == 400

@@ -1,4 +1,3 @@
-import json
 from urllib.parse import quote
 
 import pytest
@@ -35,7 +34,7 @@ class TestNewPasswordAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
         assert response_data["message"] == "Your password has been reset."
 
@@ -63,10 +62,10 @@ class TestNewPasswordAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Field required"
-        assert response_data["code"] == "DGA-V032"
+        assert response_data["code"] == "DGA-V034"
 
     def test_extra_field_in_payload(
         self, api_client, inactive_user_id, registration_token
@@ -93,10 +92,10 @@ class TestNewPasswordAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Extra inputs are not permitted"
-        assert response_data["code"] == "DGA-V032"
+        assert response_data["code"] == "DGA-V034"
 
     def test_mismatched_password(
         self, api_client, inactive_user_id, registration_token
@@ -122,10 +121,10 @@ class TestNewPasswordAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "passwords does not match"
-        assert response_data["code"] == "DGA-V033"
+        assert response_data["code"] == "DGA-V035"
 
     def test_weak_password(
         self, api_client, inactive_user_id, registration_token
@@ -151,9 +150,9 @@ class TestNewPasswordAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V034"
+        assert response_data["code"] == "DGA-V036"
         assert response_data["error"] == [
             "1. Password must contain at least 8 characters.",
             "2. Password must not be too common.",
@@ -181,7 +180,7 @@ class TestNewPasswordAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V035"
+        assert response_data["code"] == "DGA-V032"
         assert response_data["error"] == "Invalid token format."

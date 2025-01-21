@@ -17,69 +17,87 @@
 * [Parameters for requests](#parameters-for-requests)
     * [Fetching and Saving Data](#fetching-and-saving-data)
 * [Model APIs](#model-apis)
-    * [Access Token API / Login API](#access-token-api)
+    * [Captcha API](#captcha-api)
         * [Method:](#method)
         * [URL construction:](#url-construction)
-        * [Header:](#header)
-        * [<span style="color: orange;">Payload for Login:</span>](#span-stylecolor-redpayload-for-loginspan)
-        * [<span style="color: green;">Response for Login:</span>](#span-stylecolor-greenresponse-for-loginspan)
-    * [Refresh Token API](#refresh-token-api)
+        * [<span style="color: green;">Success response for Captcha:</span>](#span-stylecolor-greensuccess-response-for-captchaspan)
+        * [<span style="color: red;">Error response for Captcha:</span>](#span-stylecolor-rederror-response-for-captchaspan)
+    * [Register API](#register-api)
         * [Method:](#method-1)
         * [URL construction:](#url-construction-1)
-        * [Header](#header-1)
-        * [<span style="color: orange;">Payload for Logout:</span>](#span-stylecolor-redpayload-for-logoutspan)
-        * [<span style="color: green;">Response for Logout:</span>](#span-stylecolor-greenresponse-for-logoutspan)
-    * [Captcha API](#captcha-api)
+        * [<span style="color: orange;">Payload for Register:</span>](#span-stylecolor-orangepayload-for-registerspan)
+        * [<span style="color: green;">Success response for Register:</span>](#span-stylecolor-greensuccess-response-for-registerspan)
+        * [<span style="color: red;">Error response for Register:</span>](#span-stylecolor-rederror-response-for-registerspan)
+    * [Account activation API](#account-activation-api)
         * [Method:](#method-2)
         * [URL construction:](#url-construction-2)
-        * [<span style="color: green;">Response for Captcha:</span>](#span-stylecolor-greenresponse-for-captchaspan)
-    * [Register API](#register-api)
+        * [<span style="color: green;">Success response for account activation:</span>](#span-stylecolor-greensuccess-response-for-account-activationspan)
+        * [<span style="color: red;">Error response for account activation:</span>](#span-stylecolor-rederror-response-for-account-activationspan)
+    * [Forgot Password API](#forgot-password-api)
         * [Method:](#method-3)
         * [URL construction:](#url-construction-3)
-        * [<span style="color: orange;">Payload for Register:</span>](#span-stylecolor-redpayload-for-registerspan)
-        * [<span style="color: green;">Response for Register:</span>](#span-stylecolor-greenresponse-for-registerspan)
-    * [Log Out](#log-out)
+        * [<span style="color: orange;">Payload for Forgot Password:</span>](#span-stylecolor-orangepayload-for-forgot-passwordspan)
+        * [<span style="color: green;">Success response for Forgot Password:</span>](#span-stylecolor-greensuccess-response-for-forgot-passwordspan)
+        * [<span style="color: red;">Error response for Forgot Password:</span>](#span-stylecolor-rederror-response-for-forgot-passwordspan)
+    * [New Password API](#new-password-api)
         * [Method:](#method-4)
         * [URL construction:](#url-construction-4)
-        * [Header](#header-2)
-        * [<span style="color: green;">Response for Logout:</span>](#span-stylecolor-greenresponse-for-logoutspan-1)
-    * [Save data](#save-data)
+        * [<span style="color: orange;">Payload for New Password:</span>](#span-stylecolor-orangepayload-for-new-passwordspan)
+        * [<span style="color: green;">Success response for New Password:</span>](#span-stylecolor-greensuccess-response-for-new-passwordspan)
+        * [<span style="color: red;">Error response for New Password:</span>](#span-stylecolor-rederror-response-for-new-passwordspan)
+    * [Login API](#login-api)
         * [Method:](#method-5)
         * [URL construction:](#url-construction-5)
-        * [Header:](#header-3)
-        * [<span style="color: orange;">Payload for single record:</span>](#span-stylecolor-redpayload-for-single-recordspan)
-        * [<span style="color: green;">Response for single record:</span>](#span-stylecolor-greenresponse-for-single-recordspan)
-        * [<span style="color: orange;">Payload for multiple record:</span>](#span-stylecolor-redpayload-for-multiple-recordspan)
-        * [<span style="color: green;">Response for multiple record:</span>](#span-stylecolor-greenresponse-for-multiple-recordspan)
-        * [Description for Fields](#description-for-fields)
-    * [Fetch data](#fetch-data)
+        * [Header:](#header)
+        * [<span style="color: orange;">Payload for Login:</span>](#span-stylecolor-orangepayload-for-loginspan)
+        * [<span style="color: green;">Success response for Login:</span>](#span-stylecolor-greensuccess-response-for-loginspan)
+        * [<span style="color: red;">Error response for Login:</span>](#span-stylecolor-rederror-response-for-loginspan)
+    * [Refresh Token API](#refresh-token-api)
         * [Method:](#method-6)
         * [URL construction:](#url-construction-6)
-        * [Header:](#header-4)
-        * [<span style="color: orange;">Payload for Fetch Data:</span>](#span-stylecolor-redpayload-for-fetch-dataspan)
-        * [<span style="color: green;">Response for Fetch Data:</span>](#span-stylecolor-greenresponse-for-fetch-dataspan)
-        * [Description of Fields](#description-of-fields)
-    * [Update data](#update-data)
+        * [Header](#header-1)
+        * [<span style="color: orange;">Payload for Refresh:</span>](#span-stylecolor-orangepayload-for-refreshspan)
+        * [<span style="color: green;">Success response for Refresh:</span>](#span-stylecolor-greensuccess-response-for-refreshspan)
+    * [Fetch data](#fetch-data)
         * [Method:](#method-7)
         * [URL construction:](#url-construction-7)
-        * [Header:](#header-5)
-        * [<span style="color: orange;">Payload for Update Record:</span>](#span-stylecolor-redpayload-for-update-recordspan)
-        * [<span style="color: green;">Response for Update Record:</span>](#span-stylecolor-greenresponse-for-update-recordspan)
-        * [Description for Fields](#description-for-fields-1)
-    * [Forgot Password API](#forgot-password-api)
+        * [Header:](#header-2)
+        * [<span style="color: orange;">Payload for Fetch Data:</span>](#span-stylecolor-orangepayload-for-fetch-dataspan)
+        * [<span style="color: green;">Success response for Fetch Data:</span>](#span-stylecolor-greensuccess-response-for-fetch-dataspan)
+        * [<span style="color: red;">Error response for Fetch Data:</span>](#span-stylecolor-rederror-response-for-fetch-dataspan)
+        * [Description of Fields](#description-of-fields)
+    * [Save data](#save-data)
         * [Method:](#method-8)
         * [URL construction:](#url-construction-8)
-        * [<span style="color: orange;">Payload for Forgot Password:</span>](#span-stylecolor-redpayload-for-forgot-passwordspan)
-        * [<span style="color: green;">Response for Forgot Password:</span>](#span-stylecolor-greenresponse-for-forgot-passwordspan)
-    * [New Password API](#new-password-api)
+        * [Header:](#header-3)
+        * [<span style="color: orange;">Payload for single record:</span>](#span-stylecolor-orangepayload-for-single-recordspan)
+        * [<span style="color: green;">Success response for single record:</span>](#span-stylecolor-greensuccess-response-for-single-recordspan)
+        * [<span style="color: red;">Error response for single record:</span>](#span-stylecolor-rederror-response-for-single-recordspan)
+        * [<span style="color: orange;">Payload for multiple record:</span>](#span-stylecolor-orangepayload-for-multiple-recordspan)
+        * [<span style="color: green;">Success response for multiple record:</span>](#span-stylecolor-greensuccess-response-for-multiple-recordspan)
+        * [<span style="color: red;">Error response for multiple record:</span>](#span-stylecolor-rederror-response-for-multiple-recordspan)
+        * [Description for Fields](#description-for-fields)
+    * [Update data](#update-data)
         * [Method:](#method-9)
         * [URL construction:](#url-construction-9)
-        * [<span style="color: orange;">Payload for New Password:</span>](#span-stylecolor-redpayload-for-new-passwordspan)
-        * [<span style="color: green;">Response for New Password:</span>](#span-stylecolor-greenresponse-for-new-passwordspan)
-    * [Fetch UserProfile API](#fetch-userprofile-api)
+        * [Header:](#header-4)
+        * [<span style="color: orange;">Payload for Update Record:</span>](#span-stylecolor-orangepayload-for-update-recordspan)
+        * [<span style="color: green;">Success response for Update Record:</span>](#span-stylecolor-greensuccess-response-for-update-recordspan)
+        * [<span style="color: red;">Error response for Update Record:</span>](#span-stylecolor-rederror-response-for-update-recordspan)
+        * [Description for Fields](#description-for-fields-1)
+    * [Fetch User Info API](#fetch-user-info-api)
         * [Method:](#method-10)
         * [URL construction:](#url-construction-10)
-        * [<span style="color: green;">Response for New Password:</span>](#span-stylecolor-greenresponse-for-new-passwordspan-1)
+        * [Header:](#header-5)
+        * [<span style="color: green;">Success response for User Info:</span>](#span-stylecolor-greensuccess-response-for-user-infospan)
+        * [<span style="color: red;">Error response for User Info:</span>](#span-stylecolor-rederror-response-for-user-infospan)
+    * [Update User Info API](#update-user-info-api)
+        * [Method:](#method-11)
+        * [URL construction:](#url-construction-11)
+        * [Header:](#header-6)
+        * [<span style="color: orange;">Payload for User Info Update:</span>](#span-stylecolor-orangepayload-for-user-info-updatespan)
+        * [<span style="color: green;">Success response for User Info Update:</span>](#span-stylecolor-greensuccess-response-for-user-info-updatespan)
+        * [<span style="color: red;">Error response for User Info Update:</span>](#span-stylecolor-rederror-response-for-user-info-updatespan)
 
 <!-- TOC -->
 
@@ -391,10 +409,278 @@ REST_FRAMEWORK = {
 
 # Model APIs
 
-## Access Token API
+## Captcha API
 
-- To log a user in , post data on url '/< prefix >/login/' and set the
-  header as well and prepare payload as following.
+- This API provides users with a CAPTCHA image and its associated ID for
+  verification purposes.
+- The CAPTCHA verification is optional and can be used with the Login,
+  Registration, and Forgot Password APIs.
+- To generate a CAPTCHA, send a POST request to the URL
+  `/<prefix>/v1/captcha/`.
+- To use the CAPTCHA in the mentioned APIs:
+    - Include the CAPTCHA ID as `captcha_key` in the API payload.
+    - Include the CAPTCHA value as `captcha_value`, extracted from the CAPTCHA
+      image URL.
+- This service is optional. To disable CAPTCHA verification, set the
+  `CAPTCHA_REQUIRED`
+  variable to `False` in the settings.
+
+### Method:
+
+```bash
+HTTP Method: "POST"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/v1/generate-captcha/",
+```
+
+### <span style="color: green;">Success response for Captcha:</span>
+
+```bash
+# HTTP STATUS CODE = 200
+{
+    "data": {
+        "captcha_key": <captcha_key>,
+        "captcha_url": <image_url>
+    },
+    "message": "Captcha Generated."
+}
+```
+
+### <span style="color: red;">Error response for Captcha:</span>
+
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": <errro_message>,
+    "code": <error_code>
+}
+```
+
+---
+
+## Register API
+
+- To register a user, submit the data to the URL `/<prefix>/v1/register/`.
+- When a user sends a registration request, an activation link is sent to their
+  email.
+- Once the user clicks the activation link, their account is activated.
+- For security purposes, this API includes an optional CAPTCHA service.
+- To disable CAPTCHA, set `CAPTCHA_REQUIRED` to `False` in the settings.
+
+### Method:
+
+```bash
+HTTP Method: "POST"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/v1/register/",
+```
+
+### <span style="color: orange;">Payload for Register:</span>
+
+```bash
+{
+    "payload":{
+        "variables":{
+            "email":"user@example.com",
+            "password":"123456",
+            "password1":"123456",
+            "captcha_key": "<captcha_key>", # If CAPTCHA_REQUIRED is set True in settings.py
+            "captcha_value": "<captcha_value>" # If CAPTCHA_REQUIRED is set True in settings.py
+        }
+    }
+}
+```
+
+### <span style="color: green;">Success response for Register:</span>
+
+```bash
+# HTTP STATUS CODE = 200
+{ 
+    "data": "Registration initiated.",
+    "message": "Email sent successfully."
+}
+```
+
+### <span style="color: red;">Error response for Register:</span>
+
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": "passwords does not match",
+    "code": "DGA-V018"
+}
+```
+
+---
+
+## Account Activation API
+
+- After completing the registration, the user receives an activation link via
+  email.
+- To activate the account, the user must click on the link, which will finalize
+  the activation process.
+
+### Method:
+
+```bash
+HTTP METHOD: "GET"
+```
+
+### URL construction:
+
+```bash
+url : "<BASE_URL>/api/activate/<encoded_token>/"
+```
+
+### <span style="color: green;">Success response for account activation:</span>
+
+```bash
+# HTTP STATUS CODE = 201
+{
+    "data": "Registration completed.",
+    "message": "Your account has been activated successfully."
+}
+```
+
+### <span style="color: red;">Error response for account activation:</span>
+
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": "<error_message>", 
+    "code": "<error_code>"
+}
+```
+
+---
+
+## Forgot Password API
+
+- This API allows users to initiate the password recovery process.
+- If a user forgets their password, they can submit a request to receive a
+  password reset link via email.
+- For security purposes, an optional CAPTCHA verification is included.
+- To disable CAPTCHA, set `CAPTCHA_REQUIRED` to `False` in the settings.
+
+### Method:
+
+```bash
+HTTP Method: "POST"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/v1/forgotPassword/",
+```
+
+### <span style="color: orange;">Payload for Forgot Password:</span>
+
+```bash
+{
+    "payload":{
+        "variables":{
+            "email":"user@example.com",
+            "captcha_key": "<captcha_key>", # If CAPTCHA_REQUIRED is set True in settings.py
+            "captcha_value": "<captcha_value>"  # If CAPTCHA_REQUIRED is set True in settings.py
+        }
+    }
+}
+```
+
+### <span style="color: green;">Success response for Forgot Password:</span>
+
+```bash
+# HTTP STATUS CODE = 200
+{
+    "data": "Password reset initiated.",
+    "message": "Email sent successfully."
+}
+```
+
+### <span style="color: red;">Error response for Forgot Password:</span>
+
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": "User not found",
+    "code": "DGA-V026"
+}
+```
+
+---
+
+## New Password API
+
+- This API allows users to securely reset their password.
+- To begin the process, users must initiate a password reset request through
+  the Forgot Password API.
+- A password reset link will be sent to the user's registered email address.
+- After receiving the link, users can update their password by sending a POST
+  request as detailed below.
+
+### Method:
+
+```bash
+HTTP Method: "POST"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/v1/newpassword/<encoded_token>",
+```
+
+### <span style="color: orange;">Payload for New Password:</span>
+
+```bash
+{
+    "payload":{
+        "variables":{
+            "password": "123456",
+            "password1" : "123456"
+        }
+    }
+}
+```
+
+### <span style="color: green;">Success response for New Password:</span>
+
+```bash
+# HTTP STATUS CODE = 200
+{
+    "data": "Password reset success",
+    "message": "Your password has been reset."
+}
+```
+
+### <span style="color: red;">Error response for New Password:</span>
+
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": <error_message>,
+    "code": <error_code>
+}
+```
+
+---
+
+## Login API
+
+- This API generates a pair of access and refresh tokens for user
+  authentication.
+- To log in, send a POST request to the URL `/ <prefix> /v1/login/`.
+- For enhanced security, optional CAPTCHA verification is included.
+- To disable CAPTCHA, set `CAPTCHA_REQUIRED` to `False` in the settings.
 
 ### Method:
 
@@ -408,15 +694,10 @@ HTTP Method: "POST"
 url: "http://domain-name/api/v1/login/",
 ```
 
-### Header:
-
-```header
-header["X-CSRFToken"]=csrfvalue
-```
 
 ### <span style="color: orange;">Payload for Login:</span>
 
-```json
+```bash
 
 {
   "payload": {
@@ -430,14 +711,28 @@ header["X-CSRFToken"]=csrfvalue
 }
 ```
 
-### <span style="color: green;">Response for Login:</span>
+### <span style="color: green;">Success response for Login:</span>
 
-```json
+```bash
+# HTTP STATUS CODE = 200 OK
 {
-    "data": [{
-        "refresh": ".....",
-        "access": "......"
-    }]
+    "data": [
+        {
+            "refresh": <refresh_token> 
+            "access":  <access_token>
+        }
+    ],
+    "message": "Tokens are generated."
+}
+```
+
+### <span style="color: red;">Error response for Login:</span>
+
+```bash
+# HTTP STATUS CODE = 400 / 401/ 404
+{
+    "error": <error message>,
+    "code": <error code>
 }
 ```
 
@@ -445,9 +740,10 @@ header["X-CSRFToken"]=csrfvalue
 
 ## Refresh Token API
 
-- To get a efresh token, post data on url '/< prefix >/refresh/' .
-- As the access token expires after given time, use refresh token to get
-  new access token.
+- To obtain a new access token, send a POST request to the URL
+  `/ <prefix> /v1/refresh/`.
+- As the access token expires after a certain time, use the refresh token to
+  get a new access token.
 
 ### Method:
 
@@ -467,17 +763,18 @@ url: "http://domain-name/api/v1/refresh/",
 header["Content-Type"]="application/json"
 ```
 
-### <span style="color: orange;">Payload for Logout:</span>
+### <span style="color: orange;">Payload for Refresh:</span>
 
-```json
+```bash
 {
     "refresh":"..."
 } 
 ```
 
-### <span style="color: green;">Response for Logout:</span>
+### <span style="color: green;">Success response for Refresh:</span>
 
-```json
+```bash
+# HTTP STATUS CODE = 200
 {
     "access": "..."
 }
@@ -485,46 +782,10 @@ header["Content-Type"]="application/json"
 
 ---
 
-## Captcha API
+## Fetch data
 
-- This API allows users to obtain a CAPTCHA image and its id for verification
-  purposes.
-- This API supports both GET and POST methods.
-- To get a captcha, perform the request as
-
-### Method:
-
-```bash
-HTTP Method: "GET" / "POST"
-```
-
-### URL construction:
-
-```bash
-url: "http://domain-name/api/v1/generate-captcha/",
-```
-
-### <span style="color: green;">Response for Captcha:</span>
-
-```bash
-{
-    "captcha_key" : <captcha_key>,
-    "captcha_url" : <image_url>
-    # example for image url = "http://127.0.0.1:8050/api/v1/captcha/image/c3efb9d994299a54312e2bb864f93c7aff600c4c/"
-}
-```
-
----
-
-## Register API
-
-- Send a request to Captcha API to get "captcha_key" and "captcha_url".
-- The captcha_url is an image containing a value. Extract this value and send
-  it as captcha_value in the register API.
-- To register a user, post the data on url '/< prefix >/register/'.
-- As user sends registration request, a user activation link is sent to their
-  email, as user clicks on
-  that link user is activated.
+- To fetch the data, post on the url '/< url prefix >/v1/fetch/' and set
+  header as well prepare payload as following.
 
 ### Method:
 
@@ -535,72 +796,109 @@ HTTP Method: "POST"
 ### URL construction:
 
 ```bash
-url: "http://domain-name/api/v1/register/",
+url: "http://domain-name/api/v1/fetch/",
 ```
 
-### <span style="color: orange;">Payload for Register:</span>
+### Header:
 
-```json
+```bash
+header["Content-Type"]="application/json"
+header["Authorization"]="Bearer <access token>"
+```
+
+### <span style="color: orange;">Payload for Fetch Data:</span>
+
+```bash
 {
-    "payload":{
-        "variables":{
-            "email":"user@example.com",
-            "password":"123456",
-            "password1":"123456",
-            "captcha_key": "<captcha_key>", // If CAPTCHA_REQUIRED is set True in settings.py
-            "captcha_value": "<captcha_value>" // If CAPTCHA_REQUIRED is set True in settings.py
+  "payload": {
+    "variables": {
+      "modelName": "Model name",
+      "fields": ["field1", "field2", "field3"],
+      "filters": [
+        {
+          "operator": "eq / in / gt / like / ilike",
+          "name": "field",
+          "value": ["field-value"]  ,
+          "operation": "or / and"
+        }
+      ],
+      "pageNumber":1,
+      "pageSize":10,
+      "sort":
+        {
+        "field":"field1",
+        "order_by":"asc/desc"
         }
     }
+  }
 }
 ```
 
-### <span style="color: green;">Response for Register:</span>
+### <span style="color: green;">Success response for Fetch Data:</span>
 
-```json
+```bash
 {
-    "message": "Email sent successfully."
+    "data": {
+        "total": 10,
+        "data": [
+            {
+                "field1": "abc",
+                "field1": "def",
+                "field3": "ghi"
+            },
+            .
+            .
+            .
+            .
+        ]
+    },
+    "message": "Completed."
 }
 ```
+
+### <span style="color: red;">Error response for Fetch Data:</span>
+
+```bash
+{
+    "error":<error_message>,
+    "code": <error_code>
+}
+
+```
+
+### Description of Fields
+
+| Field Name    | Datatype   | Description                                                                                                 | Required | Default Value                                              | Example                                              |
+|---------------|------------|-------------------------------------------------------------------------------------------------------------|----------|------------------------------------------------------------|------------------------------------------------------|
+| modelName     | String     | Name of Django model to fetch                                                                               | True     | "model name"                                               | Employees                                            |
+| fields        | List       | List of database field names, ex: field1,field2,                                                            | True     | ["field1","field2","field3 "]                              | ["name","age","emp_id"]                              |
+| filters       | List[Dict] | Consists 3 filter properties (operator, name,value)                                                         | True     | [{"operator": "in", "name": "field1","value": ["value1"]}] | [{ "operator": "eq","name": "age","value": ["25"] }] |
+| operator      | Enum       | Specifies the comparison operation to be applied, Only considers one of ('eq', 'in', 'gt', 'like', 'ilike') | True     | "eq"                                                       | eq                                                   |
+| name          | String     | Name of the field on which the filter is to be applied                                                      | True     | "field1"                                                   | age                                                  |
+| value         | List[Any]  | Values against which the field will be compared                                                             | True     | "value1"                                                   | ["25"]                                               |
+| operation     | Enum       | Logical operation to chain filters. Options include 'and' or 'or'.                                          | --       | "or"                                                       | or                                                   |
+| pageNumber    | Int        | Page number for paginated results                                                                           | --       | 1                                                          | 4                                                    |  
+| pageSize      | Int        | Number of records displayed in a page after pagination                                                      | True     | 10                                                         | 10                                                   |
+| Sort          | Dict       | Consists of 2 sort options (field, order_by)                                                                | True     | { "field":"field1","order_by":"asc" }                      | { "field":"id","order_by":"asc" }                    |
+| Sort.Field    | String     | Field name by which the results should be sorted                                                            | True     | "field1"                                                   | id                                                   |
+| Sort.order_by | Enum       | Sorting order ('asc' for ascending, 'desc' for descending)                                                  | True     | "asc"                                                      | asc                                                  |
 
 ---
 
-## Log Out
+## Save Data API
 
-- To log out a user, post data on the url '/< url prefix >/logout/'.
-
-### Method:
-
-```bash
-HTTP Method: "POST"
-```
-
-### URL construction:
-
-```bash
-url: "http://domain-name/api/v1/logout/",
-```
-
-### Header
-
-```header
-header["X-CSRFToken"]=csrfvalue
-```
-
-### <span style="color: green;">Response for Logout:</span>
-
-```json
-{
-    "message": "Successfully logged out."
-}
-```
-
----
-
-## Save data
-
-- This api supports saving 1 to 10 records at once.
-- To save data, post data on the url '/< url prefix >/save/' and set header as
-  well prepare payload as following.
+- This API supports saving records, from 1 up to a customizable limit.
+- The maximum number of records is defined by the `CREATE_BATCH_SIZE` setting.
+- By default, `CREATE_BATCH_SIZE` is set to 10 if not specified.
+- To customize, set `CREATE_BATCH_SIZE` in the `django-generic-api.ini` file in
+  the `manage.py` directory:
+  ```
+  [SAVE_SETTINGS]
+  CREATE_BATCH_SIZE = 10
+  ```
+- Send a POST request to `/ <url prefix> /v1/save/` with the appropriate
+  headers.
+- Prepare the payload as required.
 
 ### Method:
 
@@ -623,7 +921,7 @@ header["Authorization"]="Bearer <access token>"
 
 ### <span style="color: orange;">Payload for single record:</span>
 
-```json
+```bash
 {
     "payload":{
         "variables":{
@@ -645,9 +943,10 @@ header["Authorization"]="Bearer <access token>"
 
 ```
 
-### <span style="color: green;">Response for single record:</span>
+### <span style="color: green;">Success response for single record:</span>
 
-```json
+```bash
+# HTTP SUCCESS CODE = 200
 {
     "data": [
         {
@@ -662,9 +961,19 @@ header["Authorization"]="Bearer <access token>"
 }
 ```
 
+### <span style="color: red;">Error response for single record:</span>
+
+```bash
+# HTTP SUCCESS CODE = 400
+{
+    "error": <error_message>,
+    "code": <error_code>
+}
+```
+
 ### <span style="color: orange;">Payload for multiple record:</span>
 
-```json
+```bash
 {
     "payload":{
         "variables":{
@@ -697,9 +1006,10 @@ header["Authorization"]="Bearer <access token>"
 
 ```
 
-### <span style="color: green;">Response for multiple record:</span>
+### <span style="color: green;">Success response for multiple record:</span>
 
-```json
+```bash
+# HTTP SUCCESS CODE = 200
 {
     "data": [
         {
@@ -715,6 +1025,16 @@ header["Authorization"]="Bearer <access token>"
 }
 ```
 
+### <span style="color: red;">Error response for multiple record:</span>
+
+```bash
+# HTTP SUCCESS CODE = 400
+{
+    "error": <error_message>,
+    "code": <error_code>
+}
+```
+
 ### Description for Fields
 
 | Field Name      | Datatype           | Description                                         | Required | Default Value                                 | Example                                   |
@@ -727,95 +1047,11 @@ header["Authorization"]="Bearer <access token>"
 
 ---
 
-## Fetch data
-
-- To fetch the data, post on the url '/< url prefix >/fetch/' and set
-  header as well prepare payload as following.
-
-### Method:
-
-```bash
-HTTP Method: "POST"
-```
-
-### URL construction:
-
-```bash
-url: "http://domain-name/api/v1/fetch/",
-```
-
-### Header:
-
-```bash
-header["Content-Type"]="application/json"
-header["Authorization"]="Bearer <access token>"
-```
-
-### <span style="color: orange;">Payload for Fetch Data:</span>
-
-```json
-{
-  "payload": {
-    "variables": {
-      "modelName": "Model name",
-      "fields": ["field1", "field2", "field3"],
-      "filters": [
-        {
-          "operator": "eq / in / gt",
-          "name": "field",
-          "value": ["field-value"]  ,
-          "operation": "or / and"
-        }
-      ],
-      "pageNumber":1,
-      "pageSize":10,
-      "sort":
-        {
-        "field":"field1",
-        "order_by":"asc/desc"
-        }
-    }
-  }
-}
-```
-
-### <span style="color: green;">Response for Fetch Data:</span>
-
-```json
-{
-    "total": 1,
-    "data": [
-        {
-            "field1": "abc",
-            "field2": "def",
-            "field3": "ghi"
-        }
-    ]
-}
-```
-
-### Description of Fields
-
-| Field Name    | Datatype   | Description                                                                                                 | Required | Default Value                                              | Example                                              |
-|---------------|------------|-------------------------------------------------------------------------------------------------------------|----------|------------------------------------------------------------|------------------------------------------------------|
-| modelName     | String     | Name of Django model to fetch                                                                               | True     | "model name"                                               | Employees                                            |
-| fields        | List       | List of database field names, ex: field1,field2,                                                            | True     | ["field1","field2","field3 "]                              | ["name","age","emp_id"]                              |
-| filters       | List[Dict] | Consists 3 filter properties (operator, name,value)                                                         | True     | [{"operator": "in", "name": "field1","value": ["value1"]}] | [{ "operator": "eq","name": "age","value": ["25"] }] |
-| operator      | Enum       | Specifies the comparison operation to be applied, Only considers one of ('eq', 'in', 'gt', 'like', 'ilike') | True     | "eq"                                                       | eq                                                   |
-| name          | String     | Name of the field on which the filter is to be applied                                                      | True     | "field1"                                                   | age                                                  |
-| value         | List[Any]  | Values against which the field will be compared                                                             | True     | "value1"                                                   | ["25"]                                               |
-| operation     | Enum       | Logical operation to chain filters. Options include 'and' or 'or'.                                          | --       | "or"                                                       | or                                                   |
-| pageNumber    | Int        | Page number for paginated results                                                                           | --       | 1                                                          | 4                                                    |  
-| pageSize      | Int        | Number of records displayed in a page after pagination                                                      | True     | 10                                                         | 10                                                   |
-| Sort          | Dict       | Consists of 2 sort options (field, order_by)                                                                | True     | { "field":"field1","order_by":"asc" }                      | { "field":"id","order_by":"asc" }                    |
-| Sort.Field    | String     | Field name by which the results should be sorted                                                            | True     | "field1"                                                   | id                                                   |
-| Sort.order_by | Enum       | Sorting order ('asc' for ascending, 'desc' for descending)                                                  | True     | "asc"                                                      | asc                                                  |
-
 ---
 
 ## Update data
 
-- To update data, post data on the url '/< url prefix >/save/' and set
+- To update data, post data on the url '/< url prefix >v1/save/' and set
   header as well prepare payload as following.
 
 ### Method:
@@ -839,7 +1075,7 @@ header["Authorization"]="Bearer <access token>"
 
 ### <span style="color: orange;">Payload for Update Record:</span>
 
-```json
+```bash
 {
     "payload":{
         "variables":{
@@ -861,9 +1097,10 @@ header["Authorization"]="Bearer <access token>"
 
 ```
 
-### <span style="color: green;">Response for Update Record:</span>
+### <span style="color: green;">Success response for Update Record:</span>
 
-```json
+```bash
+# HTTP STATUS CODE = 201
 {
     "data": [
         {
@@ -875,6 +1112,16 @@ header["Authorization"]="Bearer <access token>"
     "message": [
         "Record updated successfully."
     ]
+}
+```
+
+### <span style="color: red;">Error response for Update Record:</span>
+
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": <error_message>,
+    "code": <error_code>
 }
 ```
 
@@ -890,99 +1137,11 @@ header["Authorization"]="Bearer <access token>"
 
 ---
 
-## Forgot Password API
-
-- Send a request to Captcha API to get "captcha_key" and "captcha_url".
-- The captcha_url is an image containing a value. Extract this value and send
-  it as captcha_value in the forgot password API.
-- This API enables users to initiate the password recovery process.
-- When a user forgets their password, they can submit a request to receive a
-  password reset link via email.
-
-### Method:
-
-```bash
-HTTP Method: "POST"
-```
-
-### URL construction:
-
-```bash
-url: "http://domain-name/api/v1/forgotPassword/",
-```
-
-### <span style="color: orange;">Payload for Forgot Password:</span>
-
-```json
-{
-    "payload":{
-        "variables":{
-            "email":"user@example.com",
-            "captcha_key": "<captcha_key>", // If CAPTCHA_REQUIRED is set True in settings.py
-            "captcha_value": "<captcha_value>"  // If CAPTCHA_REQUIRED is set True in settings.py
-        }
-    }
-}
-```
-
-### <span style="color: green;">Response for Forgot Password:</span>
-
-```json
-{
-    "message": "Email sent successfully."
-}
-```
-
----
-
-## New Password API
-
-- This API enables users to reset their password securely.
-- Users must first initiate the password reset process by sending a POST
-  request to the Forgot Password API.
-- A password reset link will be sent to their registered email address.
-- Once the link is received, users can use it to update their password by
-  making a POST request as outlined below.
-
-### Method:
-
-```bash
-HTTP Method: "POST"
-```
-
-### URL construction:
-
-```bash
-url: "http://domain-name/api/v1/newpassword/<encoded_token>",
-```
-
-### <span style="color: orange;">Payload for New Password:</span>
-
-```json
-{
-    "payload":{
-        "variables":{
-            "password": "123456",
-            "password1" : "123456"
-        }
-    }
-}
-```
-
-### <span style="color: green;">Response for New Password:</span>
-
-```json
-{
-    "message": "Your password has been reset."
-}
-```
-
----
-
 ## Fetch User Info API
 
-- Provide the ability to fetch or update fields in the `auth_user` table that are defined exclusively by the system.  
-- Use the system setting variable `USER_INFO_FIELDS` to define a tuple of database table fields.  
+- Fetch or update fields in the `auth_user` table defined by the system.
+- Use the `USER_INFO_FIELDS` setting to define a tuple of database table
+  fields.
 - Authentication is required.
 
 ```bash
@@ -1010,9 +1169,10 @@ header["Content-Type"]="application/json"
 header["Authorization"]="Bearer <access token>"
 ```
 
-### <span style="color: green;">Response for User Info:</span>
+### <span style="color: green;">Success response for User Info:</span>
 
-```json
+```bash
+# HTTP STATUS CODE = 200
 {
     "data": [
         {
@@ -1024,19 +1184,30 @@ header["Authorization"]="Bearer <access token>"
 }
 ```
 
+### <span style="color: red;">Error response for User Info:</span>
+
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": <error_message>,
+    "code": <error_code>
+}
+```
+
 ---
 
 ## Update User Info API
 
-- Provide the ability to fetch or update fields in the `auth_user` table that are defined exclusively by the system.  
-- Use the system setting variable `USER_INFO_FIELDS` to define a tuple of database table fields.  
+- Fetch or update fields in the `auth_user` table defined by the system.
+- Use the `USER_INFO_FIELDS` setting to define a tuple of database table
+  fields.
 - Authentication is required.
 
 ```bash
-# ex: USER_INFO_FIELDS = (first_name, last_name)
+# Example: USER_INFO_FIELDS = ('first_name', 'last_name')
 ```
 
-- The listed attributes can be updated.
+- Only the listed attributes can be updated.
 
 ### Method:
 
@@ -1059,7 +1230,7 @@ header["Authorization"]="Bearer <access token>"
 
 ### <span style="color: orange;">Payload for User Info Update:</span>
 
-```json
+```bash
 {
     "payload":{
         "variables":{
@@ -1073,9 +1244,10 @@ header["Authorization"]="Bearer <access token>"
 
 ```
 
-### <span style="color: green;">Response for User Info Update:</span>
+### <span style="color: green;">Success response for User Info Update:</span>
 
 ```bash
+# HTTP STATUS CODE = 200
 {
     "data": [
         {
@@ -1085,3 +1257,15 @@ header["Authorization"]="Bearer <access token>"
     "message": "<user.username>'s info is updated"
 }
 ```
+
+### <span style="color: red;">Error response for User Info Update:</span>
+
+```bash
+# HTTP STATUS CODE = 400
+{
+    "error": <error_message>,
+    "code": <error_code>
+}
+```
+
+---

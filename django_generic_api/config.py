@@ -32,6 +32,7 @@ else:
 
 try:
     # Rest framework settings
+    # todo : for user convenience let them set these in settings
     user_rate = config.getint("REST_FRAMEWORK", "USER_RATE", fallback=1000)
     anon_rate = config.getint("REST_FRAMEWORK", "ANON_RATE", fallback=30)
 

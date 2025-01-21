@@ -1,4 +1,3 @@
-import json
 from unittest.mock import patch, MagicMock
 
 import pytest
@@ -29,10 +28,11 @@ class TestForgotPasswordAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
 
             forgot_password_payload = {
                 "payload": {
@@ -50,7 +50,7 @@ class TestForgotPasswordAPI:
                 format="json",
             )
 
-            response_data = response.json()
+            response_data = response.data
 
             # Assertions
             assert response.status_code == 200
@@ -66,11 +66,12 @@ class TestForgotPasswordAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
             # Use the mocked behavior for invalid captcha key
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
             forgot_password_payload = {
                 "payload": {
                     "variables": {
@@ -88,12 +89,12 @@ class TestForgotPasswordAPI:
                 format="json",
             )
 
-            response_data = response.json()
+            response_data = response.data
 
             # Assertions
             assert response.status_code == 400
             assert response_data["error"] == "Invalid or expired captcha key."
-            assert response_data["code"] == "DGA-V036"
+            assert response_data["code"] == "DGA-V025"
 
     def test_invalid_captcha_value(self, api_client, login_user):
         """
@@ -109,11 +110,12 @@ class TestForgotPasswordAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
             # Use the mocked captcha value for testing
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
             forgot_password_payload = {
                 "payload": {
                     "variables": {
@@ -130,12 +132,12 @@ class TestForgotPasswordAPI:
                 format="json",
             )
 
-            response_data = response.json()
+            response_data = response.data
 
             # Assertions
             assert response.status_code == 400
             assert response_data["error"] == "Invalid captcha response."
-            assert response_data["code"] == "DGA-V026"
+            assert response_data["code"] == "DGA-V024"
 
     def test_invalid_payload_format(self, api_client, login_user):
         """
@@ -157,14 +159,14 @@ class TestForgotPasswordAPI:
             format="json",
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
             == "Value error, Captcha key and value are required when "
             "`CAPTCHA_REQUIRED` is True."
         )
-        assert response_data["code"] == "DGA-V017"
+        assert response_data["code"] == "DGA-V023"
 
     def test_user_not_found(self, api_client):
         """
@@ -180,11 +182,12 @@ class TestForgotPasswordAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
             # Use the mocked captcha value for testing
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
             forgot_password_payload = {
                 "payload": {
                     "variables": {
@@ -201,11 +204,11 @@ class TestForgotPasswordAPI:
                 format="json",
             )
 
-            response_data = response.json()
+            response_data = response.data
 
             assert response.status_code == 404
             assert response_data["error"] == "User not found"
-            assert response_data["code"] == "DGA-V037"
+            assert response_data["code"] == "DGA-V026"
 
     def test_extra_field_in_payload(self, api_client, login_user):
         """
@@ -229,11 +232,11 @@ class TestForgotPasswordAPI:
             format="json",
         )
 
-        response_data = response.json()
+        response_data = response.data
 
         assert response.status_code == 400
         assert response_data["error"] == "Extra inputs are not permitted"
-        assert response_data["code"] == "DGA-V017"
+        assert response_data["code"] == "DGA-V023"
 
     def test_captcha_attributes_sent_captcha_required_true(
         self, api_client, login_user
@@ -254,10 +257,11 @@ class TestForgotPasswordAPI:
 
             captcha_response = api_client.post("/v1/generate-captcha/")
             assert captcha_response.status_code == 200
-            assert "captcha_key" in captcha_response.data
-            assert "captcha_url" in captcha_response.data
+            assert "captcha_key" in captcha_response.data["data"]
+            assert "captcha_url" in captcha_response.data["data"]
+            assert captcha_response.data["message"] == "Captcha Generated."
 
-            captcha_key = captcha_response.data["captcha_key"]
+            captcha_key = captcha_response.data["data"]["captcha_key"]
 
             forgot_password_payload = {
                 "payload": {
@@ -275,7 +279,7 @@ class TestForgotPasswordAPI:
                 format="json",
             )
 
-            response_data = response.json()
+            response_data = response.data
 
             # Assertions
             assert response.status_code == 200
@@ -302,7 +306,7 @@ class TestForgotPasswordAPI:
             format="json",
         )
 
-        response_data = response.json()
+        response_data = response.data
 
         assert response.status_code == 400
         assert (
@@ -310,7 +314,7 @@ class TestForgotPasswordAPI:
             == "Value error, Captcha key and value are required when "
             "`CAPTCHA_REQUIRED` is True."
         )
-        assert response_data["code"] == "DGA-V017"
+        assert response_data["code"] == "DGA-V023"
 
     def test_captcha_attributes_sent_captcha_required_false(
         self, api_client, monkeypatch
@@ -339,14 +343,14 @@ class TestForgotPasswordAPI:
             format="json",
         )
 
-        response_data = response.json()
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
             == "Value error, Captcha key and value should not be "
             "provided when `CAPTCHA_REQUIRED` is False."
         )
-        assert response_data["code"] == "DGA-V017"
+        assert response_data["code"] == "DGA-V023"
 
     def test_captcha_attributes_not_sent_captcha_required_false(
         self, api_client, login_user, monkeypatch
@@ -372,7 +376,7 @@ class TestForgotPasswordAPI:
             format="json",
         )
 
-        response_data = response.json()
+        response_data = response.data
 
         # Assertions
         assert response.status_code == 200

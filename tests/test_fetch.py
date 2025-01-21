@@ -1,5 +1,4 @@
 # Test cases for fetch API
-import json
 from unittest.mock import patch
 
 import pytest
@@ -60,12 +59,13 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
-        assert response_data["total"] == 1
-        assert response_data["data"] == [
+        assert response_data["data"]["total"] == 1
+        assert response_data["data"]["data"] == [
             {"name": customer1.name, "email": customer1.email}
         ]
+        assert response_data["message"] == "Completed."
 
     def test_fetch_filter_operator_eq(
         self, customer1, api_client, view_perm_token
@@ -100,12 +100,13 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
-        assert response_data["total"] == 1
-        assert response_data["data"] == [
+        assert response_data["data"]["total"] == 1
+        assert response_data["data"]["data"] == [
             {"name": customer1.name, "email": customer1.email}
         ]
+        assert response_data["message"] == "Completed."
 
     def test_fetch_filter_operator_in(
         self, customer1, customer2, api_client, view_perm_token
@@ -141,13 +142,14 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
-        assert response_data["total"] == 2
-        assert response_data["data"] == [
+        assert response_data["data"]["total"] == 2
+        assert response_data["data"]["data"] == [
             {"name": customer2.name, "email": customer2.email},
             {"name": customer1.name, "email": customer1.email},
         ]
+        assert response_data["message"] == "Completed."
 
     def test_fetch_filter_operator_not(
         self, customer2, api_client, view_perm_token
@@ -183,12 +185,13 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
-        assert response_data["total"] == 1
-        assert response_data["data"] == [
+        assert response_data["data"]["total"] == 1
+        assert response_data["data"]["data"] == [
             {"name": customer2.name, "email": customer2.email},
         ]
+        assert response_data["message"] == "Completed."
 
     def test_fetch_filter_operator_gt(
         self, customer1, customer2, api_client, view_perm_token
@@ -224,13 +227,14 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
-        assert response_data["total"] == 2
-        assert response_data["data"] == [
+        assert response_data["data"]["total"] == 2
+        assert response_data["data"]["data"] == [
             {"name": customer2.name, "email": customer2.email},
             {"name": customer1.name, "email": customer1.email},
         ]
+        assert response_data["message"] == "Completed."
 
     def test_fetch_filter_operator_gt_2(
         self, customer1, customer2, api_client, view_perm_token
@@ -266,10 +270,11 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
-        assert response_data["total"] == 0
-        assert response_data["data"] == []
+        assert response_data["data"]["total"] == 0
+        assert response_data["data"]["data"] == []
+        assert response_data["message"] == "Completed."
 
     def test_fetch_filter_operator_like(
         self, customer1, customer2, api_client, view_perm_token
@@ -301,10 +306,10 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
-        assert response_data["total"] == 2
-        assert response_data["data"] == [
+        assert response_data["data"]["total"] == 2
+        assert response_data["data"]["data"] == [
             {
                 "name": "test_user1",
                 "email": "user1@gmail.com",
@@ -316,6 +321,7 @@ class TestGenericFetchAPI:
                 "address": "HYDERABAD",
             },
         ]
+        assert response_data["message"] == "Completed."
 
     def test_fetch_without_app_name(
         self, customer1, api_client, view_perm_token
@@ -350,12 +356,13 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 200
-        assert response_data["total"] == 1
-        assert response_data["data"] == [
+        assert response_data["data"]["total"] == 1
+        assert response_data["data"]["data"] == [
             {"name": customer1.name, "email": customer1.email}
         ]
+        assert response_data["message"] == "Completed."
 
     def test_fetch_with_incorrect_app_name(
         self, customer1, api_client, view_perm_token
@@ -390,10 +397,10 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-V007"
+        assert response_data["code"] == "DGA-S013"
 
     def test_fetch_with_incorrect_model_name(
         self, customer1, api_client, view_perm_token
@@ -428,10 +435,10 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-V007"
+        assert response_data["code"] == "DGA-S013"
 
     def test_payload_missing_field_property(
         self, customer1, api_client, view_perm_token
@@ -465,10 +472,10 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Field required('fields',)"
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
 
     def test_fetch_access_denied(self, api_client):
         """
@@ -495,13 +502,13 @@ class TestGenericFetchAPI:
 
         # Send a POST request to the fetch endpoint without authentication
         response = api_client.post("/v1/fetch/", fetch_payload, format="json")
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 404
         assert (
             response_data["error"]
             == "Something went wrong!!! Please contact the administrator."
         )
-        assert response_data["code"] == "DGA-V008"
+        assert response_data["code"] == "DGA-V007"
 
     def test_invalid_token_format(self, api_client, view_perm_token):
         """
@@ -534,13 +541,13 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 404
         assert (
             response_data["error"]
             == "Something went wrong!!! Please contact the administrator."
         )
-        assert response_data["code"] == "DGA-V008"
+        assert response_data["code"] == "DGA-V007"
 
     def test_invalid_payload_format(
         self, customer1, api_client, view_perm_token
@@ -576,13 +583,13 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
             == "Extra inputs are not permitted('extra_field',)"
         )
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
 
     def test_invalid_model_name(self, customer1, api_client, view_perm_token):
         """
@@ -614,10 +621,10 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-V007"
+        assert response_data["code"] == "DGA-S013"
 
     def test_fetch_unauthorized(self, customer1, api_client, add_perm_token):
         """
@@ -649,13 +656,13 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 404
         assert (
             response_data["error"]
             == "Something went wrong!!! Please contact the administrator."
         )
-        assert response_data["code"] == "DGA-V008"
+        assert response_data["code"] == "DGA-V007"
 
     def test_invalid_model_name_non_string(
         self, customer1, api_client, view_perm_token
@@ -690,13 +697,13 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"]
             == "Input should be a valid string('modelName',)"
         )
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
 
     def test_invalid_payload_fields_data_type(
         self, customer1, api_client, view_perm_token
@@ -731,12 +738,12 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
         assert (
             response_data["error"] == "Input should be a valid list('fields',)"
         )
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
 
     def test_unknown_fetch_filter_name(
         self, customer1, api_client, view_perm_token
@@ -772,13 +779,10 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V009"
-        assert (
-            response_data["error"]
-            == "{'error': \"Extra field {'ABC'}\", 'code': 'DGA-U002'}"
-        )
+        assert response_data["code"] == "DGA-U002"
+        assert response_data["error"] == "Extra field {'ABC'}"
 
     def test_invalid_fetch_filter_format(
         self, customer1, api_client, view_perm_token
@@ -807,9 +811,9 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
         assert (
             response_data["error"]
             == "Input should be a valid dictionary or instance of "
@@ -849,9 +853,9 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
 
         # Add the newly added operator to the error message while testing
         assert (
@@ -894,9 +898,9 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
         assert (
             response_data["error"]
             == "Input should be a valid string('filters', 0, 'name')"
@@ -931,14 +935,10 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V009"
-        assert (
-            response_data["error"]
-            == "{'error': \"Invalid data: ['456789'] for dob\", 'code': "
-            "'DGA-S004'}"
-        )
+        assert response_data["code"] == "DGA-S002"
+        assert response_data["error"] == "Invalid data: ['456789'] for dob"
 
     def test_invalid_filter_value_length_for_eq_operator(
         self, customer1, api_client, view_perm_token
@@ -973,9 +973,9 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
         assert (
             response_data["error"]
             == "Value error, Multiple filters not supported('filters',)"
@@ -1016,10 +1016,10 @@ class TestGenericFetchAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
         assert (
             response_data["error"]
             == "Input should be 'or' or 'and'('filters', 0, 'operation')"
@@ -1056,10 +1056,10 @@ class TestGenericFetchAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
         assert (
             response_data["error"]
             == "Input should be a valid integer, unable to parse string "
@@ -1098,10 +1098,10 @@ class TestGenericFetchAPI:
             headers=headers,
         )
 
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
         assert (
             response_data["error"]
             == "Input should be greater than or equal to 1('pageSize',)"
@@ -1135,9 +1135,9 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
         assert (
             response_data["error"]
             == "Input should be a valid dictionary or instance of "
@@ -1170,9 +1170,9 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
         assert (
             response_data["error"]
             == "Extra inputs are not permitted('sort', 'abc')"
@@ -1204,13 +1204,10 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V009"
-        assert (
-            response_data["error"]
-            == "{'error': \"Extra field {'ABCD'}\", 'code': 'DGA-U002'}"
-        )
+        assert response_data["code"] == "DGA-U002"
+        assert response_data["error"] == "Extra field {'ABCD'}"
 
     def test_invalid_sort_order_by(
         self, customer1, api_client, view_perm_token
@@ -1240,9 +1237,9 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
         assert (
             response_data["error"]
             == "Input should be 'asc' or 'desc'('sort', 'order_by')"
@@ -1277,9 +1274,9 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
         assert response.status_code == 400
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-V005"
         assert (
             response_data["error"]
             == "Input should be a valid boolean, unable to interpret "
@@ -1323,7 +1320,7 @@ class TestGenericFetchAPI:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == 401
         assert response_data["error"] == "Invalid Token."
@@ -1356,8 +1353,13 @@ class TestGenericFetchAPI:
             },
             200,
             {
-                "total": 1,
-                "data": [{"name": "test_user1", "email": "user1@gmail.com"}],
+                "message": "Completed.",
+                "data": {
+                    "total": 1,
+                    "data": [
+                        {"name": "test_user1", "email": "user1@gmail.com"}
+                    ],
+                },
             },
         ),
         # Missing Required Field Scenario
@@ -1382,7 +1384,7 @@ class TestGenericFetchAPI:
             400,
             {
                 "error": "Field required('fields',)",
-                "code": "DGA-V006",
+                "code": "DGA-V005",
             },
         ),
     ],
@@ -1406,7 +1408,7 @@ class TestFetchScenarios:
             format="json",
             headers=headers,
         )
-        response_data = json.loads(response.content.decode("utf-8"))
+        response_data = response.data
 
         assert response.status_code == expected_status
         assert response_data == expected_response
