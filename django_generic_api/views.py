@@ -10,6 +10,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.mail import send_mail
 from pydantic import ValidationError
+from rest_framework import status
 from rest_framework.views import APIView
 
 from .config import create_batch_size, expiry_hours
@@ -55,11 +56,11 @@ class GenericSaveAPIView(APIView):
 
         payload = self.request.data.get("payload", {}).get("variables", {})
 
-        save_input_len = payload.get("saveInput", {})
+        save_input = payload.get("saveInput", [])
 
         # Does not allow saving more than the customized number of records
         # at once.
-        if len(save_input_len) > create_batch_size:
+        if len(save_input) > create_batch_size:
             return error_response(
                 error=f"Only {create_batch_size} records at once.",
                 code="DGA-V001",
@@ -81,12 +82,17 @@ class GenericSaveAPIView(APIView):
 
         try:
             model = get_model_by_name(model_name)
-        except (ValueError, LookupError):
+
+        except Exception as e:
             return error_response(
-                error="Model not found",
-                code="DGA-V003",
+                error=e.args[0]["error"],
+                code=e.args[0]["code"],
+                status_code=e.args[0]["http_status"],
             )
 
+        status_code = (
+            status.HTTP_201_CREATED if not record_id else status.HTTP_200_OK
+        )
         action = "save" if not record_id else "edit"
         # checks if user has permission to add or change the data
         if not self.request.user.has_perm(make_permission_str(model, action)):
@@ -94,7 +100,7 @@ class GenericSaveAPIView(APIView):
                 error="Something went wrong!!! Please contact the "
                 "administrator.",
                 code="DGA-V004",
-                status_code=404,
+                status_code=status.HTTP_404_NOT_FOUND,
             )
 
         try:
@@ -103,7 +109,9 @@ class GenericSaveAPIView(APIView):
             )
             instance_ids = [instance.id for instance in instances]
             return success_response(
-                data=[{"id": instance_ids}], message=message, status_code=201
+                data=[{"id": instance_ids}],
+                message=message,
+                status_code=status_code,
             )
         except Exception as e:
             return error_response(
@@ -146,15 +154,19 @@ class GenericFetchAPIView(APIView):
         # check if user has permission to view the data.
         try:
             model = get_model_by_name(model_name)
-        except (ValueError, LookupError):
-            return error_response(error="Model not found", code="DGA-V006")
+        except Exception as e:
+            return error_response(
+                error=e.args[0]["error"],
+                code=e.args[0]["code"],
+                status_code=e.args[0]["http_status"],
+            )
 
         if not self.request.user.has_perm(make_permission_str(model, "fetch")):
             return error_response(
                 error="Something went wrong!!! Please contact the "
                 "administrator.",
                 code="DGA-V007",
-                status_code=404,
+                status_code=status.HTTP_404_NOT_FOUND,
             )
         try:
             data = fetch_data(
@@ -224,13 +236,17 @@ class GenericLoginAPIView(APIView):
             user = user_model.objects.get(username=username)
         except user_model.DoesNotExist:
             return error_response(
-                error="Username not found", code="DGA-V011", status_code=404
+                error="Username not found",
+                code="DGA-V011",
+                status_code=status.HTTP_404_NOT_FOUND,
             )
 
         auth_user = user.check_password(password)
         if not auth_user:
             return error_response(
-                error="Invalid password", code="DGA-V012", status_code=401
+                error="Invalid password",
+                code="DGA-V012",
+                status_code=status.HTTP_401_UNAUTHORIZED,
             )
 
         if auth_user:
@@ -421,7 +437,9 @@ class GenericForgotPasswordAPIView(APIView):
             user = user_model.objects.get(username=username)
         except user_model.DoesNotExist:
             return error_response(
-                error="User not found", code="DGA-V026", status_code=404
+                error="User not found",
+                code="DGA-V026",
+                status_code=status.HTTP_404_NOT_FOUND,
             )
 
         token = registration_token(user.id)
@@ -511,7 +529,7 @@ class AccountActivateAPIView(APIView):
             return success_response(
                 message="Your account has been activated successfully.",
                 data="Registration completed.",
-                status_code=201,
+                status_code=status.HTTP_201_CREATED,
             )
         except user_model.DoesNotExist:
             return error_response(error="User not found.", code="DGA-V029")
@@ -626,7 +644,9 @@ class NewPasswordAPIView(APIView):
             )
         except user_model.DoesNotExist:
             return error_response(
-                error="User not found.", code="DGA-040", status_code=404
+                error="User not found.",
+                code="DGA-040",
+                status_code=status.HTTP_404_NOT_FOUND,
             )
         except Exception as e:
             return error_response(error=str(e), code="DGA-V041")
@@ -679,7 +699,9 @@ class UserInfoAPIView(APIView):
         try:
             message = handle_user_info_update(save_input, user_id)
             return success_response(
-                data=[{"id": user_id}], message=message, status_code=201
+                data=[{"id": user_id}],
+                message=message,
+                status_code=status.HTTP_201_CREATED,
             )
         except Exception as e:
             return error_response(

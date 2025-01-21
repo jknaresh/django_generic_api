@@ -400,7 +400,7 @@ class TestGenericFetchAPI:
         response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-S013"
 
     def test_fetch_with_incorrect_model_name(
         self, customer1, api_client, view_perm_token
@@ -438,7 +438,7 @@ class TestGenericFetchAPI:
         response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-S013"
 
     def test_payload_missing_field_property(
         self, customer1, api_client, view_perm_token
@@ -624,7 +624,7 @@ class TestGenericFetchAPI:
         response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-V006"
+        assert response_data["code"] == "DGA-S013"
 
     def test_fetch_unauthorized(self, customer1, api_client, add_perm_token):
         """

@@ -125,7 +125,7 @@ class TestGenericSaveAPI:
         )
         response_data = response.data
 
-        assert response.status_code == 201
+        assert response.status_code == 200
         assert response_data["data"] == [{"id": [data_id]}]
         assert response_data["message"] == ["Record updated successfully."]
 
@@ -167,9 +167,9 @@ class TestGenericSaveAPI:
         response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-V003"
+        assert response_data["code"] == "DGA-S013"
 
-    def test_create_record_with_incorrect_model_name(
+    def test_create_record_with_incorrect_model_name_with_appname(
         self, api_client, add_perm_token
     ):
         """
@@ -204,7 +204,44 @@ class TestGenericSaveAPI:
         response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-V003"
+        assert response_data["code"] == "DGA-S013"
+
+    def test_create_record_with_incorrect_model_name_without_appname(
+        self, api_client, add_perm_token
+    ):
+        """
+        User has sent correct payload format.
+        """
+        save_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "Customer1",
+                    "id": None,
+                    "saveInput": [
+                        {
+                            "name": "test_user1",
+                            "dob": "2020-01-21",
+                            "email": "ltest1@mail.com",
+                            "phone_no": "012345",
+                            "address": "HYD",
+                            "pin_code": "100",
+                            "status": "123",
+                        }
+                    ],
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
+        response = api_client.post(
+            "/v1/save/",
+            save_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = response.data
+        assert response.status_code == 400
+        assert response_data["error"] == "Model not found"
+        assert response_data["code"] == "DGA-S012"
 
     def test_invalid_payload_format(self, api_client, add_perm_token):
         """
@@ -315,7 +352,7 @@ class TestGenericSaveAPI:
         response_data = response.data
         assert response.status_code == 400
         assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-V003"
+        assert response_data["code"] == "DGA-S013"
 
     def test_save_input_length_greater_than_10(
         self, api_client, add_perm_token

@@ -18,7 +18,7 @@ from .utils import (
     DJANGO_TO_PYDANTIC_TYPE_MAP,
     str_field_to_model_field,
     error_response,
-    custom_error_handler,
+    raise_exception,
 )
 
 DEFAULT_APPS = {
@@ -42,18 +42,20 @@ def get_model_by_name(model_name):
     param : model_name
     return : model object/error
     """
-
     if model_name.__contains__("."):
-        model = apps.get_model(model_name)
-        if model:
-            return model
+        try:
+            model = apps.get_model(model_name)
+            if model:
+                return model
+        except LookupError:
+            raise_exception(error="Model not found", code="DGA-S013")
     else:
         for app_config in apps.get_app_configs():
             if not DEFAULT_APPS.get(app_config.name):
                 model = app_config.models.get(model_name.lower())
                 if model:
                     return model
-    raise ValueError
+    raise_exception(error="Model not found", code="DGA-S012")
 
 
 def generate_token(user):
@@ -259,7 +261,7 @@ def apply_filters(model, filters):
         operation = filter_item.operation
 
         if not check_field_value(model, field_name, value):
-            return custom_error_handler(
+            raise_exception(
                 error=f"Invalid data: {value} for {field_name}",
                 code="DGA-S002",
             )
@@ -328,9 +330,7 @@ def handle_save_input(model, record_id, save_input):
             error_msg = e.errors()[0].get("msg")
             error_loc = e.errors()[0].get("loc")
 
-            return custom_error_handler(
-                error=f"{error_msg}. {error_loc}", code="DGA-S004"
-            )
+            raise_exception(error=f"{error_msg}. {error_loc}", code="DGA-S004")
 
         for field_name, value in list(saveInput.items()):
             model_meta = getattr(model, "_meta", None)
@@ -347,7 +347,7 @@ def handle_save_input(model, record_id, save_input):
             try:
                 model_field.get_prep_value(value)
             except Exception as e:
-                return custom_error_handler(error=e, code="DGA-S005")
+                raise_exception(error=e, code="DGA-S005")
 
         try:
             if record_id:
@@ -366,19 +366,19 @@ def handle_save_input(model, record_id, save_input):
             instances.append(instance)
             messages.append(message)
         except model.DoesNotExist:
-            return custom_error_handler(
+            raise_exception(
                 error=f"Record with (ID) {record_id} does not exist",
                 code="DGA-S006",
             )
         except Exception as e:
-            return custom_error_handler(error=e.args[0], code="DGA-S007")
+            raise_exception(error=e.args[0], code="DGA-S007")
     message = list(set(messages))
     return instances, message
 
 
 def handle_user_info_update(save_input, user_id):
     if not hasattr(settings, "USER_INFO_FIELDS"):
-        return custom_error_handler(
+        raise_exception(
             error="Set setting for 'USER_INFO_FIELDS' to update "
             "information.",
             code="DGA-S008",
@@ -394,9 +394,7 @@ def handle_user_info_update(save_input, user_id):
         error_msg = e.errors()[0].get("msg")
         error_loc = e.errors()[0].get("loc")
 
-        return custom_error_handler(
-            error=f"{error_msg}. {error_loc}", code="DGA-S009"
-        )
+        raise_exception(error=f"{error_msg}. {error_loc}", code="DGA-S009")
 
     for key, value in list(save_input.items()):
         model_meta = getattr(get_user_model(), "_meta", None)
@@ -413,7 +411,7 @@ def handle_user_info_update(save_input, user_id):
         try:
             model_field.get_prep_value(value)
         except Exception as e:
-            return custom_error_handler(error=e, code="DGA-S010")
+            raise_exception(error=e, code="DGA-S010")
 
     user_model = get_user_model()
     user = user_model.objects.get(id=user_id)
@@ -428,7 +426,7 @@ def handle_user_info_update(save_input, user_id):
 
 def read_user_info(user):
     if not hasattr(settings, "USER_INFO_FIELDS"):
-        return custom_error_handler(
+        raise_exception(
             error="Set setting for 'USER_INFO_FIELDS' to update "
             "information.",
             code="DGA-S011",

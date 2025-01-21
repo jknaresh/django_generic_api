@@ -152,16 +152,14 @@ def is_fields_exist(model, fields):
                 related_model_meta = getattr(fk.related_model, "_meta")
                 related_model_meta.get_field(related_field)
             except FieldDoesNotExist:
-                return custom_error_handler(
+                return raise_exception(
                     error=f"Invalid foreign field {field}", code="DGA-U001"
                 )
 
     model_fields = get_model_fields_with_properties(model)
     result = set(valid_fields) - set(model_fields.keys())
     if len(result) > 0:
-        return custom_error_handler(
-            error=f"Extra field {result}", code="DGA-U002"
-        )
+        return raise_exception(error=f"Extra field {result}", code="DGA-U002")
     return True
 
 
@@ -368,7 +366,7 @@ def str_field_to_model_field(model, fields):
     fld_diff = set(fields) - fld_set
     if len(fld_diff) > 0:
         fld_diff = ",".join(fld_diff)
-        return custom_error_handler(
+        return raise_exception(
             error=f"'[{fld_diff}]'s not in the model.", code="DGA-U006"
         )
 
@@ -377,9 +375,7 @@ def str_field_to_model_field(model, fields):
     return fields
 
 
-def error_response(
-    error=None, code=None, status_code=status.HTTP_400_BAD_REQUEST
-):
+def error_response(error, code, status_code=status.HTTP_400_BAD_REQUEST):
     """
     Returns a structured error response.
 
@@ -393,7 +389,7 @@ def error_response(
     return Response(response_data, status=status_code)
 
 
-def success_response(data=None, message=None, status_code=status.HTTP_200_OK):
+def success_response(data, message, status_code=status.HTTP_200_OK):
     """
     Returns a structured success response.
 
@@ -407,7 +403,7 @@ def success_response(data=None, message=None, status_code=status.HTTP_200_OK):
     return Response(response_data, status=status_code)
 
 
-def custom_error_handler(error=None, code=None):
+def raise_exception(error, code, status_code=status.HTTP_400_BAD_REQUEST):
     """
     Returns a structured error response.
 
@@ -415,9 +411,6 @@ def custom_error_handler(error=None, code=None):
         dict: The JSON-like dictionary for an error response.
     """
 
-    response_data = {
-        "error": error,
-        "code": code,
-    }
+    response_data = {"error": error, "code": code, "http_status": status_code}
 
     raise Exception(response_data)

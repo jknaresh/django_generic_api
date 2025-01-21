@@ -1,4 +1,3 @@
-
 import pytest
 
 from fixtures.api import (

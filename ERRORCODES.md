@@ -54,7 +54,7 @@ DGA-U: Errors raised at the utilities level (utils.py)
 | DGA-V038   | User Info update     | User Error! The user is not authenticated.                                                |
 | DGA-V039   | User Info update     | User Error! The user info update payload and predefined payload do not match.             |
 | DGA-V040   | Password reset       | User Error! The user ID does not exist.                                                   |
-| DGA-V040   | Password reset       | User Error! Error occurred while resetting the password.                                  |
+| DGA-V041   | Password reset       | User Error! Error occurred while resetting the password.                                  |
 | DGA-S001   | Pydantic model       | User Error! The field type mapping is not found.                                          |
 | DGA-S002   | Fetch Filter         | User Error! Invalid data in fetch filter.                                                 |
 | DGA-S003   | Save(Update)         | User Error! The user is trying to update more than one record.                            |
@@ -66,6 +66,8 @@ DGA-U: Errors raised at the utilities level (utils.py)
 | DGA-S009   | User info update     | User Error! The user's save input does not match the table or model fields configuration. |
 | DGA-S010   | User info update     | User Error! The value if not suitable for field.                                          |
 | DGA-S011   | User info fetch      | User Error! `USER_INFO_FIELDS` is not configured in settings.                             |
+| DGA-S012   | Get model by name    | User Error! The model does not exist.                                                     |
+| DGA-S013   | Get model by name    | User Error! The model does not exist.                                                     |
 | DGA-U001   | Field search         | User Error! Foreign key Field not found.                                                  |
 | DGA-U002   | Field search         | User Error! User has passed an extra field.                                               |
 | DGA-U003   | Request Rate         | User Error! The user has exceeded the request rate.                                       |
