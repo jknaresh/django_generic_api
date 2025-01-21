@@ -49,12 +49,11 @@ def get_model_by_name(model_name):
                 return model
         except LookupError:
             raise_exception(error="Model not found", code="DGA-S013")
-    else:
-        for app_config in apps.get_app_configs():
-            if not DEFAULT_APPS.get(app_config.name):
-                model = app_config.models.get(model_name.lower())
-                if model:
-                    return model
+    for app_config in apps.get_app_configs():
+        if not DEFAULT_APPS.get(app_config.name):
+            model = app_config.models.get(model_name.lower())
+            if model:
+                return model
     raise_exception(error="Model not found", code="DGA-S012")
 
 

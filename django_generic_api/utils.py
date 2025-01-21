@@ -152,14 +152,14 @@ def is_fields_exist(model, fields):
                 related_model_meta = getattr(fk.related_model, "_meta")
                 related_model_meta.get_field(related_field)
             except FieldDoesNotExist:
-                return raise_exception(
+                raise_exception(
                     error=f"Invalid foreign field {field}", code="DGA-U001"
                 )
 
     model_fields = get_model_fields_with_properties(model)
     result = set(valid_fields) - set(model_fields.keys())
     if len(result) > 0:
-        return raise_exception(error=f"Extra field {result}", code="DGA-U002")
+        raise_exception(error=f"Extra field {result}", code="DGA-U002")
     return True
 
 
@@ -366,7 +366,7 @@ def str_field_to_model_field(model, fields):
     fld_diff = set(fields) - fld_set
     if len(fld_diff) > 0:
         fld_diff = ",".join(fld_diff)
-        return raise_exception(
+        raise_exception(
             error=f"'[{fld_diff}]'s not in the model.", code="DGA-U006"
         )
 
@@ -375,7 +375,7 @@ def str_field_to_model_field(model, fields):
     return fields
 
 
-def error_response(error, code, status_code=status.HTTP_400_BAD_REQUEST):
+def error_response(error, code, http_status=status.HTTP_400_BAD_REQUEST):
     """
     Returns a structured error response.
 
@@ -386,10 +386,10 @@ def error_response(error, code, status_code=status.HTTP_400_BAD_REQUEST):
         "error": error,
         "code": code,
     }
-    return Response(response_data, status=status_code)
+    return Response(response_data, status=http_status)
 
 
-def success_response(data, message, status_code=status.HTTP_200_OK):
+def success_response(data, message, http_status=status.HTTP_200_OK):
     """
     Returns a structured success response.
 
@@ -400,7 +400,7 @@ def success_response(data, message, status_code=status.HTTP_200_OK):
         "data": data,
         "message": message,
     }
-    return Response(response_data, status=status_code)
+    return Response(response_data, status=http_status)
 
 
 def raise_exception(error, code, status_code=status.HTTP_400_BAD_REQUEST):

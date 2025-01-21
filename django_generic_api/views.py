@@ -87,7 +87,7 @@ class GenericSaveAPIView(APIView):
             return error_response(
                 error=e.args[0]["error"],
                 code=e.args[0]["code"],
-                status_code=e.args[0]["http_status"],
+                http_status=e.args[0]["http_status"],
             )
 
         status_code = (
@@ -100,7 +100,7 @@ class GenericSaveAPIView(APIView):
                 error="Something went wrong!!! Please contact the "
                 "administrator.",
                 code="DGA-V004",
-                status_code=status.HTTP_404_NOT_FOUND,
+                http_status=status.HTTP_404_NOT_FOUND,
             )
 
         try:
@@ -111,7 +111,7 @@ class GenericSaveAPIView(APIView):
             return success_response(
                 data=[{"id": instance_ids}],
                 message=message,
-                status_code=status_code,
+                http_status=status_code,
             )
         except Exception as e:
             return error_response(
@@ -158,7 +158,7 @@ class GenericFetchAPIView(APIView):
             return error_response(
                 error=e.args[0]["error"],
                 code=e.args[0]["code"],
-                status_code=e.args[0]["http_status"],
+                http_status=e.args[0]["http_status"],
             )
 
         if not self.request.user.has_perm(make_permission_str(model, "fetch")):
@@ -166,7 +166,7 @@ class GenericFetchAPIView(APIView):
                 error="Something went wrong!!! Please contact the "
                 "administrator.",
                 code="DGA-V007",
-                status_code=status.HTTP_404_NOT_FOUND,
+                http_status=status.HTTP_404_NOT_FOUND,
             )
         try:
             data = fetch_data(
@@ -184,7 +184,7 @@ class GenericFetchAPIView(APIView):
             )
         except Exception as e:
             return error_response(
-                error=e.args[0]["error"], code=e.args[0]["code"]
+                **e.args[0]
             )
 
 
@@ -238,7 +238,7 @@ class GenericLoginAPIView(APIView):
             return error_response(
                 error="Username not found",
                 code="DGA-V011",
-                status_code=status.HTTP_404_NOT_FOUND,
+                http_status=status.HTTP_404_NOT_FOUND,
             )
 
         auth_user = user.check_password(password)
@@ -246,7 +246,7 @@ class GenericLoginAPIView(APIView):
             return error_response(
                 error="Invalid password",
                 code="DGA-V012",
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                http_status=status.HTTP_401_UNAUTHORIZED,
             )
 
         if auth_user:
@@ -439,7 +439,7 @@ class GenericForgotPasswordAPIView(APIView):
             return error_response(
                 error="User not found",
                 code="DGA-V026",
-                status_code=status.HTTP_404_NOT_FOUND,
+                http_status=status.HTTP_404_NOT_FOUND,
             )
 
         token = registration_token(user.id)
@@ -496,10 +496,13 @@ class AccountActivateAPIView(APIView):
     - Activates user account and stores User's IP address.
     """
 
-    def get(self, request, encoded_token, *args, **kwargs):
+    def get(self, *args, **kwargs):
+        # Fetch user by ID
+        user_model = get_user_model()
         try:
             # Decode token and get the user ID
-            token = unquote(encoded_token)
+            encode_token = kwargs.get("encoded_token")
+            token = unquote(encode_token)
             decoded_token = base64.urlsafe_b64decode(token.encode()).decode()
             user_id, timestamp = decoded_token.split(":")
 
@@ -509,8 +512,6 @@ class AccountActivateAPIView(APIView):
                     error="The activation link has expired.", code="DGA-V028"
                 )
 
-            # Fetch user by ID
-            user_model = get_user_model()
 
             user = user_model.objects.get(id=user_id)
             if user.is_active:
@@ -523,13 +524,13 @@ class AccountActivateAPIView(APIView):
             user.save()
 
             # info : store user's IP address when email is activated
-            user_ip = request.META.get("REMOTE_ADDR")
+            user_ip = self.request.META.get("REMOTE_ADDR")
             store_user_ip(user_id, user_ip)
 
             return success_response(
                 message="Your account has been activated successfully.",
                 data="Registration completed.",
-                status_code=status.HTTP_201_CREATED,
+                http_status=status.HTTP_201_CREATED,
             )
         except user_model.DoesNotExist:
             return error_response(error="User not found.", code="DGA-V029")
@@ -609,8 +610,8 @@ class NewPasswordAPIView(APIView):
                 error=e.errors()[0].get("msg"), code="DGA-V034"
             )
 
+        user_model = get_user_model()
         try:
-            user_model = get_user_model()
             user = user_model.objects.get(id=user_id)
 
             password = validated_userdata.password.get_secret_value()
@@ -646,7 +647,7 @@ class NewPasswordAPIView(APIView):
             return error_response(
                 error="User not found.",
                 code="DGA-040",
-                status_code=status.HTTP_404_NOT_FOUND,
+                http_status=status.HTTP_404_NOT_FOUND,
             )
         except Exception as e:
             return error_response(error=str(e), code="DGA-V041")
@@ -701,7 +702,7 @@ class UserInfoAPIView(APIView):
             return success_response(
                 data=[{"id": user_id}],
                 message=message,
-                status_code=status.HTTP_201_CREATED,
+                http_status=status.HTTP_201_CREATED,
             )
         except Exception as e:
             return error_response(
