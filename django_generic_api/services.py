@@ -316,8 +316,8 @@ def handle_save_input(model, record_id, save_input):
     messages = []
 
     if record_id and len(save_input) > 1:
-        raise ValueError(
-            {"error": "Only 1 record to update at once", "code": "DGA-S003"}
+        raise_exception(
+            error= "Only 1 record to update at once", code= "DGA-S003"
         )
 
     for saveInput in save_input:
