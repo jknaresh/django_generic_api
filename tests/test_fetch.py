@@ -1,5 +1,4 @@
 # Test cases for fetch API
-import json
 from unittest.mock import patch
 
 import pytest
