@@ -22,6 +22,7 @@ from .payload_models import (
     GenericForgotPasswordPayload,
     GenericNewPasswordPayload,
     GenericUserUpdatePayload,
+    GenericUserProfilePayload,
 )
 from .services import (
     get_model_by_name,
@@ -30,6 +31,8 @@ from .services import (
     generate_token,
     handle_user_info_update,
     read_user_info,
+    read_user_profile,
+    handle_user_profile,
 )
 from .utils import (
     make_permission_str,
@@ -38,6 +41,7 @@ from .utils import (
     is_valid_email_domain,
     error_response,
     success_response,
+    raise_exception,
 )
 
 
@@ -708,3 +712,57 @@ class UserInfoAPIView(APIView):
             return error_response(
                 error=e.args[0]["error"], code=e.args[0]["code"]
             )
+
+
+class UserProfileAPIView(APIView):
+
+    def post(self, *args, **kwargs):
+        # checks if user has valid authorization header.
+        if not self.request.user.is_authenticated:
+            return error_response(
+                error="User not authenticated.", code="DGA-"
+            )
+
+        try:
+            user_info = read_user_profile(user=self.request.user)
+            return success_response(data=user_info, message="Completed.")
+        except Exception as e:
+            return error_response(
+                error=e.args[0]["error"], code=e.args[0]["code"]
+            )
+
+
+    def put(self, *args, **kwargs):
+
+        # checks if user has valid authorization header.
+        if not self.request.user.is_authenticated:
+            return error_response(
+                error="User not authenticated.", code="DGA-"
+            )
+
+        payload = self.request.data.get("payload", {}).get("variables", {})
+
+        try:
+            # Validate the payload using the Pydantic model
+            validated_payload_data = GenericUserProfilePayload(**payload)
+        except ValidationError as e:
+            return error_response(
+                error=e.errors()[0].get("msg"), code="DGA-"
+            )
+
+        save_input = validated_payload_data.saveInput
+
+        user_id = self.request.user.id
+
+        try:
+            message = handle_user_profile(save_input, user_id)
+            return success_response(
+                data=[{"id": user_id}],
+                message=message,
+                http_status=status.HTTP_201_CREATED,
+            )
+        except Exception as e:
+            return error_response(
+                error=e.args[0]["error"], code=e.args[0]["code"]
+            )
+        pass

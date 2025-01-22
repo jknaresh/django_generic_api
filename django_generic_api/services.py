@@ -4,7 +4,8 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import Q, OneToOneField
+from django.shortcuts import get_object_or_404
 from pydantic import (
     create_model,
     Field,
@@ -19,6 +20,7 @@ from .utils import (
     str_field_to_model_field,
     error_response,
     raise_exception,
+    one_to_one_relation,
 )
 
 DEFAULT_APPS = {
@@ -441,3 +443,57 @@ def read_user_info(user):
         user_info[field.attname] = getattr(user, field.attname, None)
 
     return dict(data=user_info)
+
+
+def read_user_profile(user):
+    if not hasattr(settings, "USER_PROFILE_MODEL"):
+        raise_exception(
+            error="Set setting for 'USER_PROFILE_MODEL' to read "
+            "profile.",
+            code="DGA-"
+        )
+
+    profile_model = get_model_by_name(settings.USER_PROFILE_MODEL)
+    user_model = get_user_model()
+
+    is_relation, profile_field =  one_to_one_relation(profile_model, user_model)
+    if not is_relation:
+        return error_response(
+            error="Invalid profile model",
+            code="DGA-"
+        )
+
+
+    user_profile = get_object_or_404(profile_model, user_model)
+
+    if not hasattr(settings, "USER_PROFILE_FIELDS"):
+        raise_exception(
+            error="Set setting for 'USER_PROFILE_FIELDS' to read "
+            "profile.",
+            code="DGA-",
+        )
+
+    fields = str_field_to_model_field(
+        model=profile_model, fields=settings.USER_PROFILE_FIELDS
+    )
+
+    user_info = {}
+
+    for field in fields:
+        user_info[field.attname] = getattr(user_profile, field.attname, None)
+
+    return dict(data=user_info)
+
+
+
+    pass
+
+
+def handle_user_profile(save_input, user_id):
+    if not hasattr(settings,"USER_PROFILE_FIELDS"):
+        raise_exception(
+            error="Set setting for 'USER_PROFILE_FIELDS' to add or edit profile.",
+            code="DGA-"
+        )
+
+    pass

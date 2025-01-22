@@ -12,7 +12,9 @@ from typing import Any, List
 from uuid import UUID
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import FieldDoesNotExist
+from django.db.models import OneToOneField
 from pydantic import (
     ConfigDict,
     EmailStr,
@@ -414,3 +416,25 @@ def raise_exception(error, code, status_code=status.HTTP_400_BAD_REQUEST):
     response_data = {"error": error, "code": code, "http_status": status_code}
 
     raise Exception(response_data)
+
+
+def one_to_one_relation(profile_model, user_model):
+    """
+    Checks if the given model has a one-to-one relation with the user model.
+
+    Args:
+        profile_model: The model to check (e.g., UserProfile).
+
+    Returns:
+        bool: True if there's a one-to-one relation with the user model, False otherwise.
+        :param profile_model:
+        :param user_model:
+    """
+
+    profile_meta = getattr(profile_model, "_meta", None)
+    # todo: find a optimized way to validate if field is OnetoOneField related to User model.
+    for field in profile_meta.get_fields():
+        # Check if the field is a OneToOneField and points to the user model
+        if isinstance(field, OneToOneField) and field.related_model == user_model:
+            return True, field
+    return False
