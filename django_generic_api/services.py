@@ -9,6 +9,7 @@ from pydantic import (
     create_model,
     Field,
 )
+from django.db.models.fields.related import ForeignKey
 from pydantic.config import ConfigDict
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -347,6 +348,9 @@ def handle_save_input(model, record_id, save_input):
                 model_field.get_prep_value(value)
             except Exception as e:
                 raise_exception(error=e, code="DGA-S005")
+
+            if isinstance(model_field, ForeignKey):
+                saveInput[f"{field_name}_id"] = saveInput.pop(field_name)
 
         try:
             if record_id:

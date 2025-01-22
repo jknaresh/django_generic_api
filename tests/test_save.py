@@ -11,6 +11,7 @@ from fixtures.api import (
     view_perm_token,
     api_client,
     customer1,
+    student_class_1,
 )
 
 # To ensure the import is retained
@@ -55,6 +56,45 @@ class TestGenericSaveAPI:
         assert response.status_code == 201
         assert response_data["data"] == [{"id": [1]}]
         assert response_data["message"] == ["Record created successfully."]
+
+    def test_create_record_with_fk_field(self, api_client, add_perm_token, student_class_1):
+        """
+        User has sent correct payload format.
+        """
+        save_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app.Customer",
+                    "id": None,
+                    "saveInput": [
+                        {
+                            "name": "test_user1",
+                            "dob": "2020-01-21",
+                            "email": "ltest1@mail.com",
+                            "phone_no": "012345",
+                            "address": "HYD",
+                            "pin_code": "100",
+                            "status": "123",
+                            "std_class":1
+                        }
+                    ],
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
+        response = api_client.post(
+            "/v1/save/",
+            save_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = response.data
+        assert response.status_code == 201
+        assert response_data["data"] == [{"id": [1]}]
+        assert response_data["message"] == ["Record created successfully."]
+
+        record_data = Customer.objects.get(id=1)
+        assert record_data.std_class_id == 1
 
     def test_create_record_without_appname(self, api_client, add_perm_token):
         """
