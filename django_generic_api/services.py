@@ -9,6 +9,7 @@ from pydantic import (
     create_model,
     Field,
 )
+from django.db.models.fields.related import ForeignKey
 from pydantic.config import ConfigDict
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -316,7 +317,7 @@ def handle_save_input(model, record_id, save_input):
 
     if record_id and len(save_input) > 1:
         raise_exception(
-            error= "Only 1 record to update at once", code= "DGA-S003"
+            error="Only 1 record to update at once", code="DGA-S003"
         )
 
     for saveInput in save_input:
@@ -347,6 +348,9 @@ def handle_save_input(model, record_id, save_input):
                 model_field.get_prep_value(value)
             except Exception as e:
                 raise_exception(error=e, code="DGA-S005")
+
+            if isinstance(model_field, ForeignKey):
+                saveInput[model_field.attname] = saveInput.pop(field_name)
 
         try:
             if record_id:

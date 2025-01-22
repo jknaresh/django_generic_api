@@ -1,14 +1,20 @@
 from django.contrib.auth.models import User
-from django_generic_api.tests.demo_app.models import Customer
-from model_bakery.recipe import Recipe
+from django_generic_api.tests.demo_app.models import Customer, StudentClass
+from model_bakery.recipe import Recipe, foreign_key
 
 # Create instances of a model with predefined field values.
+
+student_class_1 = Recipe(
+    StudentClass, name="Class-1", address="HYD", count_of_students=10
+)
+
 customer_1 = Recipe(
     Customer,
     name="test_user1",
     email="user1@gmail.com",
     phone_no="123456",
     address="hyderabad",
+    std_class=foreign_key(student_class_1),
 )
 
 customer_2 = Recipe(

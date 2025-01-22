@@ -183,9 +183,7 @@ class GenericFetchAPIView(APIView):
                 message="Completed.",
             )
         except Exception as e:
-            return error_response(
-                **e.args[0]
-            )
+            return error_response(**e.args[0])
 
 
 class GenericLoginAPIView(APIView):
@@ -511,7 +509,6 @@ class AccountActivateAPIView(APIView):
                 return error_response(
                     error="The activation link has expired.", code="DGA-V028"
                 )
-
 
             user = user_model.objects.get(id=user_id)
             if user.is_active:
