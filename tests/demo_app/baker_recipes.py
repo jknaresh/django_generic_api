@@ -5,10 +5,7 @@ from model_bakery.recipe import Recipe, foreign_key
 # Create instances of a model with predefined field values.
 
 student_class_1 = Recipe(
-    StudentClass,
-    name = "Class-1",
-    address = "HYD",
-    count_of_students = 10
+    StudentClass, name="Class-1", address="HYD", count_of_students=10
 )
 
 customer_1 = Recipe(
@@ -17,7 +14,7 @@ customer_1 = Recipe(
     email="user1@gmail.com",
     phone_no="123456",
     address="hyderabad",
-    std_class = foreign_key(student_class_1)
+    std_class=foreign_key(student_class_1),
 )
 
 customer_2 = Recipe(

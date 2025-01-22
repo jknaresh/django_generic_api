@@ -7,6 +7,7 @@ from model_bakery import baker
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
+
 # student class instance 1
 @pytest.fixture
 def student_class_1():

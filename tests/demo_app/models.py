@@ -3,10 +3,11 @@ import uuid
 from django.db import models
 from django.utils import timezone
 
+
 class StudentClass(models.Model):
 
-    name = models.CharField(max_length=15,db_column="student_name")
-    address = models.CharField(max_length=15,verbose_name="related address")
+    name = models.CharField(max_length=15, db_column="student_name")
+    address = models.CharField(max_length=15, verbose_name="related address")
     count_of_students = models.IntegerField(null=True, blank=True)
 
     class Meta:
@@ -14,6 +15,7 @@ class StudentClass(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class BaseClass(models.Model):
     slug = models.UUIDField(
@@ -45,7 +47,13 @@ class Customer(BaseClass):
     pin_code = models.CharField(max_length=6, null=False)  # Postal/ZIP code
     status = models.CharField(max_length=5)
     is_alive = models.BooleanField(default=True, null=False)
-    std_class = models.ForeignKey(StudentClass,on_delete=models.SET_NULL,null=True,related_name="class_of_student",db_column="class_student",)
+    std_class = models.ForeignKey(
+        StudentClass,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="class_of_student",
+        db_column="class_student",
+    )
 
     def __str__(self):
         return self.name

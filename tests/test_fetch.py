@@ -118,7 +118,7 @@ class TestGenericFetchAPI:
             "payload": {
                 "variables": {
                     "modelName": "demo_app.customer",
-                    "fields": ["name","std_class"],
+                    "fields": ["name", "std_class"],
                     "filters": [
                         {
                             "operator": "eq",
@@ -159,7 +159,7 @@ class TestGenericFetchAPI:
             "payload": {
                 "variables": {
                     "modelName": "demo_app.customer",
-                    "fields": ["name","std_class__name"],
+                    "fields": ["name", "std_class__name"],
                     "filters": [
                         {
                             "operator": "eq",

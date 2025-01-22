@@ -57,7 +57,9 @@ class TestGenericSaveAPI:
         assert response_data["data"] == [{"id": [1]}]
         assert response_data["message"] == ["Record created successfully."]
 
-    def test_create_record_with_fk_field(self, api_client, add_perm_token, student_class_1):
+    def test_create_record_with_fk_field(
+        self, api_client, add_perm_token, student_class_1
+    ):
         """
         User has sent correct payload format.
         """
@@ -75,7 +77,7 @@ class TestGenericSaveAPI:
                             "address": "HYD",
                             "pin_code": "100",
                             "status": "123",
-                            "std_class":1
+                            "std_class": 1,
                         }
                     ],
                 }
