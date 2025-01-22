@@ -350,7 +350,7 @@ def handle_save_input(model, record_id, save_input):
                 raise_exception(error=e, code="DGA-S005")
 
             if isinstance(model_field, ForeignKey):
-                saveInput[f"{field_name}_id"] = saveInput.pop(field_name)
+                saveInput[model_field.attname] = saveInput.pop(field_name)
 
         try:
             if record_id:
