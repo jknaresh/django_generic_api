@@ -352,6 +352,7 @@ def str_field_to_model_field(model, fields):
     for field in model_meta.fields:
         field_name = field.attname
         field_verbose_name = field.verbose_name
+        field_name1 = field.name
         try:
             if fields.__contains__(field_name):
                 fld_set.add(field_name)
@@ -359,6 +360,10 @@ def str_field_to_model_field(model, fields):
                 c1 += 1
             elif fields.__contains__(field_verbose_name):
                 fld_set.add(field_verbose_name)
+                fld.append(field)
+                c1 += 1
+            elif fields.__contains__(field_name1):
+                fld_set.add(field_name1)
                 fld.append(field)
                 c1 += 1
         except:
@@ -405,7 +410,7 @@ def success_response(data, message, http_status=status.HTTP_200_OK):
     return Response(response_data, status=http_status)
 
 
-def raise_exception(error, code, status_code=status.HTTP_400_BAD_REQUEST):
+def raise_exception(error, code, http_status=status.HTTP_400_BAD_REQUEST):
     """
     Returns a structured error response.
 
@@ -413,7 +418,7 @@ def raise_exception(error, code, status_code=status.HTTP_400_BAD_REQUEST):
         dict: The JSON-like dictionary for an error response.
     """
 
-    response_data = {"error": error, "code": code, "http_status": status_code}
+    response_data = {"error": error, "code": code, "http_status": http_status}
 
     raise Exception(response_data)
 

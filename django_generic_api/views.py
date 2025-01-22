@@ -41,7 +41,6 @@ from .utils import (
     is_valid_email_domain,
     error_response,
     success_response,
-    raise_exception,
 )
 
 

@@ -4,7 +4,9 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.db.models import Q, OneToOneField
+from django.db import IntegrityError
+from django.db.models import Q
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from pydantic import (
     create_model,
@@ -12,6 +14,7 @@ from pydantic import (
 )
 from django.db.models.fields.related import ForeignKey
 from pydantic.config import ConfigDict
+from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .utils import (
@@ -418,6 +421,9 @@ def handle_user_info_update(save_input, user_id):
         except Exception as e:
             raise_exception(error=e, code="DGA-S010")
 
+        if isinstance(model_field, ForeignKey):
+            save_input[model_field.attname] = save_input.pop(key)
+
     user_model = get_user_model()
     user = user_model.objects.get(id=user_id)
 
@@ -467,8 +473,14 @@ def read_user_profile(user):
             code="DGA-"
         )
 
-
-    user_profile = get_object_or_404(profile_model, user_model)
+    try:
+        user_profile = get_object_or_404(profile_model, user=user)
+    except Http404:
+        raise_exception(
+            error="User's profile is not found",
+            code="DGA-",
+            http_status=status.HTTP_404_NOT_FOUND,
+        )
 
     if not hasattr(settings, "USER_PROFILE_FIELDS"):
         raise_exception(
@@ -500,4 +512,64 @@ def handle_user_profile(save_input, user_id):
             code="DGA-"
         )
 
-    pass
+    profile_model = get_model_by_name(settings.USER_PROFILE_MODEL)
+
+    user_profile_pydantic_model = get_model_config_schema(
+        profile_model, fields=settings.USER_PROFILE_FIELDS
+    )
+
+    try:
+        user_profile_pydantic_model(**save_input)
+    except Exception as e:
+        error_msg = e.errors()[0].get("msg")
+        error_loc = e.errors()[0].get("loc")
+
+        raise_exception(error=f"{error_msg}. {error_loc}", code="DGA-")
+
+    for key, value in list(save_input.items()):
+        model_meta = getattr(profile_model, "_meta", None)
+        model_field = model_meta.get_field(key)
+
+        if (
+            model_field.has_default()
+            and not value
+            and value is not False
+            and not model_field.null
+        ):
+            save_input.pop(key)
+
+        try:
+            model_field.get_prep_value(value)
+        except Exception as e:
+            raise_exception(error=e, code="DGA-")
+
+        if isinstance(model_field, ForeignKey):
+            save_input[model_field.attname] = save_input.pop(key)
+
+    is_relation, profile_field =  one_to_one_relation(profile_model, get_user_model())
+    user = get_user_model().objects.get(id=user_id)
+    user_profile = profile_model.objects.filter(**{profile_field.name: user_id}).first()
+
+    try:
+        if user_profile:
+            for key, value in list(save_input.items()):
+                setattr(user_profile , key, value)
+            user_profile.save()
+            message = f"{user.username}'s profile is updated"
+            return message
+        else:
+            save_input[profile_field.name] = user
+            user_profile=profile_model.objects.create(**save_input)
+            message = f"{user.username}'s profile is created"
+            return message
+    except IntegrityError as e:
+        raise_exception(
+            error="Invalid foreign key constraint",
+            code="DGA-"
+        )
+    except Exception as e:
+        raise_exception(
+            error=str(e),
+            code="DGA-"
+        )
+
