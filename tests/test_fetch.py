@@ -108,6 +108,88 @@ class TestGenericFetchAPI:
         ]
         assert response_data["message"] == "Completed."
 
+    def test_fetch_field_fk_field(
+        self, customer1, api_client, view_perm_token
+    ):
+        """
+        Fetch operator is eq
+        """
+        fetch_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app.customer",
+                    "fields": ["name", "std_class"],
+                    "filters": [
+                        {
+                            "operator": "eq",
+                            "name": "phone_no",
+                            "value": ["123456"],
+                            "operation": "or",
+                        }
+                    ],
+                    "pageNumber": 1,
+                    "pageSize": 10,
+                    "sort": {"field": "name", "order_by": "desc"},
+                    "distinct": True,
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {view_perm_token}"}
+        response = api_client.post(
+            "/v1/fetch/",
+            fetch_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = response.data
+        assert response.status_code == 200
+        assert response_data["data"]["total"] == 1
+        assert response_data["data"]["data"] == [
+            {"name": customer1.name, "std_class": 1}
+        ]
+        assert response_data["message"] == "Completed."
+
+    def test_fetch_field_fk_field_name(
+        self, customer1, api_client, view_perm_token
+    ):
+        """
+        Fetch operator is eq
+        """
+        fetch_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app.customer",
+                    "fields": ["name", "std_class__name"],
+                    "filters": [
+                        {
+                            "operator": "eq",
+                            "name": "phone_no",
+                            "value": ["123456"],
+                            "operation": "or",
+                        }
+                    ],
+                    "pageNumber": 1,
+                    "pageSize": 10,
+                    "sort": {"field": "name", "order_by": "desc"},
+                    "distinct": True,
+                }
+            }
+        }
+        headers = {"Authorization": f"Bearer {view_perm_token}"}
+        response = api_client.post(
+            "/v1/fetch/",
+            fetch_payload,
+            format="json",
+            headers=headers,
+        )
+        response_data = response.data
+        assert response.status_code == 200
+        assert response_data["data"]["total"] == 1
+        assert response_data["data"]["data"] == [
+            {"name": customer1.name, "std_class__name": "Class-1"}
+        ]
+        assert response_data["message"] == "Completed."
+
     def test_fetch_filter_operator_in(
         self, customer1, customer2, api_client, view_perm_token
     ):

@@ -8,6 +8,13 @@ from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
+# student class instance 1
+@pytest.fixture
+def student_class_1():
+    student_class_1 = baker.make_recipe("demo_app.student_class_1")
+    return student_class_1
+
+
 # customer instance 1
 @pytest.fixture
 def customer1():
