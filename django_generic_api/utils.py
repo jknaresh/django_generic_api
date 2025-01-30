@@ -10,9 +10,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any, List
 from uuid import UUID
-
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.exceptions import FieldDoesNotExist
 from django.db.models import OneToOneField
 from pydantic import (
@@ -440,6 +438,9 @@ def one_to_one_relation(profile_model, user_model):
     # todo: find a optimized way to validate if field is OnetoOneField related to User model.
     for field in profile_meta.get_fields():
         # Check if the field is a OneToOneField and points to the user model
-        if isinstance(field, OneToOneField) and field.related_model == user_model:
+        if (
+            isinstance(field, OneToOneField)
+            and field.related_model == user_model
+        ):
             return True, field
     return False

@@ -1,6 +1,8 @@
 from unittest.mock import patch
 
 import pytest
+from MySQLdb import IntegrityError
+
 from django_generic_api.tests.demo_app.models import Customer
 from rest_framework_simplejwt.exceptions import TokenError
 

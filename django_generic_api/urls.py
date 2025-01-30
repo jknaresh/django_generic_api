@@ -45,5 +45,7 @@ urlpatterns = [
     ),
     path("v1/captcha/", include(captcha_urls)),
     path("v1/user-info/", UserInfoAPIView.as_view(), name="user_info"),
-    path("v1/user-profile/", UserProfileAPIView.as_view(), name="user_profile"),
+    path(
+        "v1/user-profile/", UserProfileAPIView.as_view(), name="user_profile"
+    ),
 ]

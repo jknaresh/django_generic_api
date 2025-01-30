@@ -716,7 +716,7 @@ class UserProfileAPIView(APIView):
         # checks if user has valid authorization header.
         if not self.request.user.is_authenticated:
             return error_response(
-                error="User not authenticated.", code="DGA-"
+                error="User not authenticated.", code="DGA-V043"
             )
 
         try:
@@ -727,13 +727,12 @@ class UserProfileAPIView(APIView):
                 error=e.args[0]["error"], code=e.args[0]["code"]
             )
 
-
     def put(self, *args, **kwargs):
 
         # checks if user has valid authorization header.
         if not self.request.user.is_authenticated:
             return error_response(
-                error="User not authenticated.", code="DGA-"
+                error="User not authenticated.", code="DGA-V043"
             )
 
         payload = self.request.data.get("payload", {}).get("variables", {})
@@ -743,7 +742,7 @@ class UserProfileAPIView(APIView):
             validated_payload_data = GenericUserProfilePayload(**payload)
         except ValidationError as e:
             return error_response(
-                error=e.errors()[0].get("msg"), code="DGA-"
+                error=e.errors()[0].get("msg"), code="DGA-V044"
             )
 
         save_input = validated_payload_data.saveInput
@@ -751,11 +750,11 @@ class UserProfileAPIView(APIView):
         user_id = self.request.user.id
 
         try:
-            message = handle_user_profile(save_input, user_id)
+            message, status_code = handle_user_profile(save_input, user_id)
             return success_response(
                 data=[{"id": user_id}],
                 message=message,
-                http_status=status.HTTP_201_CREATED,
+                http_status=status_code,
             )
         except Exception as e:
             return error_response(

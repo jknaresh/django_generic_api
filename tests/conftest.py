@@ -3,6 +3,7 @@ import sys
 
 import django
 from django.conf import settings
+from django.conf.global_settings import AUTH_USER_MODEL
 from django.core.management import call_command
 
 sys.path.extend(
@@ -83,6 +84,7 @@ def pytest_configure():
                 ".NumericPasswordValidator",
             },
         ],
+        AUTH_USER_MODEL="demo_app.CustomUserModel",
         CAPTCHA_BACKGROUND_COLOR="#ffffff",
         CAPTCHA_FOREGROUND_COLOR="#d4c9c9",
         CAPTCHA_IMAGE_SIZE=(200, 200),
@@ -90,6 +92,8 @@ def pytest_configure():
         CAPTCHA_LENGTH=7,
         CAPTCHA_REQUIRED=True,
         USER_INFO_FIELDS=("first_name", "last_name", "is_active"),
+        USER_PROFILE_MODEL="demo_app.UserProfile",
+        USER_PROFILE_FIELDS=("birthday", "address", "primary_number"),
     )
 
     django.setup()
