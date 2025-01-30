@@ -71,7 +71,7 @@ class TestUserInfoAPI:
         """
         monkeypatch.setattr(
             "django.conf.settings.USER_INFO_FIELDS",
-            ("first name", "email"),
+            ("fname", "email"),
         )
 
         headers = {"Authorization": f"Bearer {all_perm_token}"}
@@ -113,3 +113,34 @@ class TestUserInfoAPI:
         assert response.status_code == 400
         assert response_data["error"] == "'[ABCD]'s not in the model."
         assert response_data["code"] == "DGA-U006"
+
+    def test_user_fetch_info_fk_field(
+        self, api_client, all_perm_token, monkeypatch
+    ):
+        """
+        User sends a not yet field in settings
+        """
+        monkeypatch.setattr(
+            "django.conf.settings.USER_INFO_FIELDS",
+            ("first_name", "last_name", "job_at"),
+        )
+
+        headers = {"Authorization": f"Bearer {all_perm_token}"}
+
+        response = api_client.post(
+            "/v1/user-info/",
+            format="json",
+            headers=headers,
+        )
+
+        response_data = response.data
+
+        assert response.status_code == 200
+        assert response_data["data"] == {
+            "data": {
+                "first_name": "test1",
+                "last_name": "test2",
+                "job_at_id": 1,
+            }
+        }
+        assert response_data["message"] == "Completed."

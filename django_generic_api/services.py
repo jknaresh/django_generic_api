@@ -4,13 +4,17 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.db.models import Q
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 from pydantic import (
     create_model,
     Field,
 )
 from django.db.models.fields.related import ForeignKey
 from pydantic.config import ConfigDict
+from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .utils import (
@@ -20,6 +24,7 @@ from .utils import (
     str_field_to_model_field,
     error_response,
     raise_exception,
+    one_to_one_relation,
 )
 
 DEFAULT_APPS = {
@@ -380,6 +385,18 @@ def handle_save_input(model, record_id, save_input):
 
 
 def handle_user_info_update(save_input, user_id):
+    """
+    1. Checks if user has configured Fields (USER_INFO_FIELDS) to be accessed in user model.
+    2. Creates a pydantic model with user given fields in (USER_INFO_FIELDS).
+    3. Pydantic model level validation.
+    4. Checks if the value is suitable to be inserted in respective field.
+    5. If values are valid for fields, updates the field values.
+
+    :param save_input:
+    :param user_id:
+    :return:
+    """
+
     if not hasattr(settings, "USER_INFO_FIELDS"):
         raise_exception(
             error="Set setting for 'USER_INFO_FIELDS' to update "
@@ -416,18 +433,36 @@ def handle_user_info_update(save_input, user_id):
         except Exception as e:
             raise_exception(error=e, code="DGA-S010")
 
+        if isinstance(model_field, ForeignKey):
+            save_input[model_field.attname] = save_input.pop(key)
+
     user_model = get_user_model()
     user = user_model.objects.get(id=user_id)
 
-    for key, value in list(save_input.items()):
-        setattr(user, key, value)
-    user.save()
-    message = f"{user.username}'s info is updated"
-
-    return message
+    try:
+        for key, value in list(save_input.items()):
+            setattr(user, key, value)
+        user.save()
+        return f"{user.username}'s info is updated"
+    except Exception as e:
+        if isinstance(e, IntegrityError):
+            raise_exception(
+                error="Invalid foreign key constraint", code="DGA-S018"
+            )
+        else:
+            raise_exception(error=str(e), code="DGA-S019")
 
 
 def read_user_info(user):
+    """
+    1. Checks if user has configured Fields (USER_INFO_FIELDS) to be accessed in user model.
+    2. Receives model fields of the given fields in (USER_INFO_FIELDS).
+    3. Create a dictionary mapping field names to their corresponding values from the user object.
+
+    :param user:
+    :return:
+    """
+
     if not hasattr(settings, "USER_INFO_FIELDS"):
         raise_exception(
             error="Set setting for 'USER_INFO_FIELDS' to update "
@@ -445,3 +480,154 @@ def read_user_info(user):
         user_info[field.attname] = getattr(user, field.attname, None)
 
     return dict(data=user_info)
+
+
+def check_user_profile_fields():
+    """
+    1. Raises error if USER_PROFILE_MODEL is not configured.
+    2. Retrieves model object from model name.
+    3. Checks if the given user profile model has a one-to-one relation with the user model.
+    4. Raises error if USER_PROFILE_FIELDS is not configured.
+
+    :return: User profile model.
+    """
+    if not hasattr(settings, "USER_PROFILE_MODEL"):
+        raise_exception(
+            error="Set setting for 'USER_PROFILE_MODEL'.",
+            code="DGA-S014",
+        )
+
+    profile_model = get_model_by_name(settings.USER_PROFILE_MODEL)
+    user_model = get_user_model()
+
+    is_relation = one_to_one_relation(profile_model, user_model)
+    if not is_relation:
+        return raise_exception(error="Invalid profile model", code="DGA-S015")
+
+    if not hasattr(settings, "USER_PROFILE_FIELDS"):
+        raise_exception(
+            error="Set setting for 'USER_PROFILE_FIELDS'.",
+            code="DGA-S017",
+        )
+
+    return profile_model
+
+
+def read_user_profile(user):
+    """
+    1. Checks if User profile related settings are configured or not.
+    2. Retrieves Profile data related to user.
+    3. Receives profile model field objects of given profile fields.
+    4. Create a dictionary mapping field names to their corresponding values from the user object.
+
+    :param user:
+    :return:
+    """
+
+    profile_model = check_user_profile_fields()
+
+    try:
+        user_profile = get_object_or_404(profile_model, user=user)
+    except Http404:
+        raise_exception(
+            error="User's profile is not found",
+            code="DGA-S016",
+            http_status=status.HTTP_404_NOT_FOUND,
+        )
+
+    fields = str_field_to_model_field(
+        model=profile_model, fields=settings.USER_PROFILE_FIELDS
+    )
+
+    user_info = {}
+
+    for field in fields:
+        user_info[field.attname] = getattr(user_profile, field.attname, None)
+
+    return dict(data=user_info)
+
+
+def handle_user_profile(save_input, user_id):
+    """
+    1. Checks if user has configured profile related fields or not.
+    2. Generates a pydantic model for the configured user profile fields.
+    3. Pydantic model level validation is done.
+    4. Checks if the value is suitable to be inserted in respective field.
+    4. Retrieves profile related with the user.
+    5. If user has a profile, it is updated with the values.
+    6. If user does not have a profile, it creates a profile for user.
+
+    :param save_input:
+    :param user_id:
+    :return:
+    """
+
+    profile_model = check_user_profile_fields()
+
+    user_profile_pydantic_model = get_model_config_schema(
+        profile_model, fields=settings.USER_PROFILE_FIELDS
+    )
+
+    try:
+        user_profile_pydantic_model(**save_input)
+    except Exception as e:
+        error_msg = e.errors()[0].get("msg")
+        error_loc = e.errors()[0].get("loc")
+
+        raise_exception(error=f"{error_msg}. {error_loc}", code="DGA-S021")
+
+    for key, value in list(save_input.items()):
+        model_meta = getattr(profile_model, "_meta", None)
+        model_field = model_meta.get_field(key)
+
+        if (
+            model_field.has_default()
+            and not value
+            and value is not False
+            and not model_field.null
+        ):
+            save_input.pop(key)
+
+        try:
+            model_field.get_prep_value(value)
+        except Exception as e:
+            raise_exception(error=e, code="DGA-S020")
+
+        if isinstance(model_field, ForeignKey):
+            save_input[model_field.attname] = save_input.pop(key)
+
+    is_relation, profile_field = one_to_one_relation(
+        profile_model, get_user_model()
+    )
+
+    user = get_user_model().objects.get(id=user_id)
+
+    user_profile = profile_model.objects.filter(
+        **{profile_field.name: user_id}
+    ).first()
+
+    try:
+        if user_profile:
+            for key, value in list(save_input.items()):
+                setattr(user_profile, key, value)
+            user_profile.save()
+            message = f"{user.username}'s profile is updated"
+            return (
+                message,
+                status.HTTP_200_OK,
+            )
+        else:
+            save_input[profile_field.name] = user
+            user_profile = profile_model.objects.create(**save_input)
+            message = f"{user.username}'s profile is created"
+            return (
+                message,
+                status.HTTP_201_CREATED,
+            )
+    except Exception as e:
+        if isinstance(e, IntegrityError):
+            raise_exception(
+                error="Invalid foreign key constraint", code="DGA-S022"
+            )
+        else:
+            raise_exception(error=str(e), code="DGA-S023")

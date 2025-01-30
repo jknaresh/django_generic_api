@@ -2,7 +2,7 @@ import base64
 import time
 
 import pytest
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from fixtures.api import (
     api_client,
@@ -12,6 +12,7 @@ from fixtures.api import (
 
 # To ensure the import is retained
 usage = non_existing_user
+User = get_user_model()
 
 
 @pytest.mark.django_db

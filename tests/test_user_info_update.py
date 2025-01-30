@@ -1,13 +1,15 @@
 import pytest
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from fixtures.api import (
     api_client,
     all_perm_token,
     all_perm_user,
+    job_model_second_instance,
 )
 
 usage = all_perm_user
+User = get_user_model()
 
 
 @pytest.mark.django_db
@@ -43,6 +45,54 @@ class TestUserInfoUpdateAPI:
         inserted_data = User.objects.get(id=1)
         assert inserted_data.first_name == "Fname"
         assert inserted_data.last_name == "Lname"
+
+    def test_user_info_update_fk_field(
+        self,
+        api_client,
+        all_perm_token,
+        job_model_second_instance,
+        monkeypatch,
+    ):
+
+        monkeypatch.setattr(
+            "django.conf.settings.USER_INFO_FIELDS",
+            ("first_name", "last_name", "job_at"),
+        )
+        headers = {"Authorization": f"Bearer {all_perm_token}"}
+
+        user_info_update_payload = {
+            "payload": {
+                "variables": {
+                    "saveInput": {
+                        "first_name": "Fname",
+                        "last_name": "Lname",
+                        "job_at": 2,
+                    }
+                }
+            }
+        }
+
+        response = api_client.put(
+            "/v1/user-info/",
+            user_info_update_payload,
+            format="json",
+            headers=headers,
+        )
+
+        response_data = response.data
+
+        assert response.status_code == 201
+        assert response_data["data"] == [{"id": 1}]
+        assert (
+            response_data["message"]
+            == "allpermuser@gmail.com's info is updated"
+        )
+
+        inserted_data = User.objects.get(id=1)
+        assert inserted_data.first_name == "Fname"
+        assert inserted_data.last_name == "Lname"
+        assert inserted_data.job_at.id == 2
+        assert inserted_data.job_at.company_name == "Apple"
 
     def test_user_info_update_no_header(self, api_client):
         user_info_update_payload = {
