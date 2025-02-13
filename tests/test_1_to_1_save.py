@@ -30,17 +30,20 @@ class TestUserProfileUpdateAPI:
         user_profile_update_payload = {
             "payload": {
                 "variables": {
-                    "saveInput": {
-                        "birthday": "2025-01-01",
-                        "address": "HYDERABAD",
-                        "primary_number": "123456",
-                    }
+                    "modelName": "demo_app.UserProfile",
+                    "saveInput": [
+                        {
+                            "birthday": "2025-01-01",
+                            "gender": "M",
+                            "primary_number": "123456",
+                        }
+                    ],
                 }
             }
         }
 
         response = api_client.put(
-            "/v1/user-profile/",
+            "/v1/1-1/",
             user_profile_update_payload,
             format="json",
             headers=headers,
@@ -56,7 +59,7 @@ class TestUserProfileUpdateAPI:
         )
 
         assert inserted_data.birthday == date.fromisoformat("2025-01-01")
-        assert inserted_data.address == "HYDERABAD"
+        assert inserted_data.gender == "M"
         assert inserted_data.primary_number == "123456"
 
     def test_user_profile_update_success(
@@ -70,17 +73,20 @@ class TestUserProfileUpdateAPI:
         user_profile_update_payload = {
             "payload": {
                 "variables": {
-                    "saveInput": {
-                        "birthday": "2025-01-01",
-                        "address": "HYDERABAD",
-                        "primary_number": "123456",
-                    }
+                    "modelName": "demo_app.UserProfile",
+                    "saveInput": [
+                        {
+                            "birthday": "2025-01-01",
+                            "gender": "M",
+                            "primary_number": "123456",
+                        }
+                    ],
                 }
             }
         }
 
         response = api_client.put(
-            "/v1/user-profile/",
+            "/v1/1-1/",
             user_profile_update_payload,
             format="json",
             headers=headers,
@@ -94,7 +100,7 @@ class TestUserProfileUpdateAPI:
         assert response_data["message"] == "user@test.com's profile is updated"
 
         assert inserted_data.birthday == date.fromisoformat("2025-01-01")
-        assert inserted_data.address == "HYDERABAD"
+        assert inserted_data.gender == "M"
         assert inserted_data.primary_number == "123456"
 
     def test_user_does_not_pass_header(self, api_client):
@@ -105,17 +111,20 @@ class TestUserProfileUpdateAPI:
         user_profile_update_payload = {
             "payload": {
                 "variables": {
-                    "saveInput": {
-                        "birthday": "2025-01-01",
-                        "address": "HYDERABAD",
-                        "primary_number": "123456",
-                    }
+                    "modelName": "demo_app.UserProfile",
+                    "saveInput": [
+                        {
+                            "birthday": "2025-01-01",
+                            "gender": "M",
+                            "primary_number": "123456",
+                        }
+                    ],
                 }
             }
         }
 
         response = api_client.put(
-            "/v1/user-profile/",
+            "/v1/1-1/",
             user_profile_update_payload,
             format="json",
         )
@@ -124,7 +133,7 @@ class TestUserProfileUpdateAPI:
 
         assert response.status_code == 400
         assert response_data["error"] == "User not authenticated."
-        assert response_data["code"] == "DGA-V043"
+        assert response_data["code"] == "DGA-V044"
 
     def test_user_passes_wrong_payload_format(self, api_client, user1_token):
         """
@@ -135,15 +144,19 @@ class TestUserProfileUpdateAPI:
         user_profile_update_payload = {
             "payload": {
                 "variables": {
-                    "birthday": "2025-01-01",
-                    "address": "HYDERABAD",
-                    "primary_number": "123456",
+                    "saveInput": [
+                        {
+                            "birthday": "2025-01-01",
+                            "gender": "M",
+                            "primary_number": "123456",
+                        }
+                    ]
                 }
             }
         }
 
         response = api_client.put(
-            "/v1/user-profile/",
+            "/v1/1-1/",
             user_profile_update_payload,
             format="json",
             headers=headers,
@@ -153,33 +166,36 @@ class TestUserProfileUpdateAPI:
 
         assert response.status_code == 400
         assert response_data["error"] == "Field required"
-        assert response_data["code"] == "DGA-V044"
+        assert response_data["code"] == "DGA-V046"
 
     def test_no_profile_model_settings(
         self, api_client, user1_token, monkeypatch
     ):
         """
-        User does not configure USER_PROFILE_MODEL in settings
+        User does not configure ONE_TO_ONE_MODELS in settings
         """
-        if hasattr(settings, "USER_PROFILE_MODEL"):
-            monkeypatch.delattr(settings, "USER_PROFILE_MODEL")
+        if hasattr(settings, "ONE_TO_ONE_MODELS"):
+            monkeypatch.delattr(settings, "ONE_TO_ONE_MODELS")
 
         headers = {"Authorization": f"Bearer {user1_token}"}
 
         user_profile_update_payload = {
             "payload": {
                 "variables": {
-                    "saveInput": {
-                        "birthday": "2025-01-01",
-                        "address": "HYDERABAD",
-                        "primary_number": "123456",
-                    }
+                    "modelName": "demo_app.UserProfile",
+                    "saveInput": [
+                        {
+                            "birthday": "2025-01-01",
+                            "gender": "M",
+                            "primary_number": "123456",
+                        }
+                    ],
                 }
             }
         }
 
         response = api_client.put(
-            "/v1/user-profile/",
+            "/v1/1-1/",
             user_profile_update_payload,
             format="json",
             headers=headers,
@@ -188,9 +204,9 @@ class TestUserProfileUpdateAPI:
         response_data = response.data
         assert response.status_code == 400
         assert (
-            response_data["error"] == "Set setting for 'USER_PROFILE_MODEL'."
+            response_data["error"] == "Set settings for User Related models."
         )
-        assert response_data["code"] == "DGA-S014"
+        assert response_data["code"] == "DGA-S019"
 
     def test_profile_model_not_found(
         self, api_client, user1_token, monkeypatch
@@ -199,27 +215,25 @@ class TestUserProfileUpdateAPI:
         User passes invalid profile model.
         """
 
-        monkeypatch.setattr(
-            "django.conf.settings.USER_PROFILE_MODEL",
-            "demo_app.ABCD",
-        )
-
         headers = {"Authorization": f"Bearer {user1_token}"}
 
         user_profile_update_payload = {
             "payload": {
                 "variables": {
-                    "saveInput": {
-                        "birthday": "2025-01-01",
-                        "address": "HYDERABAD",
-                        "primary_number": "123456",
-                    }
+                    "modelName": "demo_app.ABCD",
+                    "saveInput": [
+                        {
+                            "birthday": "2025-01-01",
+                            "address": "HYDERABAD",
+                            "primary_number": "123456",
+                        }
+                    ],
                 }
             }
         }
 
         response = api_client.put(
-            "/v1/user-profile/",
+            "/v1/1-1/",
             user_profile_update_payload,
             format="json",
             headers=headers,
@@ -227,8 +241,8 @@ class TestUserProfileUpdateAPI:
 
         response_data = response.data
         assert response.status_code == 400
-        assert response_data["error"] == "Model not found"
-        assert response_data["code"] == "DGA-S013"
+        assert response_data["error"] == "demo_app.ABCD is not configured."
+        assert response_data["code"] == "DGA-S020"
 
     def test_user_wrong_profile_model(
         self, profile_record, api_client, user1_token, monkeypatch
@@ -237,14 +251,37 @@ class TestUserProfileUpdateAPI:
         User sends a sets a wrong profile model.
         """
         monkeypatch.setattr(
-            "django.conf.settings.USER_PROFILE_MODEL",
-            "demo_app.Customer",
+            settings,
+            "ONE_TO_ONE_MODELS",
+            {
+                "demo_app.Customer": {
+                    "user_related_field": "user",
+                    "fetch_fields": ("birthday", "gender", "primary_number"),
+                    "save_fields": ("birthday", "gender", "primary_number"),
+                }
+            },
         )
 
         headers = {"Authorization": f"Bearer {user1_token}"}
 
-        response = api_client.post(
-            "/v1/user-profile/",
+        user_profile_update_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app.UserProfile",
+                    "saveInput": [
+                        {
+                            "fav_book": 10,
+                            "address": "HYDERABAD",
+                            "primary_number": "123456",
+                        }
+                    ],
+                }
+            }
+        }
+
+        response = api_client.put(
+            "/v1/1-1/",
+            user_profile_update_payload,
             format="json",
             headers=headers,
         )
@@ -252,8 +289,10 @@ class TestUserProfileUpdateAPI:
         response_data = response.data
 
         assert response.status_code == 400
-        assert response_data["error"] == "Invalid profile model"
-        assert response_data["code"] == "DGA-S015"
+        assert (
+            response_data["error"] == "demo_app.UserProfile is not configured."
+        )
+        assert response_data["code"] == "DGA-S020"
 
     def test_no_profile_field_settings(
         self, api_client, user1_token, monkeypatch
@@ -261,25 +300,30 @@ class TestUserProfileUpdateAPI:
         """
         User does not configure USER_PROFILE_MODEL in settings
         """
-        if hasattr(settings, "USER_PROFILE_FIELDS"):
-            monkeypatch.delattr(settings, "USER_PROFILE_FIELDS")
+        monkeypatch.delitem(
+            settings.ONE_TO_ONE_MODELS["demo_app.UserProfile"],
+            "save_fields",
+        )
 
         headers = {"Authorization": f"Bearer {user1_token}"}
 
         user_profile_update_payload = {
             "payload": {
                 "variables": {
-                    "saveInput": {
-                        "birthday": "2025-01-01",
-                        "address": "HYDERABAD",
-                        "primary_number": "123456",
-                    }
+                    "modelName": "demo_app.UserProfile",
+                    "saveInput": [
+                        {
+                            "birthday": "2025-01-01",
+                            "address": "HYDERABAD",
+                            "primary_number": "123456",
+                        }
+                    ],
                 }
             }
         }
 
         response = api_client.put(
-            "/v1/user-profile/",
+            "/v1/1-1/",
             user_profile_update_payload,
             format="json",
             headers=headers,
@@ -287,10 +331,8 @@ class TestUserProfileUpdateAPI:
 
         response_data = response.data
         assert response.status_code == 400
-        assert (
-            response_data["error"] == "Set setting for 'USER_PROFILE_FIELDS'."
-        )
-        assert response_data["code"] == "DGA-S017"
+        assert response_data["error"] == "save_fields must be configured."
+        assert response_data["code"] == "DGA-S021"
 
     def test_invalid_data(self, api_client, user1_token):
         """
@@ -302,17 +344,20 @@ class TestUserProfileUpdateAPI:
         user_profile_update_payload = {
             "payload": {
                 "variables": {
-                    "saveInput": {
-                        "birthday": "abcd",
-                        "address": "HYDERABAD",
-                        "primary_number": "123456",
-                    }
+                    "modelName": "demo_app.UserProfile",
+                    "saveInput": [
+                        {
+                            "birthday": "abcd",
+                            "address": "HYDERABAD",
+                            "primary_number": "123456",
+                        }
+                    ],
                 }
             }
         }
 
         response = api_client.put(
-            "/v1/user-profile/",
+            "/v1/1-1/",
             user_profile_update_payload,
             format="json",
             headers=headers,
@@ -324,7 +369,7 @@ class TestUserProfileUpdateAPI:
             response_data["error"]
             == "Input should be a valid date or datetime, input is too short. ('birthday',)"
         )
-        assert response_data["code"] == "DGA-S021"
+        assert response_data["code"] == "DGA-S017"
 
     def test_invalid_fk_field_value(
         self, api_client, user1_token, monkeypatch
@@ -333,9 +378,14 @@ class TestUserProfileUpdateAPI:
         User sends not yet id for fk value.
         """
 
-        monkeypatch.setattr(
-            "django.conf.settings.USER_PROFILE_FIELDS",
-            ("fav_book", "address", "primary_number"),
+        monkeypatch.setitem(
+            settings.ONE_TO_ONE_MODELS["demo_app.UserProfile"],
+            "save_fields",
+            (
+                "fav_book",
+                "address",
+                "primary_number",
+            ),
         )
 
         headers = {"Authorization": f"Bearer {user1_token}"}
@@ -343,11 +393,14 @@ class TestUserProfileUpdateAPI:
         user_profile_update_payload = {
             "payload": {
                 "variables": {
-                    "saveInput": {
-                        "fav_book": 10,
-                        "address": "HYDERABAD",
-                        "primary_number": "123456",
-                    }
+                    "modelName": "demo_app.UserProfile",
+                    "saveInput": [
+                        {
+                            "fav_book": 10,
+                            "address": "HYDERABAD",
+                            "primary_number": "123456",
+                        }
+                    ],
                 }
             }
         }
@@ -357,7 +410,7 @@ class TestUserProfileUpdateAPI:
             side_effect=IntegrityError,
         ):
             response = api_client.put(
-                "/v1/user-profile/",
+                "/v1/1-1/",
                 user_profile_update_payload,
                 format="json",
                 headers=headers,
@@ -367,3 +420,47 @@ class TestUserProfileUpdateAPI:
             assert response.status_code == 400
             assert response_data["error"] == "Invalid foreign key constraint"
             assert response_data["code"] == "DGA-S022"
+
+    def test_unknown_fields_are_configured(
+        self, api_client, user1_token, monkeypatch
+    ):
+        """
+        Unknown fields are configured in settings.
+        :param api_client:
+        :return:
+        """
+        monkeypatch.setitem(
+            settings.ONE_TO_ONE_MODELS["demo_app.UserProfile"],
+            "save_fields",
+            ("ABCD",),
+        )
+
+        headers = {"Authorization": f"Bearer {user1_token}"}
+
+        user_profile_update_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app.UserProfile",
+                    "saveInput": [
+                        {
+                            "birthday": "2024-10-10",
+                            "address": "HYDERABAD",
+                            "primary_number": "123456",
+                        }
+                    ],
+                }
+            }
+        }
+
+        response = api_client.put(
+            "/v1/1-1/",
+            user_profile_update_payload,
+            format="json",
+            headers=headers,
+        )
+
+        response_data = response.data
+
+        assert response.status_code == 400
+        assert response_data["error"] == "'[ABCD]'s not in the model."
+        assert response_data["code"] == "DGA-U006"

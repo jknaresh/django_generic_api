@@ -22,7 +22,8 @@ from .payload_models import (
     GenericForgotPasswordPayload,
     GenericNewPasswordPayload,
     GenericUserUpdatePayload,
-    GenericUserProfilePayload,
+    GenericOneToOneSavePayload,  # 1-1 save payload model
+    GenericOneToOneFetchPayload,  # 1-1 fetch payload model
 )
 from .services import (
     get_model_by_name,
@@ -30,9 +31,9 @@ from .services import (
     fetch_data,
     generate_token,
     handle_user_info_update,
-    read_user_info,
-    read_user_profile,
-    handle_user_profile,
+    fetch_user_info,
+    save_one_to_one,
+    fetch_one_to_one,
 )
 from .utils import (
     make_permission_str,
@@ -41,6 +42,7 @@ from .utils import (
     is_valid_email_domain,
     error_response,
     success_response,
+    model_is_accessible,
 )
 
 
@@ -85,7 +87,7 @@ class GenericSaveAPIView(APIView):
 
         try:
             model = get_model_by_name(model_name)
-
+            model_is_accessible(model)
         except Exception as e:
             return error_response(
                 error=e.args[0]["error"],
@@ -157,6 +159,7 @@ class GenericFetchAPIView(APIView):
         # check if user has permission to view the data.
         try:
             model = get_model_by_name(model_name)
+            model_is_accessible(model)
         except Exception as e:
             return error_response(
                 error=e.args[0]["error"],
@@ -669,7 +672,7 @@ class UserInfoAPIView(APIView):
             )
 
         try:
-            user_info = read_user_info(user=self.request.user)
+            user_info = fetch_user_info(user=self.request.user)
             return success_response(data=user_info, message="Completed.")
         except Exception as e:
             return error_response(
@@ -710,17 +713,34 @@ class UserInfoAPIView(APIView):
             )
 
 
-class UserProfileAPIView(APIView):
+class OneToOneAPIView(APIView):
 
     def post(self, *args, **kwargs):
         # checks if user has valid authorization header.
         if not self.request.user.is_authenticated:
             return error_response(
-                error="User not authenticated.", code="DGA-V043"
+                error="User not authenticated.", code="DGA-V040"
             )
 
+        payload = self.request.data.get("payload", {}).get("variables", {})
         try:
-            user_info = read_user_profile(user=self.request.user)
+            # Validate the payload using the Pydantic model
+            validated_payload_data = GenericOneToOneFetchPayload(**payload)
+        except ValidationError as e:
+            error_msg = e.errors()[0].get("msg")
+            error_loc = e.errors()[0].get("loc")
+            error = f"{error_msg}{error_loc}"
+
+            return error_response(error=error, code="DGA-V042")
+
+        model_name = validated_payload_data.modelName
+        fields = validated_payload_data.fields
+
+        user_id = self.request.user.id
+        key = f"1-1.{self.request.method}"
+
+        try:
+            user_info = fetch_one_to_one(model_name, fields, user_id, key)
             return success_response(data=user_info, message="Completed.")
         except Exception as e:
             return error_response(
@@ -732,25 +752,37 @@ class UserProfileAPIView(APIView):
         # checks if user has valid authorization header.
         if not self.request.user.is_authenticated:
             return error_response(
-                error="User not authenticated.", code="DGA-V043"
+                error="User not authenticated.", code="DGA-V044"
             )
 
         payload = self.request.data.get("payload", {}).get("variables", {})
 
-        try:
-            # Validate the payload using the Pydantic model
-            validated_payload_data = GenericUserProfilePayload(**payload)
-        except ValidationError as e:
+        save_input = payload.get("saveInput", [])
+
+        if len(save_input) > 1:
             return error_response(
-                error=e.errors()[0].get("msg"), code="DGA-V044"
+                error=f"Only 1 record to save.",
+                code="DGA-V045",
             )
 
+        try:
+            # Validate the payload using the Pydantic model
+            validated_payload_data = GenericOneToOneSavePayload(**payload)
+        except ValidationError as e:
+            return error_response(
+                error=e.errors()[0].get("msg"), code="DGA-V046"
+            )
+
+        model_name = validated_payload_data.modelName
         save_input = validated_payload_data.saveInput
 
         user_id = self.request.user.id
+        key = f"1-1.{self.request.method}"
 
         try:
-            message, status_code = handle_user_profile(save_input, user_id)
+            message, status_code = save_one_to_one(
+                model_name, save_input, user_id, key
+            )
             return success_response(
                 data=[{"id": user_id}],
                 message=message,
@@ -760,4 +792,3 @@ class UserProfileAPIView(APIView):
             return error_response(
                 error=e.args[0]["error"], code=e.args[0]["code"]
             )
-        pass

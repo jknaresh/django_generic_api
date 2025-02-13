@@ -3,7 +3,6 @@ import sys
 
 import django
 from django.conf import settings
-from django.conf.global_settings import AUTH_USER_MODEL
 from django.core.management import call_command
 
 sys.path.extend(
@@ -92,8 +91,13 @@ def pytest_configure():
         CAPTCHA_LENGTH=7,
         CAPTCHA_REQUIRED=True,
         USER_INFO_FIELDS=("first_name", "last_name", "is_active"),
-        USER_PROFILE_MODEL="demo_app.UserProfile",
-        USER_PROFILE_FIELDS=("birthday", "address", "primary_number"),
+        ONE_TO_ONE_MODELS={
+            "demo_app.UserProfile": {
+                "user_related_field": "user",
+                "fetch_fields": ("birthday", "gender", "primary_number"),
+                "save_fields": ("birthday", "gender", "primary_number"),
+            },
+        },
     )
 
     django.setup()

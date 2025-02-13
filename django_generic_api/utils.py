@@ -12,7 +12,6 @@ from typing import Any, List
 from uuid import UUID
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
-from django.db.models import OneToOneField
 from pydantic import (
     ConfigDict,
     EmailStr,
@@ -421,26 +420,31 @@ def raise_exception(error, code, http_status=status.HTTP_400_BAD_REQUEST):
     raise Exception(response_data)
 
 
-def one_to_one_relation(profile_model, user_model):
+def model_is_accessible(model):
     """
-    Checks if the given model has a one-to-one relation with the user model.
+    Checks if the model which is being accessed by user is a system configured (user related) model or not.
+    - Gets the models from ONE_TO_ONE_MODEL,AUTH_USER_MODEL from system settings.
+    - If user tries to access any of those models, deny.
 
-    Args:
-        profile_model: The model to check (e.g., UserProfile).
-
-    Returns:
-        bool: True if there's a one-to-one relation with the user model, False otherwise.
-        :param profile_model:
-        :param user_model:
+    :param model:
+    :return:
     """
 
-    profile_meta = getattr(profile_model, "_meta", None)
-    # todo: find a optimized way to validate if field is OnetoOneField related to User model.
-    for field in profile_meta.get_fields():
-        # Check if the field is a OneToOneField and points to the user model
-        if (
-            isinstance(field, OneToOneField)
-            and field.related_model == user_model
-        ):
-            return True, field
-    return False
+    # get model name as "app_name.model_name"
+    model_meta = getattr(model, "_meta")
+    model_str = f"{model_meta.app_label}.{model_meta.object_name}"
+
+    restricted_models = set()
+
+    one_to_one_models = set(getattr(settings, "ONE_TO_ONE_MODELS", {}).keys())
+    one_to_many_models = set(
+        getattr(settings, "ONE_TO_MANY_MODELS", {}).keys()
+    )
+    user_model = getattr(settings, "AUTH_USER_MODEL", "auth.User")
+
+    restricted_models.update(one_to_one_models)
+    restricted_models.update(one_to_many_models)
+    restricted_models.add(user_model)
+
+    if restricted_models.__contains__(model_str):
+        raise_exception(code="Access is denied to this model.", error="DGA-U007")
