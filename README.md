@@ -871,7 +871,7 @@ header["Authorization"]="Bearer <access token>"
 | Field Name    | Datatype   | Description                                                                                                 | Required | Default Value                                              | Example                                              |
 |---------------|------------|-------------------------------------------------------------------------------------------------------------|----------|------------------------------------------------------------|------------------------------------------------------|
 | modelName     | String     | Name of Django model to fetch                                                                               | True     | "model name"                                               | Employees                                            |
-| fields        | List       | List of database field names, ex: field1,field2,                                                            | True     | ["field1","field2","field3 "]                              | ["name","age","emp_id"]                              |
+| fields        | List       | List of field names, ex: field1,field2,                                                            | True     | ["field1","field2","field3 "]                              | ["name","age","emp_id"]                              |
 | filters       | List[Dict] | Consists 3 filter properties (operator, name,value)                                                         | True     | [{"operator": "in", "name": "field1","value": ["value1"]}] | [{ "operator": "eq","name": "age","value": ["25"] }] |
 | operator      | Enum       | Specifies the comparison operation to be applied, Only considers one of ('eq', 'in', 'gt', 'like', 'ilike') | True     | "eq"                                                       | eq                                                   |
 | name          | String     | Name of the field on which the filter is to be applied                                                      | True     | "field1"                                                   | age                                                  |
@@ -1037,13 +1037,13 @@ header["Authorization"]="Bearer <access token>"
 
 ### Description for Fields
 
-| Field Name      | Datatype           | Description                                         | Required | Default Value                                 | Example                                   |
-|-----------------|--------------------|-----------------------------------------------------|----------|-----------------------------------------------|-------------------------------------------|
-| modelName       | String             | Name of Django Model to Save                        | True     | "model name"                                  | Employees                                 |
-| id              | None               | ID of the record to be updated                      | --       | null                                          | null                                      |
-| SaveInput       | List( Dictionary ) | Contains list of fields and their values            | True     | [{ "field1": "value1","field2": "value2  " }] | [{ "field1": "emp_id","field2": "789 " }] |
-| SaveInput.field | String             | Name of field in table in Database , ex:field1      | True     | "default_field"                               | "emp_id"                                  |
-| SaveInput.value | Any                | Value of corresponding column in table , ex: value1 | True     | "default_value"                               | "789"                                     |
+| Field Name      | Datatype           | Description                                          | Required | Default Value                                 | Example                                   |
+|-----------------|--------------------|------------------------------------------------------|----------|-----------------------------------------------|-------------------------------------------|
+| modelName       | String             | Name of Django Model to Save                         | True     | "model name"                                  | Employees                                 |
+| id              | None               | ID of the record to be updated                       | --       | null                                          | null                                      |
+| SaveInput       | List( Dictionary ) | Contains list of fields and their values             | True     | [{ "field1": "value1","field2": "value2  " }] | [{ "field1": "emp_id","field2": "789 " }] |
+| SaveInput.field | String             | Name of field , ex:field1                            | True     | "default_field"                               | "emp_id"                                  |
+| SaveInput.value | Any                | Value of corresponding column in table , ex: value1  | True     | "default_value"                               | "789"                                     |
 
 ---
 
@@ -1132,7 +1132,7 @@ header["Authorization"]="Bearer <access token>"
 | modelName       | String           | Name of Django Model to Save                        | True     | "model name"                                | Employees                                |
 | id              | Int              | id value of record to update, ex: 1                 | True     | 1                                           | 5                                        |
 | SaveInput       | List[Dictionary] | Contains list of fields and their values            | True     | [{ "field1": "field1","field2": "value1" }] | [{ "field1": "emp_id","field2": "963" }] |
-| SaveInput.field | String           | Name of field in table in Database , ex:field1      | True     | "field1"                                    | emp_id                                   |
+| SaveInput.field | String           | Name of field, ex:field1                            | True     | "field1"                                    | emp_id                                   |
 | SaveInput.value | Any              | Value of corresponding column in table , ex: value1 | True     | "value1"                                    | 963                                      |
 
 ---
@@ -1140,8 +1140,7 @@ header["Authorization"]="Bearer <access token>"
 ## Fetch User Info API
 
 - Fetch or update fields in the `auth_user` table defined by the system.
-- Use the `USER_INFO_FIELDS` setting to define a tuple of database table
-  fields.
+- Use the `USER_INFO_FIELDS` setting to define a tuple of fields.
 - Authentication is required.
 
 ```bash
@@ -1199,8 +1198,7 @@ header["Authorization"]="Bearer <access token>"
 ## Update User Info API
 
 - Fetch or update fields in the `auth_user` table defined by the system.
-- Use the `USER_INFO_FIELDS` setting to define a tuple of database table
-  fields.
+- Use the `USER_INFO_FIELDS` setting to define a tuple of fields.
 - Authentication is required.
 
 ```bash
@@ -1269,3 +1267,238 @@ header["Authorization"]="Bearer <access token>"
 ```
 
 ---
+
+# One to One API
+
+- This API is designed to prevent Fetch and Save operations on user-related models that have a One-to-One relationship with the user model.
+- To restrict access, configure the One-to-One models in settings as shown below.
+```bash
+ONE_TO_ONE_MODELS = {
+    "<app_name>.<model_name>" : {
+        "user_related_field": "<user_related_field>",
+        "fetch_fields": ("<field1>","<field2>","<field3>"),
+        "save_fields": ("<field1>","<field2>","<field3>"),
+    },
+}
+```
+
+### Configuration Details: 
+- `user_related_field`: Specifies the field that establishes a One-to-One relationship with the `AUTH_USER` model.
+- `fetch_fields`: A tuple listing the fields that are permitted for fetch.
+- `save_fields`: A tuple listing the fields that can be created or updated.
+
+
+### Info:
+- Take this field as example:
+```bash
+  user = models.OneToOneField(USER, **..)
+```
+- You may include `user` in `fetch_fields`, but related fields (eg. `user__id`) cannot be accessed.
+
+
+### Setup: 
+- Since `ONE_TO_ONE_MODELS` are restricted, users need specific permissions to access them.
+- To enable access, create a group, assign model permissions, and automatically add users to this group upon registration.
+
+
+- Creating a Group with Permissions:
+```bash
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
+from django.apps import apps
+
+# Create the group
+group, created = Group.objects.get_or_create(name="ONE_TO_ONE_MODEL_ACCESS")
+
+# List of One-to-One models (replace with actual model names)
+one_to_one_models = [
+    "<app_name>.<model_name>",
+]
+
+for model_str in one_to_one_models:
+    model = apps.get_model(model_str)
+    content_type = ContentType.objects.get_for_model(model)
+
+    permissions = Permission.objects.filter(
+        content_type=content_type,
+        codename__in=[
+            f"add_{model._meta.model_name}",
+            f"change_{model._meta.model_name}",
+            f"view_{model._meta.model_name}"
+        ]
+    )
+
+    group.permissions.add(*permissions)
+
+message = "Group and permissions set up successfully."
+print(message)
+
+```
+
+-  Adding Users to the Group
+
+```bash
+
+from django.contrib.auth.models import Group
+from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+
+def add_user_to_group(user_id):
+    user = get_user_model().objects.get(id=user_id)
+    group = Group.objects.get(name="ONE_TO_ONE_MODEL_ACCESS")
+    user.groups.add(group)
+    user.save()
+    
+    message = f"User {user.username} added to ONE_TO_ONE_MODEL_ACCESS group."
+    return HttpResponse(message)
+
+```
+
+- Workflow:
+    - When the service starts, ensure that `ONE_TO_ONE_MODEL_ACCESS` group exists with the add, change, view permissions to `ONE_TO_ONE_MODEL`.
+    - After registration is successfull, send a request to `add_user_to_group` with `user_id`, adding the user to the group and granting access to `ONE_TO_ONE_MODELS`. 
+
+
+## One to One Fetch API 
+
+- To Fetch the data, post on url '/< url prefix >/v1/1-1/' and set the header as well prepare payload as following.
+
+### Method:
+```bash
+HTTP Method: "POST"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/v1/1-1/",
+```
+
+### Header:
+
+```bash
+header["Content-Type"]="application/json"
+header["Authorization"]="Bearer <access token>"
+```
+
+### <span style="color: orange;">Payload for 1-1 Fetch:</span>
+
+```bash
+{
+    "payload":{
+        "variables":{
+            "modelName": "<app_name>.<model_name>",
+            "fields":["<field1>","<field2>","<field3>","<field4>"]
+        }
+    }
+}
+```
+
+### <span style="color: green;">Success response for 1-1 Fetch:</span>
+
+```bash
+{
+    "data": {
+        "total": 1,
+        "data": [
+            {
+                "<field1>": "<value1>",
+                "<field2>": "<value2>",
+                "<field3>": "<value3>",
+                "<field4>": "<value4>"
+            }
+        ]
+    },
+    "message": "Completed."
+}
+```
+
+### <span style="color: red;">Error response for Fetch Data:</span>
+
+```bash
+{
+    "error":<error_message>,
+    "code": <error_code>
+}
+```
+
+### Description of Fields
+
+| Field Name    | Datatype   | Description                                                                                                 | Required | Default Value                                    | Example                 |
+|---------------|------------|-------------------------------------------------------------------------------------------------------------|----------|--------------------------------------------------|-------------------------|
+| modelName     | String     | Name of Django model to fetch (<app_name>.<model_name>)                                                     | True     | "<app_name>.<model_name>"                        | <std_app.Teacher>       |
+| fields        | List       | List of field names, ex: field1,field2,                                                            | True     | ["field1","field2","field3 "]                    | ["name","age","emp_id"] |
+
+
+
+## One to One Save API 
+
+- To Fetch the data, put on url '/< url prefix >/v1/1-1/' and set the header as well prepare payload as following.
+
+### Method:
+```bash
+HTTP Method: "PUT"
+```
+
+### URL construction:
+
+```bash
+url: "http://domain-name/api/v1/1-1/",
+```
+
+### Header:
+
+```bash
+header["Content-Type"]="application/json"
+header["Authorization"]="Bearer <access token>"
+```
+
+### <span style="color: orange;">Payload for 1-1 Save:</span>
+
+```bash
+{
+    "payload":{
+        "variables":{
+            "modelName": "<app_name>.<model_name>",
+            "saveInput":[{
+                "<field1>":"<value1>",
+                "<field2>":"<value2>",
+                "<field3>":"<value3>"
+            }]
+        }
+    }
+}
+
+```
+
+### <span style="color: green;">Success response for 1-1 Save:</span>
+
+```bash
+{
+    "data": [
+        {
+            "id": <id>
+        }
+    ],
+    "message": "<user.username>'s profile is created/updated."
+}
+```
+
+### <span style="color: red;">Error response for Save Data:</span>
+
+```bash
+{
+    "error":<error_message>,
+    "code": <error_code>
+}
+```
+
+### Description for Fields
+
+| Field Name      | Datatype           | Description                                         | Required | Default Value                                 | Example                                   |
+|-----------------|--------------------|-----------------------------------------------------|----------|-----------------------------------------------|-------------------------------------------|
+| modelName       | String             | Name of Django Model to Save                        | True     | "model name"                                  | Employees                                 |
+| SaveInput       | List( Dictionary ) | Contains list of fields and their values            | True     | [{ "field1": "value1","field2": "value2  " }] | [{ "field1": "emp_id","field2": "789 " }] |
+| SaveInput.field | String             | Name of field, ex:field1                            | True     | "default_field"                               | "emp_id"                                  |
+| SaveInput.value | Any                | Value of corresponding column in table , ex: value1 | True     | "default_value"                               | "789"                                     |
+--- 

@@ -16,6 +16,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .utils import (
+    make_permission_str,
     get_model_fields_with_properties,
     is_fields_exist,
     DJANGO_TO_PYDANTIC_TYPE_MAP,
@@ -382,7 +383,7 @@ def handle_save_input(model, record_id, save_input):
     return instances, message
 
 
-def handle_user_info_update(save_input, user_id):
+def handle_user_info_save_input(save_input, user_id):
     """
     1. Checks if user has configured Fields (USER_INFO_FIELDS) to be accessed in user model.
     2. Creates a pydantic model with user given fields in (USER_INFO_FIELDS).
@@ -521,7 +522,7 @@ def check_user_related_configurations(model_name, key):
     if user_related_field is None:
         raise_exception(
             error="`user_related_field` must be configured.",
-            code="DGA-S022",
+            code="DGA-S018",
         )
 
     # Checks if system `user_related_field` is Fk or not.
@@ -568,7 +569,14 @@ def fetch_one_to_one(model_name, fields, user_id, key):
     if len(extra_fields) > 0:
         raise_exception(
             error=f"Unknown fields {extra_fields} in payload",
-            code="DGA-S029",
+            code="DGA-S027",
+        )
+
+    perm_str = make_permission_str(model, action="fetch")
+    user = get_user_model().objects.get(id=user_id)
+    if not user.has_perm(perm_str):
+        raise_exception(
+            error="Access is restricted to this model", code="DGA-S029"
         )
 
     try:
@@ -584,7 +592,7 @@ def fetch_one_to_one(model_name, fields, user_id, key):
         total_records = queryset.count()
         return dict(total=total_records, data=list(queryset))
     except Exception as e:
-        raise_exception(error=str(e), code="DGA-S030")
+        raise_exception(error=str(e), code="DGA-S028")
 
 
 def save_one_to_one(model_name, save_input, user_id, key):
@@ -613,7 +621,7 @@ def save_one_to_one(model_name, save_input, user_id, key):
     if configured_fields.__contains__(user_related_field):
         raise_exception(
             error="The USER field cannot be included in save_fields.",
-            code="DGA-S027",
+            code="DGA-S026",
         )
 
     user_profile_pydantic_model = get_model_config_schema(
@@ -656,6 +664,16 @@ def save_one_to_one(model_name, save_input, user_id, key):
         **{user_related_field: user_id}
     ).first()
 
+    action_str = "edit" if user_profile else "save"
+
+    # Check is user has permission to add or change.
+    perm_str = make_permission_str(model, action=action_str)
+    user = get_user_model().objects.get(id=user_id)
+    if not user.has_perm(perm_str):
+        raise_exception(
+            error="Access is restricted to this model", code="DGA-S030"
+        )
+
     try:
         if user_profile:
             for key, value in list(save_input[0].items()):
@@ -680,4 +698,4 @@ def save_one_to_one(model_name, save_input, user_id, key):
                 error="Invalid foreign key constraint", code="DGA-S022"
             )
         else:
-            raise_exception(error=str(e), code="DGA-S023")
+            raise_exception(error=str(e), code="DGA-S025")

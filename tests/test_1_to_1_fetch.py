@@ -10,10 +10,13 @@ from fixtures.api import (
     profile_record,
     all_perm_token,
     all_perm_user,
+    save_perm_user,
+    add_perm_token,
 )
 
 usage = user1
 usage1 = all_perm_user
+usage2 = save_perm_user
 
 
 @pytest.mark.django_db
@@ -70,7 +73,7 @@ class TestUserProfileAPI:
 
         assert response.status_code == 400
         assert response_data["error"] == "User not authenticated."
-        assert response_data["code"] == "DGA-V040"
+        assert response_data["code"] == "DGA-V043"
 
     def test_user_fetch_info_fk_field(
         self, profile_record, api_client, user1_token, monkeypatch
@@ -291,3 +294,34 @@ class TestUserProfileAPI:
         assert response.status_code == 400
         assert response_data["error"] == "fetch_fields must be configured."
         assert response_data["code"] == "DGA-S021"
+
+    def test_user_does_not_have_access_to_model(
+        self, api_client, add_perm_token
+    ):
+        """
+        User does not have access to model.
+        """
+
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
+
+        one_to_one_fetch_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app.UserProfile",
+                    "fields": ["birthday", "gender", "primary_number"],
+                }
+            }
+        }
+
+        response = api_client.post(
+            "/v1/1-1/",
+            one_to_one_fetch_payload,
+            format="json",
+            headers=headers,
+        )
+
+        response_data = response.data
+
+        assert response.status_code == 400
+        assert response_data["error"] == "Access is restricted to this model"
+        assert response_data["code"] == "DGA-S029"

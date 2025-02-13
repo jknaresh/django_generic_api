@@ -30,7 +30,7 @@ from .services import (
     handle_save_input,
     fetch_data,
     generate_token,
-    handle_user_info_update,
+    handle_user_info_save_input,
     fetch_user_info,
     save_one_to_one,
     fetch_one_to_one,
@@ -701,7 +701,7 @@ class UserInfoAPIView(APIView):
 
         user_id = self.request.user.id
         try:
-            message = handle_user_info_update(save_input, user_id)
+            message = handle_user_info_save_input(save_input, user_id)
             return success_response(
                 data=[{"id": user_id}],
                 message=message,
@@ -719,7 +719,7 @@ class OneToOneAPIView(APIView):
         # checks if user has valid authorization header.
         if not self.request.user.is_authenticated:
             return error_response(
-                error="User not authenticated.", code="DGA-V040"
+                error="User not authenticated.", code="DGA-V043"
             )
 
         payload = self.request.data.get("payload", {}).get("variables", {})

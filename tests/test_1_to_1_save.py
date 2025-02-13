@@ -11,11 +11,14 @@ from fixtures.api import (
     profile_record,
     all_perm_token,
     all_perm_user,
+    save_perm_user,
+    add_perm_token,
 )
 from unittest import mock
 
 usage = user1
 usage1 = all_perm_user
+usage2 = save_perm_user
 
 
 @pytest.mark.django_db
@@ -464,3 +467,40 @@ class TestUserProfileUpdateAPI:
         assert response.status_code == 400
         assert response_data["error"] == "'[ABCD]'s not in the model."
         assert response_data["code"] == "DGA-U006"
+
+    def test_user_does_not_have_access_to_model(
+        self, api_client, add_perm_token
+    ):
+        """
+        User does not have access to model.
+        """
+
+        headers = {"Authorization": f"Bearer {add_perm_token}"}
+
+        one_to_one_save_payload = {
+            "payload": {
+                "variables": {
+                    "modelName": "demo_app.UserProfile",
+                    "saveInput": [
+                        {
+                            "birthday": "2025-01-01",
+                            "gender": "M",
+                            "primary_number": "123456",
+                        }
+                    ],
+                }
+            }
+        }
+
+        response = api_client.put(
+            "/v1/1-1/",
+            one_to_one_save_payload,
+            format="json",
+            headers=headers,
+        )
+
+        response_data = response.data
+
+        assert response.status_code == 400
+        assert response_data["error"] == "Access is restricted to this model"
+        assert response_data["code"] == "DGA-S030"

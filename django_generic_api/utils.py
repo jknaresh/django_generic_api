@@ -106,6 +106,7 @@ def get_model_fields_with_properties(model, field_list=None):
     dictionary
     of field properties such as 'type', 'nullability', etc.
 
+    :param field_list:
     :param model: Django model class
     :return: dict
     """
@@ -447,4 +448,6 @@ def model_is_accessible(model):
     restricted_models.add(user_model)
 
     if restricted_models.__contains__(model_str):
-        raise_exception(code="Access is denied to this model.", error="DGA-U007")
+        raise_exception(
+            code="Access is denied to this model.", error="DGA-U007"
+        )

@@ -17,7 +17,11 @@ def user1():
 
     perm1 = Permission.objects.get(codename="add_customer")
     perm2 = Permission.objects.get(codename="view_customer")
-    user.user_permissions.add(perm1, perm2)
+    perm3 = Permission.objects.get(codename="add_userprofile")
+    perm4 = Permission.objects.get(codename="view_userprofile")
+    perm5 = Permission.objects.get(codename="change_userprofile")
+
+    user.user_permissions.add(perm1, perm2, perm3, perm4, perm5)
 
     return user
 
@@ -104,8 +108,11 @@ def all_perm_user():
 
     perm1 = Permission.objects.get(codename="add_customer")
     perm2 = Permission.objects.get(codename="view_customer")
-    user.user_permissions.add(perm1, perm2)
+    perm3 = Permission.objects.get(codename="add_userprofile")
+    perm4 = Permission.objects.get(codename="view_userprofile")
+    perm5 = Permission.objects.get(codename="change_userprofile")
 
+    user.user_permissions.add(perm1, perm2, perm3, perm4, perm5)
     return user
 
 
