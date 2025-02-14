@@ -1288,14 +1288,6 @@ ONE_TO_ONE_MODELS = {
 - `save_fields`: A tuple listing the fields that can be created or updated.
 
 
-### Info:
-- Take this field as example:
-```bash
-  user = models.OneToOneField(USER, **..)
-```
-- You may include `user` in `fetch_fields`, but related fields (eg. `user__id`) cannot be accessed.
-
-
 ### Setup: 
 - Since `ONE_TO_ONE_MODELS` are restricted, users need specific permissions to access them.
 - To enable access, create a group, assign model permissions, and automatically add users to this group upon registration.
