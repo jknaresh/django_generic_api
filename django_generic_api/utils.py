@@ -10,7 +10,6 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any, List
 from uuid import UUID
-
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
 from pydantic import (
@@ -107,6 +106,7 @@ def get_model_fields_with_properties(model, field_list=None):
     dictionary
     of field properties such as 'type', 'nullability', etc.
 
+    :param field_list:
     :param model: Django model class
     :return: dict
     """
@@ -350,6 +350,7 @@ def str_field_to_model_field(model, fields):
     for field in model_meta.fields:
         field_name = field.attname
         field_verbose_name = field.verbose_name
+        field_name1 = field.name
         try:
             if fields.__contains__(field_name):
                 fld_set.add(field_name)
@@ -357,6 +358,10 @@ def str_field_to_model_field(model, fields):
                 c1 += 1
             elif fields.__contains__(field_verbose_name):
                 fld_set.add(field_verbose_name)
+                fld.append(field)
+                c1 += 1
+            elif fields.__contains__(field_name1):
+                fld_set.add(field_name1)
                 fld.append(field)
                 c1 += 1
         except:
@@ -403,7 +408,7 @@ def success_response(data, message, http_status=status.HTTP_200_OK):
     return Response(response_data, status=http_status)
 
 
-def raise_exception(error, code, status_code=status.HTTP_400_BAD_REQUEST):
+def raise_exception(error, code, http_status=status.HTTP_400_BAD_REQUEST):
     """
     Returns a structured error response.
 
@@ -411,6 +416,38 @@ def raise_exception(error, code, status_code=status.HTTP_400_BAD_REQUEST):
         dict: The JSON-like dictionary for an error response.
     """
 
-    response_data = {"error": error, "code": code, "http_status": status_code}
+    response_data = {"error": error, "code": code, "http_status": http_status}
 
     raise Exception(response_data)
+
+
+def model_is_accessible(model):
+    """
+    Checks if the model which is being accessed by user is a system configured (user related) model or not.
+    - Gets the models from ONE_TO_ONE_MODEL,AUTH_USER_MODEL from system settings.
+    - If user tries to access any of those models, deny.
+
+    :param model:
+    :return:
+    """
+
+    # get model name as "app_name.model_name"
+    model_meta = getattr(model, "_meta")
+    model_str = f"{model_meta.app_label}.{model_meta.object_name}"
+
+    restricted_models = set()
+
+    one_to_one_models = set(getattr(settings, "ONE_TO_ONE_MODELS", {}).keys())
+    one_to_many_models = set(
+        getattr(settings, "ONE_TO_MANY_MODELS", {}).keys()
+    )
+    user_model = getattr(settings, "AUTH_USER_MODEL", "auth.User")
+
+    restricted_models.update(one_to_one_models)
+    restricted_models.update(one_to_many_models)
+    restricted_models.add(user_model)
+
+    if restricted_models.__contains__(model_str):
+        raise_exception(
+            code="Access is denied to this model.", error="DGA-U007"
+        )

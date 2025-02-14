@@ -8,6 +8,66 @@ from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
+@pytest.fixture
+def user1():
+    """
+    User with add and view perm.
+    """
+    user = baker.make_recipe("demo_app.user1")
+
+    perm1 = Permission.objects.get(codename="add_customer")
+    perm2 = Permission.objects.get(codename="view_customer")
+    perm3 = Permission.objects.get(codename="add_userprofile")
+    perm4 = Permission.objects.get(codename="view_userprofile")
+    perm5 = Permission.objects.get(codename="change_userprofile")
+
+    user.user_permissions.add(perm1, perm2, perm3, perm4, perm5)
+
+    return user
+
+
+@pytest.fixture
+def user1_token(user1):
+    """
+    Token for all_perm user
+    """
+    token = generate_token(user1)
+    access_token = token[0]["access"]
+
+    return access_token
+
+
+# book instance id=2
+@pytest.fixture
+def book_id_2():
+    book2 = baker.make_recipe("demo_app.book2")
+    book2.id = 2
+    book2.save()
+
+    return book2
+
+
+# user profile instance
+@pytest.fixture
+def profile_record(user1):
+    user_profile_1 = baker.make_recipe(
+        "demo_app.user_profile",
+        user=user1,
+    )
+
+    return user_profile_1
+
+
+# job model instance with id=2
+@pytest.fixture
+def job_model_second_instance():
+    job_instance = baker.make_recipe("demo_app.job_instance2")
+    job_instance.id = 2
+    job_instance.save()
+
+    return job_instance
+
+
 # student class instance 1
 @pytest.fixture
 def student_class_1():
@@ -48,8 +108,11 @@ def all_perm_user():
 
     perm1 = Permission.objects.get(codename="add_customer")
     perm2 = Permission.objects.get(codename="view_customer")
-    user.user_permissions.add(perm1, perm2)
+    perm3 = Permission.objects.get(codename="add_userprofile")
+    perm4 = Permission.objects.get(codename="view_userprofile")
+    perm5 = Permission.objects.get(codename="change_userprofile")
 
+    user.user_permissions.add(perm1, perm2, perm3, perm4, perm5)
     return user
 
 

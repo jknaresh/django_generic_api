@@ -83,6 +83,7 @@ def pytest_configure():
                 ".NumericPasswordValidator",
             },
         ],
+        AUTH_USER_MODEL="demo_app.CustomUserModel",
         CAPTCHA_BACKGROUND_COLOR="#ffffff",
         CAPTCHA_FOREGROUND_COLOR="#d4c9c9",
         CAPTCHA_IMAGE_SIZE=(200, 200),
@@ -90,6 +91,13 @@ def pytest_configure():
         CAPTCHA_LENGTH=7,
         CAPTCHA_REQUIRED=True,
         USER_INFO_FIELDS=("first_name", "last_name", "is_active"),
+        ONE_TO_ONE_MODELS={
+            "demo_app.UserProfile": {
+                "user_related_field": "user",
+                "fetch_fields": ("birthday", "gender", "primary_number"),
+                "save_fields": ("birthday", "gender", "primary_number"),
+            },
+        },
     )
 
     django.setup()

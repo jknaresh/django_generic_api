@@ -4,6 +4,7 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.db.models import Q
 from pydantic import (
     create_model,
@@ -11,9 +12,11 @@ from pydantic import (
 )
 from django.db.models.fields.related import ForeignKey
 from pydantic.config import ConfigDict
+from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .utils import (
+    make_permission_str,
     get_model_fields_with_properties,
     is_fields_exist,
     DJANGO_TO_PYDANTIC_TYPE_MAP,
@@ -82,6 +85,7 @@ def get_model_config_schema(model, fields=None):
     types, `max_length`, `default` constraints (if applicable), and an
     indication of whether fields are required.
 
+    :param fields:
     :param model: Django model class to convert into a Pydantic model.
     """
     model_fields: Dict[str, tuple] = {}
@@ -379,7 +383,19 @@ def handle_save_input(model, record_id, save_input):
     return instances, message
 
 
-def handle_user_info_update(save_input, user_id):
+def handle_user_info_save_input(save_input, user_id):
+    """
+    1. Checks if user has configured Fields (USER_INFO_FIELDS) to be accessed in user model.
+    2. Creates a pydantic model with user given fields in (USER_INFO_FIELDS).
+    3. Pydantic model level validation.
+    4. Checks if the value is suitable to be inserted in respective field.
+    5. If values are valid for fields, updates the field values.
+
+    :param save_input:
+    :param user_id:
+    :return:
+    """
+
     if not hasattr(settings, "USER_INFO_FIELDS"):
         raise_exception(
             error="Set setting for 'USER_INFO_FIELDS' to update "
@@ -416,18 +432,36 @@ def handle_user_info_update(save_input, user_id):
         except Exception as e:
             raise_exception(error=e, code="DGA-S010")
 
+        if isinstance(model_field, ForeignKey):
+            save_input[model_field.attname] = save_input.pop(key)
+
     user_model = get_user_model()
     user = user_model.objects.get(id=user_id)
 
-    for key, value in list(save_input.items()):
-        setattr(user, key, value)
-    user.save()
-    message = f"{user.username}'s info is updated"
+    try:
+        for key, value in list(save_input.items()):
+            setattr(user, key, value)
+        user.save()
+        return f"{user.username}'s info is updated"
+    except Exception as e:
+        if isinstance(e, IntegrityError):
+            raise_exception(
+                error="Invalid foreign key constraint", code="DGA-S014"
+            )
+        else:
+            raise_exception(error=str(e), code="DGA-S015")
 
-    return message
 
+def fetch_user_info(user):
+    """
+    1. Checks if user has configured Fields (USER_INFO_FIELDS) to be accessed in user model.
+    2. Receives model fields of the given fields in (USER_INFO_FIELDS).
+    3. Create a dictionary mapping field names to their corresponding values from the user object.
 
-def read_user_info(user):
+    :param user:
+    :return:
+    """
+
     if not hasattr(settings, "USER_INFO_FIELDS"):
         raise_exception(
             error="Set setting for 'USER_INFO_FIELDS' to update "
@@ -445,3 +479,223 @@ def read_user_info(user):
         user_info[field.attname] = getattr(user, field.attname, None)
 
     return dict(data=user_info)
+
+
+def check_user_related_configurations(model_name, key):
+    """
+    Checks if user related models system settings are properly configured or not.
+    - Checks if user given model in configured in system or not.
+    - Checks if user passed model actually exists or not.
+    - Checks if fields are configured in system.
+    - Checks if user_related_field is configured or not.
+    - Checks if user_related_field is linked to auth user model or not.
+
+    :param model_name:
+    :param key:
+    :return:
+    """
+    rel_type, method = key.split(".")
+    field = {"POST": "fetch_fields", "PUT": "save_fields"}.get(method)
+    config_map = {
+        "1-1": getattr(settings, "ONE_TO_ONE_MODELS", {}),
+    }
+
+    if not config_map.get(rel_type):
+        raise_exception(
+            error="Set settings for User Related models.", code="DGA-S019"
+        )
+
+    configured_model = config_map.get(rel_type, {}).get(model_name)
+    if configured_model is None:
+        raise_exception(
+            error=f"{model_name} is not configured.", code="DGA-S020"
+        )
+
+    model = get_model_by_name(model_name)
+    model_meta = getattr(model, "_meta", None)
+
+    configured_fields = configured_model.get(field)
+    if configured_fields is None:
+        raise_exception(error=f"{field} must be configured.", code="DGA-S021")
+
+    user_related_field = configured_model.get("user_related_field")
+    if user_related_field is None:
+        raise_exception(
+            error="`user_related_field` must be configured.",
+            code="DGA-S018",
+        )
+
+    # Checks if system `user_related_field` is Fk or not.
+    # Retrieves the fk model.
+    try:
+        related_model = model_meta.get_field(user_related_field).related_model
+    except Exception as e:
+        raise_exception(error=e.args[0], code="DGA-S023")
+
+    if related_model != get_user_model():
+        raise_exception(
+            error=f"{user_related_field} is not linked to auth model.",
+            code="DGA-S024",
+        )
+
+    return model, configured_fields, user_related_field
+
+
+def fetch_one_to_one(model_name, fields, user_id, key):
+    """
+    Fetches all records of authenticated user from system configured 1-1 and 1-M model.
+    - Checks if system settings are properly configured or not.
+    - Checks if system configured fields exist in model.
+    - Raises an error if the payload contains undefined fields.
+    - Fetches records related to user in system model.
+
+    :param model_name:
+    :param fields:
+    :param user_id:
+    :param key:
+    :return:
+    """
+
+    # Check if system settings are properly configured.
+    model, configured_fields, user_related_field = (
+        check_user_related_configurations(model_name, key)
+    )
+
+    # Check if fields in settings actually exist in model or not.
+    is_fields_exist(model, configured_fields)
+
+    # Check if user has passed extra fields in payload.
+    extra_fields = set(fields) - set(configured_fields)
+    if len(extra_fields) > 0:
+        raise_exception(
+            error=f"Unknown fields {extra_fields} in payload",
+            code="DGA-S027",
+        )
+
+    perm_str = make_permission_str(model, action="fetch")
+    user = get_user_model().objects.get(id=user_id)
+    if not user.has_perm(perm_str):
+        raise_exception(
+            error="Access is restricted to this model", code="DGA-S029"
+        )
+
+    try:
+        # Filters records with user id from request.user.id.
+        # Returns specific fields instead of full objects.
+        queryset = model.objects.filter(
+            **{user_related_field: user_id}
+        ).values(*fields)
+
+        if not queryset.exists():
+            return "No data found."
+
+        total_records = queryset.count()
+        return dict(total=total_records, data=list(queryset))
+    except Exception as e:
+        raise_exception(error=str(e), code="DGA-S028")
+
+
+def save_one_to_one(model_name, save_input, user_id, key):
+    """
+    1. Checks if user has configured profile related fields or not.
+    2. Generates a pydantic model for the configured user profile fields.
+    3. Pydantic model level validation is done.
+    4. Checks if the value is suitable to be inserted in respective field.
+    4. Retrieves profile related with the user.
+    5. If user has a profile, it is updated with the values.
+    6. If user does not have a profile, it creates a profile for user.
+
+    :param model_name:
+    :param save_input:
+    :param user_id:
+    :param key:
+    :return:
+    """
+
+    # Check if system settings are properly configured.
+    model, configured_fields, user_related_field = (
+        check_user_related_configurations(model_name, key)
+    )
+
+    # Throw error if `save_fields` contains th user related field.
+    if configured_fields.__contains__(user_related_field):
+        raise_exception(
+            error="The USER field cannot be included in save_fields.",
+            code="DGA-S026",
+        )
+
+    user_profile_pydantic_model = get_model_config_schema(
+        model, fields=configured_fields
+    )
+
+    model_meta = getattr(model, "_meta", None)
+
+    try:
+        user_profile_pydantic_model(**save_input[0])
+    except Exception as e:
+        error_msg = e.errors()[0].get("msg")
+        error_loc = e.errors()[0].get("loc")
+
+        raise_exception(error=f"{error_msg}. {error_loc}", code="DGA-S017")
+
+    for key, value in list(save_input[0].items()):
+        model_field = model_meta.get_field(key)
+
+        if (
+            model_field.has_default()
+            and not value
+            and value is not False
+            and not model_field.null
+        ):
+            save_input[0].pop(key)
+
+        try:
+            model_field.get_prep_value(value)
+        except Exception as e:
+            raise_exception(error=e, code="DGA-S016")
+
+        if isinstance(model_field, ForeignKey):
+            save_input[0][model_field.attname] = save_input[0].pop(key)
+
+    user = get_user_model().objects.get(id=user_id)
+    user_field = model_meta.get_field(user_related_field)
+
+    user_profile = model.objects.filter(
+        **{user_related_field: user_id}
+    ).first()
+
+    action_str = "edit" if user_profile else "save"
+
+    # Check is user has permission to add or change.
+    perm_str = make_permission_str(model, action=action_str)
+    user = get_user_model().objects.get(id=user_id)
+    if not user.has_perm(perm_str):
+        raise_exception(
+            error="Access is restricted to this model", code="DGA-S030"
+        )
+
+    try:
+        if user_profile:
+            for key, value in list(save_input[0].items()):
+                setattr(user_profile, key, value)
+            user_profile.save()
+            message = f"{user.username}'s profile is updated"
+            return (
+                message,
+                status.HTTP_200_OK,
+            )
+        else:
+            save_input[0][user_field.attname] = user_id
+            user_profile = model.objects.create(**save_input[0])
+            message = f"{user.username}'s profile is created"
+            return (
+                message,
+                status.HTTP_201_CREATED,
+            )
+    except Exception as e:
+        if isinstance(e, IntegrityError):
+            raise_exception(
+                error="Invalid foreign key constraint", code="DGA-S022"
+            )
+        else:
+            raise_exception(error=str(e), code="DGA-S025")
